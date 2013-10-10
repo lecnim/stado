@@ -10,20 +10,27 @@ class TestLoader(unittest.TestCase):
         self.path = os.path.join(os.path.dirname(__file__), 'test_loader')
 
 
-    def test_load_content(self):
+    def test_load_module(self):
 
-
-
-        contents = [i for i in Loader(self.path).load()]
-
-        self.assertIn('.\\a.html', contents)
-        self.assertIn('.\\a\\b.html', contents)
-        self.assertNotIn('.\\a', contents)
-        self.assertNotIn('.\\controller.py', contents)
-
-    def test_load_controller(self):
-
-        module = Loader(self.path).load_controller()
+        path = os.path.join(self.path, 'controller.py')
+        module = Loader().load_module(path)
 
         self.assertTrue(inspect.ismodule(module))
         self.assertEqual('hello world', module.hello)
+
+
+    def test_load_dir(self):
+
+        contents = [i for i in Loader().load_dir(self.path)]
+
+        self.assertEqual(1, len(contents))
+        self.assertTrue(contents[0].path.endswith('a.html'))
+
+
+    def test_walk(self):
+
+        contents = [i for i in Loader().walk(self.path)]
+
+        self.assertEqual(2, len(contents))
+        self.assertTrue(contents[0].path.endswith('a.html'))
+        self.assertTrue(contents[1].path.endswith('b.html'))
