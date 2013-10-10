@@ -16,6 +16,9 @@ except ImportError:
     enabled = False
 
 
-def parse(source):
+def parse(source, context):
     """Parsing method used by renderer."""
-    return yaml.load(source)
+    data = yaml.load(source)
+    context.update(data)
+
+    return source, context

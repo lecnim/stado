@@ -110,17 +110,19 @@ class Site:
 
 
 
-# TODO: Loader events
-#
-#   loader.before_loading_controller
-#   loader.after_loading_controller
-#   loader.before_loading_content
-#   loader.after_loading_content
-#
-
 
 
 class Loader(Events):
+    """
+
+    Events:
+
+        loader.before_loading_controller
+        loader.after_loading_controller
+        loader.before_loading_content
+        loader.after_loading_content
+
+    """
 
     def load_dir(self, path, import_controllers=True):
         """Yields Content objects created from files in directory."""
@@ -198,6 +200,8 @@ class Content:
     def __init__(self, path):
 
         self.path = path
+
+        self.raw = ''
         self.context = {}
 
     def __repr__(self):
@@ -224,6 +228,11 @@ class MemoryCache(dict):
 
 
 
+#
+# {{ content }} available in layout file
+#
+#
+
 class Rendered:
 
     def __init__(self):
@@ -236,9 +245,15 @@ class Rendered:
             for ext in parser.file_extensions:
                 self.parsers[ext] = parser
 
-    def render(self):
-        pass
+    def render(self, parsers, source, context=None):
 
+        if context is None:
+            context = {}
+
+        for i in parsers:
+            source, context = self.parsers[i].parse(source, context)
+
+        return source, context
 
 
 class Parser:

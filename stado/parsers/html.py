@@ -4,6 +4,6 @@ name = 'HTML'
 file_extensions = ['html']
 
 
-def parse(source):
+def parse(source, context):
     """Parsing method used by renderer."""
-    return source
+    return source, context
