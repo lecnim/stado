@@ -1,14 +1,14 @@
 import unittest
 
-from stado import parsers
-from stado.parsers import html, json, yaml
+from stado import loaders
+from stado.loaders import html, json, yaml
 
-class TestParsers(unittest.TestCase):
+class TestLoaders(unittest.TestCase):
 
     def test_importing(self):
         """Importing should correctly import parser modules."""
 
-        returned = parsers.import_parsers()
+        returned = loaders.import_loaders()
         self.assertIsInstance(returned, tuple)
 
         enabled = returned[0]

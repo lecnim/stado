@@ -5,7 +5,8 @@
 enabled = True
 name = 'YAML'
 requirements = 'Require yaml module! http://pyyaml.org/'
-file_extensions = ['yml', 'yaml']
+inputs = ['yml', 'yaml']
+output = 'html'
 
 
 # Importing required modules.
@@ -16,9 +17,6 @@ except ImportError:
     enabled = False
 
 
-def parse(source, context):
-    """Parsing method used by renderer."""
-    data = yaml.load(source)
-    context.update(data)
-
-    return source, context
+def load(path):
+    with open(path) as file:
+        return None, yaml.load(file.read())
