@@ -30,7 +30,11 @@ import re
 
 def get_default_config():
     return {
-        'destination': 'public'
+        'destination': 'public',
+
+
+        'loaders': None,
+        'plugins': None,
     }
 
 
@@ -138,15 +142,6 @@ class Site:
 
         return True
 
-            #with open(content.path) as data:
-            #    source = data.read()
-            #
-            #filename = os.path.split(content.path)[1]
-            #source, context = self.rendered.render(filename.split('.'), source,
-            #                                       content.context)
-            #
-            ##content.s
-
 
     def deploy(self):
         pass
@@ -167,16 +162,20 @@ class Loader(Events):
 
     """
 
-    def __init__(self, path):
+    def __init__(self, path, config=None):
         Events.__init__(self)
 
         # File will be loaded from this absolute path pointing to directory.
         self.path = path
 
+        # Site configuration.
+        self.config = get_default_config() if config is None else config
+
         # Loaders.
         self.loaders = {}
 
-        for module in loaders.import_loaders()[0]:
+        # Loaders list is get from site configuration.
+        for module in loaders.load(self.config['loaders'])[0]:
             for ext in module.inputs:
                 self.loaders[ext] = module
 
