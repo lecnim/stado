@@ -11,5 +11,6 @@ output = 'html'
 
 
 def load(path):
+    print(path)
     with open(path) as file:
-        return None, json.loads(file.read())
+        return None, json.load(file)

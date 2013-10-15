@@ -110,7 +110,6 @@ class Site:
 
         self.path = os.path.normpath(path)
         self.destination = os.path.join(self.path, self.config['destination'])
-        #print(self.destination)
 
         self.cache = Cache()
 
@@ -166,7 +165,7 @@ class Loader(Events):
         Events.__init__(self)
 
         # File will be loaded from this absolute path pointing to directory.
-        self.path = path
+        self.path = os.path.normpath(path)
 
         # Site configuration.
         self.config = get_default_config() if config is None else config
@@ -175,9 +174,14 @@ class Loader(Events):
         self.loaders = {}
 
         # Loaders list is get from site configuration.
-        for module in loaders.load(self.config['loaders'])[0]:
-            for ext in module.inputs:
-                self.loaders[ext] = module
+        for module in loaders.load(self.config['loaders']):
+            if module.enabled:
+                for ext in module.inputs:
+                    self.loaders[ext] = module
+
+            # Loader is disabled, for example requirements are not met.
+            else:
+                pass
 
 
 
