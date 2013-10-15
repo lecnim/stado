@@ -33,6 +33,8 @@ def get_default_config():
     return {
         'destination': 'public',
 
+        'cache': 'shelve',
+
 
         'loaders': None,
         'plugins': None,
@@ -103,16 +105,20 @@ class Site:
     def __init__(self, path, config=None):
 
         # Configuration loading.
-        self.config = config
-        if config is None:
-            self.config = get_default_config()
+        self.config = get_default_config()
+        if config:
+            self.config.update(config)
 
         # Absolute path to site source directory.
         self.path = os.path.normpath(path)
         # Absolute path to site destination directory.
         self.destination = os.path.join(self.path, self.config['destination'])
 
-        self.cache = Cache()
+        # Cache for storing content.
+        if self.config['cache'] == 'dict':
+            self.cache = DictCache()
+        elif self.config['cache'] == 'shelve':
+            self.cache = ShelveCache(self.destination)
 
         self.loader = Loader(self.path)
         self.rendered = Rendered(self.path)
@@ -362,22 +368,18 @@ class Page(Content):
 
 # Cache.
 
-class Cache(dict):
-    pass
-
-
-class FileCache(UserDict):
+class ShelveCache(UserDict):
+    """Cache data in filesystem using shelve module."""
 
     def __init__(self, full_path):
-
         UserDict.__init__(self)
 
         self.data = shelve.open(os.path.join(full_path, '__cache__'))
+        # Removes previous data.
         self.data.clear()
 
-
-
-class MemoryCache(dict):
+class DictCache(dict):
+    """Cache data in RAM memory using only python dict object."""
     pass
 
 
@@ -425,8 +427,6 @@ class Deployer:
     def deploy(self, path, content):
 
         full_path = os.path.join(self.path, path)
-
-        print(path, full_path)
 
         # Create missing directories.
         os.makedirs(os.path.split(full_path)[0], exist_ok=True)

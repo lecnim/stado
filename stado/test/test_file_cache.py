@@ -3,7 +3,7 @@ import os
 import tempfile
 import shutil
 
-from stado.stado import FileCache
+from stado.stado import ShelveCache
 
 class TestFileCache(unittest.TestCase):
 
@@ -15,7 +15,7 @@ class TestFileCache(unittest.TestCase):
 
     def test_dict(self):
 
-        cache = FileCache(self.temp_dir)
+        cache = ShelveCache(self.temp_dir)
         cache['a'] = 1
 
         self.assertEqual(1, cache['a'])
