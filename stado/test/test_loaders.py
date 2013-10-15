@@ -1,28 +1,24 @@
 import unittest
-
 from stado import loaders
-from stado.loaders import html, json, yaml
 
 class TestLoaders(unittest.TestCase):
+    """Tests loaders loading."""
 
     def test_loading(self):
         """Loading should correctly import loader modules."""
 
-        returned = loaders.load()
-        self.assertIsInstance(returned, tuple)
+        modules = [i.__name__ for i in loaders.load()]
 
-        enabled = returned[0]
-        self.assertIsInstance(enabled, list)
-        self.assertIn(html, enabled)
-        self.assertIn(json, enabled)
-        self.assertIn(yaml, enabled)
+        self.assertIn('html', modules)
+        self.assertIn('json', modules)
+        self.assertIn('yaml', modules)
 
 
     def test_loading_with_select(self):
         """Loading should correctly import only selected loader modules."""
 
-        enabled, disabled = loaders.load(['html'])
+        modules = [i.__name__ for i in loaders.load(['html'])]
 
-        self.assertIn(html, enabled)
-        self.assertNotIn(json, disabled)
-        self.assertNotIn(yaml, disabled)
+        self.assertIn('html', modules)
+        self.assertNotIn('json', modules)
+        self.assertNotIn('yaml', modules)

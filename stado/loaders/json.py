@@ -1,15 +1,15 @@
-"""Support for JSON."""
+"""Support for json files."""
 
 import json
 
 
-# Parser info.
+# Loader info.
 
-name = 'JSON'
+enabled = True
 inputs = ['json']
 output = 'html'
 
 
 def load(path):
     with open(path) as file:
-        return None, json.load(file)
+        return None, json.loads(file.read())

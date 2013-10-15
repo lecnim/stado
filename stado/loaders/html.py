@@ -1,6 +1,6 @@
-"""Support for HTML."""
+"""Support for html files."""
 
-name = 'HTML'
+enabled = True
 inputs = ['html']
 output = 'html'
 

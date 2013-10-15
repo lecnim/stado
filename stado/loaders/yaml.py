@@ -1,9 +1,8 @@
-"""Support for YAML."""
+"""Support for yaml files."""
 
-# Parser info.
+# Loader info.
 
 enabled = True
-name = 'YAML'
 requirements = 'Require yaml module! http://pyyaml.org/'
 inputs = ['yml', 'yaml']
 output = 'html'
