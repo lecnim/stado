@@ -1,4 +1,9 @@
-import pkgutil
+import inspect
+
+from . import html_loader
+from . import json_loader
+from . import yaml_loader
+from . import markdown_loader
 
 
 def load(select=None):
@@ -10,12 +15,7 @@ def load(select=None):
         module object
     """
 
-    # Iterate all modules in loaders directory.
-    for loader, module_name, is_pkg in pkgutil.iter_modules(['stado/loaders']):
-
-        # Check if module is selected to be loaded.
-        # If select is None => every module will be loaded.
-        if select is None or module_name in select:
-
-            module = loader.find_module(module_name).load_module(module_name)
-            yield module
+    for key, module in globals().items():
+        if inspect.ismodule(module) and key != 'inspect':
+            if select is None or module.name in select:
+                yield module

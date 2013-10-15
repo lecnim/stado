@@ -22,6 +22,7 @@ if sys.version_info[:2] <= (3, 2):
 import shelve
 from collections import UserDict
 
+from stado import libs
 from stado import loaders
 from stado import templates
 

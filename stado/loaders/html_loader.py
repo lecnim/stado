@@ -1,6 +1,8 @@
 """Support for html files."""
 
 enabled = True
+
+name = 'html'
 inputs = ['html']
 output = 'html'
 

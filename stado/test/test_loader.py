@@ -59,6 +59,15 @@ class TestLoader(unittest.TestCase):
         self.assertEqual(a.context, None)
 
 
+    def test_load_markdown_file(self):
+
+        a = Loader(self.path).load_file('e.md')
+
+        self.assertIsInstance(a, Page)
+        self.assertEqual(a.template, '<p>hello world</p>')
+        self.assertEqual(a.context, None)
+
+
     def test_load_yaml_file(self):
 
         a = Loader(self.path).load_file('c.yaml')

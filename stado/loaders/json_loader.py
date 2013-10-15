@@ -6,6 +6,8 @@ import json
 # Loader info.
 
 enabled = True
+
+name = 'json'
 inputs = ['json']
 output = 'html'
 

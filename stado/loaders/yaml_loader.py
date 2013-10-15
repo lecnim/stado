@@ -4,6 +4,8 @@
 
 enabled = True
 requirements = 'Require yaml module! http://pyyaml.org/'
+
+name = 'yaml'
 inputs = ['yml', 'yaml']
 output = 'html'
 
