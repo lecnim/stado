@@ -17,10 +17,10 @@ class TestSite(unittest.TestCase):
         shutil.rmtree(self.temp_path)
 
 
-    def test_load(self):
+    def test_run(self):
 
         site = Site(self.path, config={'destination': self.temp_path})
-        returned = site.load()
+        returned = site.run()
 
         self.assertTrue(returned)
 

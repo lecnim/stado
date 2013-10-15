@@ -22,7 +22,7 @@ if sys.version_info[:2] <= (3, 2):
 import shelve
 from collections import UserDict
 
-from stado import libs
+#from stado import libs
 from stado import loaders
 from stado import templates
 
@@ -96,20 +96,20 @@ class Events:
 
 
 
-
-
-
-
+# Site:
 
 class Site:
 
     def __init__(self, path, config=None):
 
+        # Configuration loading.
         self.config = config
         if config is None:
             self.config = get_default_config()
 
+        # Absolute path to site source directory.
         self.path = os.path.normpath(path)
+        # Absolute path to site destination directory.
         self.destination = os.path.join(self.path, self.config['destination'])
 
         self.cache = Cache()
@@ -119,37 +119,45 @@ class Site:
         self.deployer = Deployer(self.destination)
 
 
+    def run(self):
+        """Creates site: Loads, renders, deploys."""
 
-
-    def load(self):
-
-        for content in self.loader.walk():
-
-            # Relative path to content file.
-            rel_path = os.path.relpath(content.path, self.path)
-
-            # Save content in cache (where? it depends on cache type).
-            self.cache[rel_path] = content
-
-        for content in self.cache.values():
-
-            if content.is_page:
-                content.template = self.rendered.render(content.template,
-                                                        content.context)
-
-        for content in self.cache.values():
-            self.deployer.deploy(content.destination, content.template)
+        self.load()
+        self.render()
+        self.deploy()
 
         return True
 
 
+    def load(self):
+        """Loads content from site files."""
+
+        for content in self.loader.walk():
+            # Save content in cache (where? it depends on cache type).
+            self.cache[content.source] = content
+
+        return self
+
+    def render(self):
+        """Renders content."""
+
+        for content in self.cache.values():
+            if content.is_page:
+                data = self.rendered.render(content.template, content.context)
+                content.template = data
+                self.cache[content.source] = content
+
+        return self
+
     def deploy(self):
-        pass
+        """Saves content to destination directory."""
+
+        for content in self.cache.values():
+            self.deployer.deploy(content.destination, content.template)
 
 
 
 
-# TODO: events
 class Loader(Events):
     """
 
@@ -185,43 +193,40 @@ class Loader(Events):
                 pass
 
 
-
-
-
-
     def load_file(self, path):
+        """Returns Content object created from file."""
 
-        #print(path)
+        self.event('loader.before_loading_content', path)
 
         full_path = os.path.join(self.path, path)
-
         ext = os.path.splitext(path)[1][1:]
 
+        # File is supported by one of loaders.
         if ext in self.loaders:
 
+            # Use loader to get file data.
             loader = self.loaders[ext]
             template, context = loader.load(full_path)
 
-
+            # Loader modify Content destination path.
+            # For example markdown loader change *.md to *.html
             if loader.output == 'html':
                 content = Page(path)
             else:
                 content = Asset(path)
 
-            content.permalink = ':path/:title.' + loader.output
+            content.permalink = '/:path/:title.' + loader.output
             content.context = context
             content.template = template
 
-
-
+        # File is not supported by loaders.
         else:
             content = Asset(path)
 
-        self.event('loader.before_loading_content', path)
-        #content = Content(file_path)
-        self.event('loader.after_loading_content', path)
 
+        self.event('loader.after_loading_content', content)
         return content
+
 
     def load_dir(self, path='', import_controllers=True):
         """Yields Content objects created from files in directory."""
@@ -355,7 +360,7 @@ class Page(Content):
 
 
 
-
+# Cache.
 
 class Cache(dict):
     pass

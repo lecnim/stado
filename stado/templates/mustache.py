@@ -1,13 +1,12 @@
 from stado.libs import pystache
 
-#from stado.libs.pystache import dumper
-
 
 # Template engine info.
 
 enabled = True
-name = 'mustache'
 requirements = 'Require mustache module! http://github.com/defunkt/pystache'
+
+name = 'mustache'
 
 
 class TemplateEngine:
