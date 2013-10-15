@@ -10,5 +10,4 @@ class TemplateEngine:
         self.path = path
 
     def render(self, source, context):
-        print(source)
         return pystache.render(source, **context)
