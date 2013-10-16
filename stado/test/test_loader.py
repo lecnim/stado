@@ -2,7 +2,7 @@ import unittest
 import os
 import inspect
 
-from stado.stado import Loader, Page, Asset, Content
+from stado.stado import Loader, Page, Asset
 
 class TestLoader(unittest.TestCase):
 
@@ -11,15 +11,6 @@ class TestLoader(unittest.TestCase):
 
 
     # Test methods.
-
-    def test_load_module(self):
-
-        path = os.path.join(self.path, 'tree')
-        module = Loader(path).load_module('controller.py')
-
-        self.assertTrue(inspect.ismodule(module))
-        self.assertEqual('hello world', module.hello)
-
 
     def test_load_dir(self):
 

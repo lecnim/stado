@@ -11,7 +11,6 @@ class TestSite(unittest.TestCase):
         self.path = os.path.join(os.path.dirname(__file__), 'test_loader')
 
         self.temp_path = tempfile.mkdtemp()
-        print(self.temp_path)
 
     def tearDown(self):
         shutil.rmtree(self.temp_path)

@@ -1,0 +1,255 @@
+Added
+Merge
+Updated
+Removed
+
+
+
+MAJOR version when you make incompatible API changes,
+MINOR version when you add functionality in a backwards-compatible manner, and
+PATCH version when you make backwards-compatible bug fixes.
+
+Additional labels for pre-release and build metadata are available as extensions to the MAJOR.MINOR.PATCH format.
+
+
+Markup languages
+Pre-processors
+Template engines
+
+
+
+pages / assets
+
+pages:
+    output ending with: .html
+
+template engine = mustache
+
+
+
+*.md => load, render, deploy
+
+*.md => render_markdown, deploy
+*.html => render, deploy
+* => copy
+
+
+*.html.md
+*.html.json
+
+
+
+
+
+Minimal app:
+
+    With site object:
+
+        from stado import Stado
+        app = Stado()
+        app.layout('layout.html')
+        app.run()
+
+
+    With default site:
+
+        from stado import layout, run
+        layout('layout.html')
+        run()
+
+
+Tree:
+
+    stado.py
+    site.py         => site.py build
+                    => site.py          / build, serve, watch
+                    => site.py serve
+    ...
+
+
+
+    stado.py
+        example
+            site.py
+
+    => stado.py build <project>
+    => stado.py <project>
+
+
+
+
+index.html: {{ page }}
+
+
+@before('/index.html')      => index.html: 'Empty'
+def index(path):
+    return 'Empty'
+
+@before('/index.html')
+def index(path):
+    return {'title': 'Page'}
+
+
+@before('/index.html')
+def index(path):
+    return {'title': 'Page'}
+
+    layout(path, 'layout.html')
+    permalink(path, ':path/:title/index.html')
+
+
+
+with open(path) as file:
+    return yaml.load(file.read())
+
+
+
+
+
+@before('index.yaml')
+def index(page):
+    layout(page, 'layout.html')
+    permalink(page, ':path/:title.html')
+    return read_yaml(page)
+
+@before('index.md')
+def index(page):
+    layout(page, 'layout.html')
+    permalink(page, ':path/:title.html')
+    return read_markdown(page)
+
+@before('*.yaml')
+def yaml_to_html(path):
+    permalink(page, ':path/:title.html')
+    return read_yaml(page)
+
+
+index.html
+
+
+*.HTML:
+
+auto_pages('html', 'md', 'yaml')
+auto_render('html', 'md', 'yaml')
+
+loaders('html', 'markdown', 'yaml')    <+++++ OK
+
+
+
+1. Loading
+
+    create Content
+
+    plugins event 'loader.loading_file'
+
+
+    if file output extension is 'html'
+        file is page
+    else
+        file is asset
+
+
+    If is page: Page()
+        raw() => reads file content
+        content => '...'
+            use loader
+            use template engine
+        context => {}
+    Is is asset: Asset()
+        raw() => reads file content
+
+    run @before(page_path)
+        add returned to page.context
+
+
+
+    save in cache
+
+
+
+2. Rendering
+    Render using loader
+    Render using template engine
+
+    save in cache
+
+
+3. Deploying
+    @after(source)
+
+    Deploy
+
+
+Without layouts:
+    page.html => render => page.html
+    page.md => render markdown, render => page.html
+    page.yaml => load yaml, render => page.html
+
+markdown-pages, yaml-pages, json-pages
+
+plugins = ['markdown', 'yaml-pages', 'json-pages']
+
+pages = ['html', 'md', 'yaml']
+
+config.pages = ['html', 'md', 'yaml']
+pages.register('html')
+auto_render('htlm', 'md', 'yaml')
+
+auto_pages('html', 'md', 'yaml')
+
+
+page.md => render markdown, render page => page.html
+page.yaml => load yaml, render page => page.html
+page.json => load json, render page => page.html
+
+
+yaml-pages
+json-pages
+
+
+page.html.md
+page.html.textile
+page.html.yaml
+page.html.json
+
+page.md
+page.textile
+page.yaml
+page.json
+
+
+
+
+Events:
+
+loader.before_loading_content
+loader.after_loading_content
+
+loader.
+
+
+
+
+index.html.mustache => index.html
+
+page.title = 'a'
+
+{{ page.title }}
+
+
+index.yaml => index.yaml
+
+page.* => parse yaml
+
+
+
+
+index.yaml
+    title = 'a'
+layout.mustache
+    {{ page.title }}
+
+    {{ content }}
+
+    {{ navigation }}
+        {{ title }}

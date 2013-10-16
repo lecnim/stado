@@ -22,3 +22,6 @@ class TestLoaders(unittest.TestCase):
         self.assertIn('html', modules)
         self.assertNotIn('json', modules)
         self.assertNotIn('yaml', modules)
+
+if __name__ == '__main__':
+    unittest.main()

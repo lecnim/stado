@@ -1,35 +1,30 @@
 """
 
-            <= Loader -> Content, Cache
-    Site    <= Renderer
-            <= Deployer
-
 """
 
+# Standard modules.
 import os
-import importlib
 import sys
+import importlib
 import inspect
-
-
-
-
-
-
-if sys.version_info[:2] <= (3, 2):
-    import imp
-
+import re
 import shelve
 from collections import UserDict
 
-#from stado import libs
-from stado import loaders
-from stado import templates
+# Support for importing in older python.
+if sys.version_info[:2] <= (3, 2):
+    import imp
 
-import re
+# Local imports.
+from . import plugins
+from . import loaders
+from . import templates
+from .events_system import Events
+
 
 
 def get_default_config():
+    """Returns dict with default configuration."""
     return {
         'destination': 'public',
 
@@ -41,68 +36,16 @@ def get_default_config():
     }
 
 
-class Utilities:
-    pass
-
-
-
-
-
-# Events.
-
-class EventsHandler:
-    """Basic events system. How  it works:
-
-    - Object which receives events must bind them to methods using bind()
-    - Object which send events must subscribe objects which receives events using
-      subscribe()
-    - Object send event using notify() method.
-
-    """
-
-    def __init__(self):
-
-        # List of objects with events system.
-        self.subscribers = []
-        # Key is event name, value is method to run when event is triggered.
-        self.registered = {}
-
-    def subscribe(self, obj):
-
-        if not isinstance(obj.events, EventsHandler):
-            raise TypeError('subscribe(x): x must supports events system')
-
-        if not obj in self.subscribers:
-            self.subscribers.append(obj)
-
-    def notify(self, event, *args, **kwargs):
-
-        for obj in self.subscribers:
-            if event in obj.events.registered:
-                yield obj.events.registered[event](*args, **kwargs)
-
-    def bind(self, events):
-        self.registered.update(events)
-
-
-class Events:
-    """Class should inherit this to use events system."""
-
-    def __init__(self):
-        self.events = EventsHandler()
-
-    def event(self, name, *args, **kwargs):
-        for result in self.events.notify(name, *args, **kwargs):
-            yield result
-
-
-
 
 # Site:
 
 class Site:
 
-    def __init__(self, path, config=None):
+    def __init__(self, path=None, config=None):
+
+        # Set path to file path from where Site is used.
+        if path is None:
+            path = os.path.split(inspect.stack()[1][1])[0]
 
         # Configuration loading.
         self.config = get_default_config()
@@ -112,21 +55,50 @@ class Site:
         # Absolute path to site source directory.
         self.path = os.path.normpath(path)
         # Absolute path to site destination directory.
-        self.destination = os.path.join(self.path, self.config['destination'])
+        self._destination = os.path.join(self.path, self.config['destination'])
 
         # Cache for storing content.
-        if self.config['cache'] == 'dict':
-            self.cache = DictCache()
-        elif self.config['cache'] == 'shelve':
-            self.cache = ShelveCache(self.destination)
+        self.cache = None
+
+        # Main components.
 
         self.loader = Loader(self.path)
         self.rendered = Rendered(self.path)
         self.deployer = Deployer(self.destination)
 
+        # Plugins
+
+        self.plugins = {}
+        for class_object in plugins.load(self.config['plugins']):
+            plugin = class_object(self)
+            self.plugins[plugin.name] = plugin
+
+            # Bind plugin as a object method.
+            setattr(self, plugin.name, plugin)
+
+            self.loader.events.subscribe(plugin)
+
+    @property
+    def destination(self):
+        return self._destination
+
+    @destination.setter
+    def destination(self, value):
+        self._destination = value
+        self.deployer.path = value
+
 
     def run(self):
         """Creates site: Loads, renders, deploys."""
+
+
+        # Cache for storing content.
+
+        if self.config['cache'] == 'dict':
+            self.cache = DictCache()
+        elif self.config['cache'] == 'shelve':
+            self.cache = ShelveCache(self.destination)
+
 
         self.load()
         self.render()
@@ -200,9 +172,11 @@ class Loader(Events):
 
 
     def load_file(self, path):
-        """Returns Content object created from file."""
+        """Returns Content object created from file or None if loading failed."""
 
-        self.event('loader.before_loading_content', path)
+        # Event can cancel loading file.
+        if False in self.event('loader.before_loading_content', path):
+            return None
 
         full_path = os.path.join(self.path, path)
         ext = os.path.splitext(path)[1][1:]
@@ -229,7 +203,6 @@ class Loader(Events):
         else:
             content = Asset(path)
 
-
         self.event('loader.after_loading_content', content)
         return content
 
@@ -240,25 +213,14 @@ class Loader(Events):
         full_path = os.path.join(self.path, path)
         list_dirs = os.listdir(full_path)
 
-        # Load controller.
-        controller_filename = 'controller.py'
-        if controller_filename in list_dirs:
-            if import_controllers:
-                ctrl_path = os.path.join(full_path, controller_filename)
-
-                self.event('loader.before_loading_controller', ctrl_path)
-                module = self.load_module(ctrl_path)
-                self.event('loader.after_loading_controller', module)
-
-            # Prevent loading controller file as a Content object.
-            list_dirs.remove(controller_filename)
-
         # Load contents.
         for file_name in list_dirs:
 
-            # Path must points to file.
-            if not os.path.isdir(os.path.join(full_path, file_name)):
-                yield self.load_file(os.path.join(path, file_name))
+            # Path must points to file, file should not be python script.
+            if os.path.isfile(os.path.join(full_path, file_name)) and \
+                    not file_name.endswith('.py'):
+                content = self.load_file(os.path.join(path, file_name))
+                if content: yield content
 
 
     def walk(self, path='', import_controllers=True):
@@ -280,25 +242,6 @@ class Loader(Events):
                     yield content
 
 
-    def load_module(self, path):
-        """Returns module loaded from path pointing to python file. Module name is
-        filename without extension."""
-
-        path, filename = os.path.split(path)
-        path = os.path.join(self.path, path)
-        module_name = os.path.splitext(filename)[0]
-
-        # Newer python. >= 3.3
-        if sys.version_info[:2] > (3, 2):
-            loader = importlib.find_loader(module_name, [path])
-            return loader.load_module()
-
-        # Older python: <= 3.2
-        else:
-            fp, pathname, description = imp.find_module(module_name, [path])
-            return imp.load_module(module_name, fp, pathname, description)
-
-
 
 
 # Content events:
@@ -310,8 +253,6 @@ class Loader(Events):
 class Content:
 
     def __init__(self, source):
-
-        print(source)
 
         self.path = source
         self.source = source

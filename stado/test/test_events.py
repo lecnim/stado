@@ -1,5 +1,5 @@
 import unittest
-from stado.stado import Events
+from stado.events_system import Events
 
 
 # Class helpers.
