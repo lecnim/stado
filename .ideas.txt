@@ -40,6 +40,42 @@ template engine = mustache
 
 
 
+Commands:
+
+    run
+        without arguments:
+            each not build project:
+                build project
+            copy compiled files to temp
+            start server in temp
+            watch for changes in projects
+
+        <project>:
+            if project not build:
+                build project
+
+            start server in project build directory
+            watch for changes in project directory
+
+    build
+        without arguments: build every project to project output dir
+        <project>: builds given project to project output dir
+
+    deploy
+        without arguments: copy every build project to deploy path
+        <project>: copy build project to deploy path
+
+    view
+        without arguments:
+        <project>: start server
+
+
+
+
+
+
+
+
 
 Minimal app:
 

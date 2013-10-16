@@ -1,6 +1,6 @@
 import unittest
 import os
-from stado.test.test_plugins import TestPlugin
+from test.test_stado.test_plugins import TestPlugin
 from stado import Stado
 
 
