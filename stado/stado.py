@@ -19,6 +19,7 @@ if sys.version_info[:2] <= (3, 2):
 from . import plugins
 from . import loaders
 from . import templates
+from . import config as CONFIG
 from .events_system import Events
 
 
@@ -26,7 +27,7 @@ from .events_system import Events
 def get_default_config():
     """Returns dict with default configuration."""
     return {
-        'destination': 'public',
+        'destination': CONFIG.build_dir,
 
         'cache': 'shelve',
 
@@ -314,6 +315,9 @@ class ShelveCache(UserDict):
 
     def __init__(self, full_path):
         UserDict.__init__(self)
+
+        if not os.path.exists(full_path):
+            os.makedirs(full_path)
 
         self.data = shelve.open(os.path.join(full_path, '__cache__'))
         # Removes previous data.

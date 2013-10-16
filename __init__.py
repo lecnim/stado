@@ -84,14 +84,14 @@
     #    """Runs after rebuilding triggered by site monitor."""
     #    pass
 
-import sys
-from commands import UserInterface
-
-
-framework = UserInterface()
-
-if __name__ == "__main__":
-    if framework.call():
-        sys.exit(0)
-    else:
-        sys.exit(1)
+#import sys
+#from commands import UserInterface
+#
+#
+#framework = UserInterface()
+#
+#if __name__ == "__main__":
+#    if framework.call():
+#        sys.exit(0)
+#    else:
+#        sys.exit(1)

@@ -71,7 +71,7 @@ from . import Command
 
 class View(Command):
 
-    name = 'build'
+    name = 'view'
 
     def run(self, project=None):
 

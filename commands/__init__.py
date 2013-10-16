@@ -6,6 +6,7 @@ class Command:
     summary = ''
 
     def install(self, parser):
+        print('in', self.name)
         return parser
 
     def run(self, *args, **kwargs):
@@ -51,7 +52,8 @@ class UserInterface:
         # Add subparsers from commands.
 
         for i in self.commands.values():
-             i.install(subparsers.add_parser(i.name, add_help=False))
+            parser = subparsers.add_parser(i.name, add_help=False)
+            i.install(parser)
 
 
     def call(self, arguments=None):
@@ -72,13 +74,14 @@ class UserInterface:
         # Execute command.
         args = vars(args)
         print(args)
-        if 'cmd' in args:
+        if 'function' in args:
 
 
-            cmd = args.pop('cmd')
+            cmd = args.pop('function')
+            cmd(**args)
 
-            if cmd(**args):
-                sys.exit(0)         # Success.
-            else:
-                sys.exit(1)         # Fail.
+            #if cmd(**args):
+            #    sys.exit(0)         # Success.
+            #else:
+            #    sys.exit(1)         # Fail.
         return False
