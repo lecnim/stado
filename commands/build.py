@@ -20,7 +20,7 @@ class Build(Command):
         command."""
 
         # Run user interface event.
-        self.user_interface.before_build()
+        self.command_line.before_build()
 
         # Build all projects.
         if site is None:
@@ -40,7 +40,7 @@ class Build(Command):
         CONFIG.output = None
 
         # Run user interface event.
-        self.user_interface.after_build()
+        self.command_line.after_build()
 
 
     def build_site(self, site: 'site directory'):

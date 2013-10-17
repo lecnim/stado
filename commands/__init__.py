@@ -6,7 +6,7 @@ class Command:
     summary = ''
 
     def __init__(self, user_interface):
-        self.user_interface = user_interface
+        self.command_line = user_interface
 
     def install(self, parser):
         print('in', self.name)
@@ -24,11 +24,26 @@ class Command:
         return False
 
 
+    def event(self, name):
+
+        method = getattr(self.command_line, name)
+
+        if isinstance(method, (list, tuple)):
+            if len(method) == 2:
+                method[0](*method[1])
+            else:
+                method[0](*method[1], **method[2])
+        else:
+            method()
+
+
+
 import sys
 import argparse
 
 
 from .build import Build
+from .watch import Watch
 from .view import View
 from .run import Run
 
@@ -41,6 +56,7 @@ class CommandLineInterface:
 
         self.commands = {
             Build.name: Build(self),
+            Watch.name: Watch(self),
             View.name: View(self),
             Run.name: Run(self)
         }
@@ -56,6 +72,14 @@ class CommandLineInterface:
             parser = subparsers.add_parser(i.name, add_help=False)
             i.install(parser)
 
+
+    # Shortcuts to commands.
+
+    def build(self, *args, **kwargs):
+        self.commands['build'].run(*args, **kwargs)
+
+
+    # Execute command.
 
     def __call__(self, arguments=None):
         """Run stado with given arguments"""
@@ -90,10 +114,30 @@ class CommandLineInterface:
 
     # Events:
 
+    def set_interval(self, value):
+        self.commands['watch'].file_monitor.interval = value
+
+    def before_waiting(self):
+        pass
+    def stop_waiting(self):
+        self.commands['watch'].stop()
+
+    def after_rebuild(self):
+        pass
+
+
     def before_build(self):
         pass
     def after_build(self):
         pass
+
+
+    def before_watch(self):
+        pass
+    def after_watch(self):
+        pass
+
+
 
     def before_view(self):
         pass

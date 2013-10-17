@@ -107,7 +107,7 @@ class View(Command):
 
     def run(self, site=None, host='', port=8080):
 
-        self.user_interface.before_view()
+        self.command_line.before_view()
 
         # Path pointing to current working directory.
         cwd = os.getcwd()
@@ -117,11 +117,11 @@ class View(Command):
 
 
             # Build site.
-            self.user_interface.__call__('build ' + site)
+            self.command_line.__call__('build ' + site)
 
             # Start server.
             self.server.start(host, port, threaded=True)
             self.server.set_source(os.path.join(cwd, site, config.build_dir))
 
 
-        self.user_interface.after_view()
+        self.command_line.after_view()
