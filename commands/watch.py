@@ -52,7 +52,9 @@ class Watch(Command):
 
         # Monitoring.
         self.file_monitor.start()
-        self.event('before_waiting')
+
+        if wait:
+            self.event('before_waiting')
 
         while not self.file_monitor.stopped and wait is True:
             time.sleep(.2)

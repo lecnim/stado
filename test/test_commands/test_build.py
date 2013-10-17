@@ -1,5 +1,8 @@
+"""Tests command: build"""
+
 import os
 import tempfile
+import shutil
 
 from stado import config
 from commands import CommandLineInterface
@@ -7,8 +10,10 @@ from test.test_commands import TestCommand
 
 
 
-class TestBuildWithSiteArgument(TestCommand):
-    """Tests: build [site]
+class TestBuildSite(TestCommand):
+    """Tests command:
+
+        build [site] --output
 
     Important!
     This test is done in temporary directory. Use self.temp_path to get path to it.
@@ -18,7 +23,7 @@ class TestBuildWithSiteArgument(TestCommand):
     """
 
     def test_build_directory(self):
-        """Build command should create build directory in site directory."""
+        """build [site]: Should create output directory in site directory."""
 
         CommandLineInterface().__call__('build a')
 
@@ -28,7 +33,7 @@ class TestBuildWithSiteArgument(TestCommand):
 
 
     def test_page(self):
-        """Build command should correctly build page from site content."""
+        """build [site]: Should correctly build page from site content."""
 
         CommandLineInterface().__call__('build a')
 
@@ -41,7 +46,7 @@ class TestBuildWithSiteArgument(TestCommand):
 
 
     def test_skip_python_script(self):
-        """Build command should skip python files."""
+        """build [site]: Should skip python files."""
 
         CommandLineInterface().__call__('build a')
 
@@ -52,19 +57,26 @@ class TestBuildWithSiteArgument(TestCommand):
 
 
     def test_output_option(self):
-        """Build command should read --output option and build site in custom output
-        directory."""
+        """build [site] --output: Should build site in custom output directory."""
 
         output_path = tempfile.mkdtemp()
         CommandLineInterface().__call__('build a --output ' + output_path)
 
         self.assertListEqual(['a.html'], os.listdir(output_path))
 
+        # Should build site in output directory.
+        path = os.path.join(self.temp_path, 'a')
+        self.assertNotIn(config.build_dir, os.listdir(path))
+
+        shutil.rmtree(output_path)
+
 
 
 
 class TestBuildWithoutArguments(TestCommand):
-    """Tests: build
+    """Tests command:
+
+        build --output
 
     Important!
     This test is done in temporary directory. Use self.temp_path to get path to it.
@@ -74,8 +86,7 @@ class TestBuildWithoutArguments(TestCommand):
     """
 
     def test_build_directory(self):
-        """Build command without arguments should create build directory in each
-        site."""
+        """build: Should create output directory in each site directory."""
 
         CommandLineInterface().__call__('build')
 
@@ -87,8 +98,7 @@ class TestBuildWithoutArguments(TestCommand):
 
 
     def test_page(self):
-        """Build command without arguments should correctly build page in each
-        site."""
+        """build: Should correctly build pages in each site content."""
 
         CommandLineInterface().__call__('build')
 
@@ -105,7 +115,7 @@ class TestBuildWithoutArguments(TestCommand):
 
 
     def test_skip_python_script(self):
-        """Build command without arguments should skip python files in each site."""
+        """build: Should skip python files."""
 
         CommandLineInterface().__call__('build')
 
@@ -117,8 +127,7 @@ class TestBuildWithoutArguments(TestCommand):
 
 
     def test_output_option(self):
-        """Build command should read --output option and build site in custom output
-        directory."""
+        """build --output: Should build each site in custom output directory."""
 
         output_path = tempfile.mkdtemp()
         CommandLineInterface().__call__('build --output ' + output_path)

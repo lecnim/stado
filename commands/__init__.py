@@ -82,6 +82,9 @@ class CommandLineInterface:
     def watch(self, *args, **kwargs):
         self.commands['watch'].run(*args, **kwargs)
 
+    def view(self, *args, **kwargs):
+        self.commands['view'].run(*args, **kwargs)
+
 
     # Execute command.
 
@@ -124,8 +127,10 @@ class CommandLineInterface:
     def before_waiting(self):
         pass
     def stop_waiting(self):
+        pass
         self.commands['watch'].stop()
         self.commands['view'].stop()
+        self.commands['edit'].stop()
 
     def after_rebuild(self):
         pass
@@ -147,4 +152,9 @@ class CommandLineInterface:
     def before_view(self):
         pass
     def after_view(self):
+        pass
+
+    def before_edit(self):
+        pass
+    def after_edit(self):
         pass

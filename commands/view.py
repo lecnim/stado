@@ -20,30 +20,39 @@ class View(Command):
         Command.__init__(self, user_interface)
 
         self.server =  DevelopmentServer()
+        self.cwd = os.getcwd()
 
 
     def install(self, parser):
         parser.add_argument('site')
         parser.add_argument('--port', '-p', type=int, default=4000)
         parser.add_argument('--host', '-h', default='')
+        parser.add_argument('--output', default=None)
         parser.set_defaults(function=self.run)
 
-    def run(self, site, host, port, wait=True):
+    def run(self, site, host, port, output=None, wait=True):
 
         self.event('before_view')
 
         # Path pointing to current working directory.
-        cwd = os.getcwd()
+        self.cwd = os.getcwd()
+
 
         # Build site.
-        self.command_line('build ' + site)
+        self.command_line.build(site, output)
 
-        # Start server.
-        self.server.set_source(os.path.join(cwd, site, config.build_dir))
+        if output:
+            self.server.set_source(output)
+        else:
+            self.server.set_source(os.path.join(self.cwd, site, config.build_dir))
+
+
+
         self.server.start(host, port, threaded=True)
 
         # Waiting.
-        self.event('before_waiting')
+        if wait:
+            self.event('before_waiting')
 
         while not self.server.stopped and wait is True:
             time.sleep(.2)
@@ -52,6 +61,8 @@ class View(Command):
 
     def stop(self):
 
+        # Change current working directory.
+        os.chdir(self.cwd)
         self.server.stop()
 
 

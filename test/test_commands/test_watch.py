@@ -1,3 +1,5 @@
+"""Tests command: watch"""
+
 import os
 import tempfile
 
@@ -22,7 +24,9 @@ def create_file(path):
 
 
 class TestWatchSite(TestCommand):
-    """Tests: watch [site]
+    """Tests command:
+
+        watch [site] --output
 
     Important!
     This test is done in temporary directory. Use self.temp_path to get path to it.
@@ -30,6 +34,8 @@ class TestWatchSite(TestCommand):
     directory is self.cwd.
 
     """
+
+    command = 'watch'
 
     def setUp(self):
         TestCommand.setUp(self)
@@ -43,11 +49,11 @@ class TestWatchSite(TestCommand):
 
 
     def test_modify_file(self):
-        """Watch command should rebuild site if site files were modified."""
+        """watch [site]: Watcher should react on file modifying."""
 
         self.shell.before_waiting = (modify_file,
                                      [os.path.join(self.temp_path, 'a', 'a.html')])
-        self.shell('watch a')
+        self.shell(self.command + ' a')
 
         path = os.path.join(self.temp_path, 'a', config.build_dir, 'a.html')
         with open(path) as file:
@@ -55,11 +61,11 @@ class TestWatchSite(TestCommand):
 
 
     def test_create_file(self):
-        """Watch command should rebuild site if new file was created."""
+        """watch [site]: Watcher should react on file creating."""
 
         self.shell.before_waiting = (create_file,
                                      [os.path.join(self.temp_path, 'a', 'new.html')])
-        self.shell('watch a')
+        self.shell(self.command + ' a')
 
         path = os.path.join(self.temp_path, 'a', config.build_dir, 'new.html')
         with open(path) as file:
@@ -67,14 +73,13 @@ class TestWatchSite(TestCommand):
 
 
     def test_output_option(self):
-        """Watch command should read --output option and rebuild site in custom
-        output directory."""
+        """watch [site] --output: Watcher should use custom output directory."""
 
         output_path = tempfile.mkdtemp()
 
         self.shell.before_waiting = (modify_file,
                                      [os.path.join(self.temp_path, 'a', 'a.html')])
-        self.shell('watch a --output ' + output_path)
+        self.shell(self.command + ' a --output ' + output_path)
 
         path = os.path.join(output_path, 'a.html')
         with open(path) as file:
@@ -83,7 +88,9 @@ class TestWatchSite(TestCommand):
 
 
 class TestWatchGroupOfSites(TestCommand):
-    """Tests: watch
+    """Tests command:
+
+        watch --output
 
     Important!
     This test is done in temporary directory. Use self.temp_path to get path to it.
@@ -104,7 +111,7 @@ class TestWatchGroupOfSites(TestCommand):
 
 
     def test_modify_site(self):
-        """Watch command should rebuild only modified site."""
+        """watch: Watcher should rebuild only modified site."""
 
         self.shell.before_waiting = (modify_file,
                                      [os.path.join(self.temp_path, 'a', 'a.html')])
@@ -120,8 +127,7 @@ class TestWatchGroupOfSites(TestCommand):
 
 
     def test_output_option(self):
-        """Watch command should read --output option and rebuild only modified site
-        in custom output directory."""
+        """watch --output: Watcher should use custom output directory."""
 
         output_path = tempfile.mkdtemp()
 
@@ -136,28 +142,3 @@ class TestWatchGroupOfSites(TestCommand):
         # Should not rebuild not modified sites.
         path = os.path.join(output_path, 'b')
         self.assertFalse(os.path.exists(path))
-
-
-
-
-
-
-
-    #def test_skip_output_directory(self):
-    #
-    #
-    #    self.shell.before_waiting = self._test_create_file_in_output
-    #    self.shell.after_rebuild = self.shell.stop_waiting
-    #    self.shell('watch a')
-    #
-    #    path = os.path.join(self.temp_path, 'a', config.build_dir, 'new.html')
-    #    with open(path) as file:
-    #        self.assertEqual('hello world', file.read())
-    #
-    #def _test_create_file_in_output(self):
-    #
-    #    path = os.path.join(self.temp_path, 'a', config.build_dir, 'new.html')
-    #    with open(path, 'w') as file:
-    #        file.write('hello world')
-    #
-    #    self._test_modify_file()

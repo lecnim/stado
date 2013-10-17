@@ -83,6 +83,8 @@ class Site:
 
     @property
     def output(self):
+        if CONFIG.output:
+            return CONFIG.output
         return self._output
 
     @output.setter
