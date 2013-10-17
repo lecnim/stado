@@ -241,21 +241,19 @@ class Loader(Events):
         full_path = os.path.join(self.path, path)
 
         # Skip directory if it is excluded.
-        if exclude:
-            if full_path in exclude or path in exclude:
-                return ()
+        if (not exclude) or (not full_path in exclude) and (not path in exclude):
 
-        # Load current dir.
-        for content in self.load_dir(path):
-            yield content
+            # Load current dir.
+            for content in self.load_dir(path):
+                yield content
 
-        for directory in os.listdir(full_path):
+            for directory in os.listdir(full_path):
 
-            # Important! Skip __pycache__ directory!
-            if os.path.isdir(os.path.join(full_path, directory)) \
-                and not directory == '__pycache__':
-                for content in self.walk(os.path.join(path, directory), exclude):
-                    yield content
+                # Important! Skip __pycache__ directory!
+                if os.path.isdir(os.path.join(full_path, directory)) \
+                    and not directory == '__pycache__':
+                    for content in self.walk(os.path.join(path, directory), exclude):
+                        yield content
 
 
 
@@ -392,7 +390,13 @@ class Deployer:
 
     def deploy(self, path, content):
 
+
         full_path = os.path.join(self.path, path)
+
+        if CONFIG.output:
+            full_path = os.path.join(CONFIG.output, path)
+
+
 
         # Create missing directories.
         os.makedirs(os.path.split(full_path)[0], exist_ok=True)

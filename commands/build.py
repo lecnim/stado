@@ -2,6 +2,7 @@ import os
 import pkgutil
 
 from . import Command
+from stado import config as CONFIG
 
 
 class Build(Command):
@@ -10,36 +11,45 @@ class Build(Command):
 
     def install(self, parser):
         parser.add_argument('site', default=None, nargs='?')
+        parser.add_argument('--output', '-o')
         parser.set_defaults(function=self.run)
 
-    def run(self, site=None):
+
+    def run(self, site=None, output=None):
+        """Command-line interface will execute this method if user type 'build'
+        command."""
 
         # Run user interface event.
         self.user_interface.before_build()
 
-        # Path pointing to current working directory.
-        cwd = os.getcwd()
-
         # Build all projects.
         if site is None:
-            for directory in os.listdir(cwd):
-                dir_path = os.path.join(cwd, directory)
+            for directory in os.listdir(os.getcwd()):
 
-                if self.is_site(dir_path):
-                    self.import_site(dir_path)
+                # Set custom output directory.
+                if output: CONFIG.output = os.path.join(output, directory)
+                self.build_site(directory)
 
         # Build only given project.
         else:
-            dir_path = os.path.join(cwd, site)
-            if self.is_site(dir_path):
-                self.import_site(dir_path)
+            # Set custom output directory.
+            CONFIG.output = output
+            self.build_site(site)
+
+        # This is default output directory.
+        CONFIG.output = None
 
         # Run user interface event.
         self.user_interface.after_build()
 
 
-    def import_site(self, path):
+    def build_site(self, site: 'site directory'):
+        """Returns imported site.py module from site directory."""
 
-        for loader, module_name, is_pkg in pkgutil.iter_modules([path]):
-            if module_name == 'site':
-                loader.find_module(module_name).load_module(module_name)
+        path = os.path.join(os.getcwd(), site)
+        if self.is_site(path):
+
+            # Import site.py
+            for loader, module_name, is_pkg in pkgutil.iter_modules([path]):
+                if module_name == 'site':
+                    return loader.find_module(module_name).load_module(module_name)

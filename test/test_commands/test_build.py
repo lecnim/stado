@@ -1,4 +1,5 @@
 import os
+import tempfile
 
 from stado import config
 from commands import UserInterface
@@ -34,7 +35,7 @@ class TestBuildWithSiteArgument(TestCommand):
         # temp/a/_build
         build_directory = os.path.join(self.temp_path, 'a', config.build_dir)
 
-        self.assertEqual(['a.html'], os.listdir(build_directory))
+        self.assertListEqual(['a.html'], os.listdir(build_directory))
         with open(os.path.join(build_directory, 'a.html')) as page:
             self.assertEqual('hello world', page.read())
 
@@ -48,6 +49,17 @@ class TestBuildWithSiteArgument(TestCommand):
         site_py = os.path.join(self.temp_path, 'a', config.build_dir, 'site.py')
 
         self.assertFalse(os.path.exists(site_py))
+
+
+    def test_output_option(self):
+        """Build command should read --output option and build site in custom output
+        directory."""
+
+        output_path = tempfile.mkdtemp()
+        UserInterface().call('build a --output ' + output_path)
+
+        self.assertListEqual(['a.html'], os.listdir(output_path))
+
 
 
 
@@ -102,3 +114,13 @@ class TestBuildWithoutArguments(TestCommand):
 
         self.assertFalse(os.path.exists(a))
         self.assertFalse(os.path.exists(b))
+
+
+    def test_output_option(self):
+        """Build command should read --output option and build site in custom output
+        directory."""
+
+        output_path = tempfile.mkdtemp()
+        UserInterface().call('build --output ' + output_path)
+
+        self.assertListEqual(['a', 'b'], os.listdir(output_path))
