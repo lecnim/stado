@@ -45,7 +45,8 @@ import argparse
 from .build import Build
 from .watch import Watch
 from .view import View
-from .run import Run
+from .edit import Edit
+
 
 
 class CommandLineInterface:
@@ -58,7 +59,7 @@ class CommandLineInterface:
             Build.name: Build(self),
             Watch.name: Watch(self),
             View.name: View(self),
-            Run.name: Run(self)
+            Edit.name: Edit(self)
         }
 
         # Create command line parser.
@@ -77,6 +78,9 @@ class CommandLineInterface:
 
     def build(self, *args, **kwargs):
         self.commands['build'].run(*args, **kwargs)
+
+    def watch(self, *args, **kwargs):
+        self.commands['watch'].run(*args, **kwargs)
 
 
     # Execute command.
@@ -121,6 +125,7 @@ class CommandLineInterface:
         pass
     def stop_waiting(self):
         self.commands['watch'].stop()
+        self.commands['view'].stop()
 
     def after_rebuild(self):
         pass

@@ -3,6 +3,58 @@ import http.server
 import socketserver
 socketserver.TCPServer.allow_reuse_address = True
 
+import os
+from . import Command
+from stado import config
+import time
+
+
+
+
+
+class View(Command):
+
+    name = 'view'
+
+    def __init__(self, user_interface):
+        Command.__init__(self, user_interface)
+
+        self.server =  DevelopmentServer()
+
+
+    def install(self, parser):
+        parser.add_argument('site')
+        parser.add_argument('--port', '-p', type=int, default=4000)
+        parser.add_argument('--host', '-h', default='')
+        parser.set_defaults(function=self.run)
+
+    def run(self, site, host, port, wait=True):
+
+        self.event('before_view')
+
+        # Path pointing to current working directory.
+        cwd = os.getcwd()
+
+        # Build site.
+        self.command_line('build ' + site)
+
+        # Start server.
+        self.server.set_source(os.path.join(cwd, site, config.build_dir))
+        self.server.start(host, port, threaded=True)
+
+        # Waiting.
+        self.event('before_waiting')
+
+        while not self.server.stopped and wait is True:
+            time.sleep(.2)
+
+        self.event('after_view')
+
+    def stop(self):
+
+        self.server.stop()
+
+
 
 class DevelopmentServer:
 
@@ -64,11 +116,8 @@ class DevelopmentServer:
 
     def stop(self):
         """Stops development server."""
-        print('TRYING TO STOP SERVER')
-        print(self.server)
         if self.server is not None:
             self.stopped = True
-            print('STOPPING SERVER')
             #logger.debug('Stopping server.')
             self.server.shutdown()
             self.server.server_close()
@@ -76,52 +125,3 @@ class DevelopmentServer:
     def set_source(self, path):
         os.chdir(path)
 
-
-import os
-from . import Command
-from stado import config
-
-class View(Command):
-
-    name = 'view'
-
-    def __init__(self, user_interface):
-        Command.__init__(self, user_interface)
-
-        self.server =  DevelopmentServer()
-
-
-    def event_server_start(self):
-        pass
-
-    def event_server_stop(self):
-        pass
-
-
-
-    def install(self, parser):
-        parser.add_argument('site', default=None)
-        parser.add_argument('--port', '-p', type=int, default='8080')
-        parser.add_argument('--host', '-h', default='')
-        parser.set_defaults(function=self.run)
-
-    def run(self, site=None, host='', port=8080):
-
-        self.command_line.before_view()
-
-        # Path pointing to current working directory.
-        cwd = os.getcwd()
-
-        if site:
-
-
-
-            # Build site.
-            self.command_line.__call__('build ' + site)
-
-            # Start server.
-            self.server.start(host, port, threaded=True)
-            self.server.set_source(os.path.join(cwd, site, config.build_dir))
-
-
-        self.command_line.after_view()

@@ -23,7 +23,7 @@ class Watch(Command):
 
 
 
-    def run(self, site=None, output=None):
+    def run(self, site=None, output=None, wait=True):
         """Command-line interface will execute this method if user type 'watch'
         command."""
 
@@ -54,7 +54,7 @@ class Watch(Command):
         self.file_monitor.start()
         self.event('before_waiting')
 
-        while not self.file_monitor.stopped:
+        while not self.file_monitor.stopped and wait is True:
             time.sleep(.2)
 
         self.event('after_watch')
@@ -215,7 +215,8 @@ class FileMonitor:
     def stop(self):
         """Stop watching."""
 
-        self.monitor.cancel()
+        if self.monitor:
+            self.monitor.cancel()
         self.stopped = True
 
     def start(self):
