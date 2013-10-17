@@ -29,7 +29,6 @@ import argparse
 
 
 from .build import Build
-from .deploy import Deploy
 from .view import View
 from .run import Run
 
@@ -42,7 +41,6 @@ class UserInterface:
 
         self.commands = {
             Build.name: Build(self),
-            Deploy.name: Deploy(self),
             View.name: View(self),
             Run.name: Run(self)
         }
