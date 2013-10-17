@@ -5,6 +5,9 @@ class Command:
     name = ''
     summary = ''
 
+    def __init__(self, user_interface):
+        self.user_interface = user_interface
+
     def install(self, parser):
         print('in', self.name)
         return parser
@@ -38,10 +41,10 @@ class UserInterface:
         # Available commands.
 
         self.commands = {
-            Build.name: Build(),
-            Deploy.name: Deploy(),
-            View.name: View(),
-            Run.name: Run()
+            Build.name: Build(self),
+            Deploy.name: Deploy(self),
+            View.name: View(self),
+            Run.name: Run(self)
         }
 
         # Create command line parser.
@@ -85,3 +88,16 @@ class UserInterface:
             #else:
             #    sys.exit(1)         # Fail.
         return False
+
+
+    # Events:
+
+    def before_build(self):
+        pass
+    def after_build(self):
+        pass
+
+    def before_view(self):
+        pass
+    def after_view(self):
+        pass

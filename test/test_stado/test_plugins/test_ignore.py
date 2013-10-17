@@ -10,7 +10,7 @@ class TestIgnore(TestPlugin):
         TestPlugin.setUp(self)
 
         self.app = Stado(os.path.join(self.path, 'test_ignore'))
-        self.app.destination = self.temp_path
+        self.app.output = self.temp_path
 
 
     def test_file(self):

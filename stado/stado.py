@@ -6,6 +6,7 @@
 import os
 import sys
 import importlib
+import shutil
 import inspect
 import re
 import shelve
@@ -56,7 +57,8 @@ class Site:
         # Absolute path to site source directory.
         self.path = os.path.normpath(path)
         # Absolute path to site destination directory.
-        self._destination = os.path.join(self.path, self.config['destination'])
+        #self._destination = os.path.join(self.path, self.config['destination'])
+        self._output = os.path.join(self.path, CONFIG.build_dir)
 
         # Cache for storing content.
         self.cache = None
@@ -65,7 +67,7 @@ class Site:
 
         self.loader = Loader(self.path)
         self.rendered = Rendered(self.path)
-        self.deployer = Deployer(self.destination)
+        self.deployer = Deployer(self.output)
 
         # Plugins
 
@@ -80,30 +82,38 @@ class Site:
             self.loader.events.subscribe(plugin)
 
     @property
-    def destination(self):
-        return self._destination
+    def output(self):
+        return self._output
 
-    @destination.setter
-    def destination(self, value):
-        self._destination = value
+    @output.setter
+    def output(self, value):
+        self._output = value
         self.deployer.path = value
 
 
     def run(self):
         """Creates site: Loads, renders, deploys."""
 
+        # Create output directory if not exists.
+
+        if not os.path.exists(self.output):
+            os.makedirs(self.output)
 
         # Cache for storing content.
 
         if self.config['cache'] == 'dict':
             self.cache = DictCache()
         elif self.config['cache'] == 'shelve':
-            self.cache = ShelveCache(self.destination)
+            self.cache = ShelveCache(self.output)
 
 
         self.load()
         self.render()
         self.deploy()
+
+        # Remove cache.
+
+        self.cache.clear()
 
         return True
 
@@ -111,7 +121,7 @@ class Site:
     def load(self):
         """Loads content from site files."""
 
-        for content in self.loader.walk():
+        for content in self.loader.walk(exclude=[self.output]):
             # Save content in cache (where? it depends on cache type).
             self.cache[content.source] = content
 
@@ -208,7 +218,7 @@ class Loader(Events):
         return content
 
 
-    def load_dir(self, path='', import_controllers=True):
+    def load_dir(self, path=''):
         """Yields Content objects created from files in directory."""
 
         full_path = os.path.join(self.path, path)
@@ -224,22 +234,27 @@ class Loader(Events):
                 if content: yield content
 
 
-    def walk(self, path='', import_controllers=True):
+    def walk(self, path='', exclude=None):
         """Yields Content objects created from files in directory tree. Also
         imports controller modules depending import_controllers argument."""
 
-        for content in self.load_dir(path, import_controllers):
-            yield content
-
         full_path = os.path.join(self.path, path)
+
+        # Skip directory if it is excluded.
+        if exclude:
+            if full_path in exclude or path in exclude:
+                return ()
+
+        # Load current dir.
+        for content in self.load_dir(path):
+            yield content
 
         for directory in os.listdir(full_path):
 
             # Important! Skip __pycache__ directory!
             if os.path.isdir(os.path.join(full_path, directory)) \
                 and not directory == '__pycache__':
-                for content in self.walk(os.path.join(path, directory),
-                                         import_controllers):
+                for content in self.walk(os.path.join(path, directory), exclude):
                     yield content
 
 
@@ -313,19 +328,25 @@ class Page(Content):
 class ShelveCache(UserDict):
     """Cache data in filesystem using shelve module."""
 
-    def __init__(self, full_path):
+    def __init__(self, path):
         UserDict.__init__(self)
 
-        if not os.path.exists(full_path):
-            os.makedirs(full_path)
+        self.path = os.path.join(path, '__cache__')
+        os.makedirs(self.path)
 
-        self.data = shelve.open(os.path.join(full_path, '__cache__'))
+        self.data = shelve.open(os.path.join(self.path, 'contents'))
         # Removes previous data.
         self.data.clear()
 
+    def clear(self):
+        self.data.close()
+        shutil.rmtree(self.path)
+
 class DictCache(dict):
     """Cache data in RAM memory using only python dict object."""
-    pass
+
+    def clear(self):
+        pass
 
 
 

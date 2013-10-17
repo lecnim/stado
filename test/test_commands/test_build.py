@@ -7,7 +7,7 @@ from test.test_commands import TestCommand
 
 
 class TestBuildWithSiteArgument(TestCommand):
-    """Tests build command with site argument.
+    """Tests: build [site]
 
     Important!
     This test is done in temporary directory. Use self.temp_path to get path to it.
@@ -31,11 +31,11 @@ class TestBuildWithSiteArgument(TestCommand):
 
         UserInterface().call('build a')
 
-        # temp/a/_build/a.html
-        page_file = os.path.join(self.temp_path, 'a', config.build_dir, 'a.html')
+        # temp/a/_build
+        build_directory = os.path.join(self.temp_path, 'a', config.build_dir)
 
-        self.assertTrue(os.path.exists(page_file))
-        with open(page_file) as page:
+        self.assertEqual(['a.html'], os.listdir(build_directory))
+        with open(os.path.join(build_directory, 'a.html')) as page:
             self.assertEqual('hello world', page.read())
 
 
@@ -52,7 +52,7 @@ class TestBuildWithSiteArgument(TestCommand):
 
 
 class TestBuildWithoutArguments(TestCommand):
-    """Tests build command without arguments.
+    """Tests: build
 
     Important!
     This test is done in temporary directory. Use self.temp_path to get path to it.

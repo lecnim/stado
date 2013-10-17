@@ -18,8 +18,11 @@ class TestSite(unittest.TestCase):
 
     def test_run(self):
 
-        site = Site(self.path, config={'destination': self.temp_path})
+        site = Site(self.path)
+        site.output = self.temp_path
         returned = site.run()
+
+        print(os.listdir(self.temp_path))
 
         self.assertTrue(returned)
 

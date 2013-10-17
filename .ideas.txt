@@ -1,3 +1,6 @@
+Changelog
+---------
+
 Added
 Merge
 Updated
@@ -5,11 +8,105 @@ Removed
 
 
 
+
+Versions
+--------
+
+
 MAJOR version when you make incompatible API changes,
 MINOR version when you add functionality in a backwards-compatible manner, and
 PATCH version when you make backwards-compatible bug fixes.
 
-Additional labels for pre-release and build metadata are available as extensions to the MAJOR.MINOR.PATCH format.
+Additional labels for pre-release and build metadata are available as extensions
+to the MAJOR.MINOR.PATCH format.
+
+
+
+
+
+Mechanism
+---------
+
+build
+    load content, write content to output
+
+build
+    load content, write pages to _build, write list of assets with destinations
+
+    Use deploy to write site to location.
+
+
+
+
+build
+    Loads content and write pages to _build/pages directory
+    Creates list of assets with destinations and write it in _build as assets.json
+
+deploy
+    build
+    Copy pages from _build/pages to deploy destination.
+    Copy assets from _build/assets.json to deploy destination.
+
+view
+    build
+    deploy to temp
+    run server in temp
+
+edit
+    build
+    deploy to temp
+    run server in temp
+    watch
+
+
+
+# GOOD COMMANDS: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+build (default command)
+    Load content and write it in --output (default: _output)
+    If file already in output and is not newer: skip it.
+
+    stado.py
+    stado.py build
+        Build each site in stado directory. Output is site/_output
+
+    stado.py build --output /home/sites
+        Same as stado.py build, output is /home/sites/<site>
+
+    stado.py build example
+        Build example site. Output is example/_output
+
+    stado.py build example --output /home/sites
+        Build example site. Output is /home/sites
+
+watch
+    Auto-build, options same as build.
+
+
+edit
+    Build site, start server and watch for changes.
+
+    stado.py edit example
+    stado.py edit example --output /home/sites
+
+
+new
+    Creates new site.
+
+    stado.py new example
+
+help
+
+show-plugins
+
+version
+
+
+
+
+
+
 
 
 Markup languages
@@ -37,6 +134,19 @@ template engine = mustache
 *.html.md
 *.html.json
 
+
+stado.py edit
+stado.py edit example
+stado.py edit example --
+
+stado.py build
+stado.py build example
+stado.py build example --output /home/sites
+
+
+stado.py watch
+stado.py watch example
+stado.py watch example --output /home/sites
 
 
 

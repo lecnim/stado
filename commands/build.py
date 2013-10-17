@@ -14,6 +14,9 @@ class Build(Command):
 
     def run(self, site=None):
 
+        # Run user interface event.
+        self.user_interface.before_build()
+
         # Path pointing to current working directory.
         cwd = os.getcwd()
 
@@ -23,15 +26,19 @@ class Build(Command):
                 dir_path = os.path.join(cwd, directory)
 
                 if self.is_site(dir_path):
-                    self._import_site(dir_path)
+                    self.import_site(dir_path)
 
         # Build only given project.
         else:
             dir_path = os.path.join(cwd, site)
             if self.is_site(dir_path):
-                self._import_site(dir_path)
+                self.import_site(dir_path)
 
-    def _import_site(self, path):
+        # Run user interface event.
+        self.user_interface.after_build()
+
+
+    def import_site(self, path):
 
         for loader, module_name, is_pkg in pkgutil.iter_modules([path]):
             if module_name == 'site':

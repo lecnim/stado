@@ -2,6 +2,7 @@ import os
 import threading
 from . import Command
 from .build import Build
+from stado import config as CONFIG
 
 
 
@@ -151,22 +152,27 @@ class Run(Command):
 
     name = 'run'
 
-    def run(self, project=None):
-            #    <project>:
-            #if project not build:
-            #    build project
-            #
-            #start server in project build directory
-            #watch for changes in project directory
+    def __init__(self, user_interface):
+        Command.__init__(self, user_interface)
 
-        if project:
-            pass
+        self.watcher = FileMonitor()
+
+    def run(self, site=None):
+
+        # Build site / sites
+        cmd = 'build' if site is None else 'build ' + site
+        self.user_interface.call(cmd)
+
+        # Watcher.
+        if site:
+            site_path = os.path.join(os.getcwd(), site)
+            exclude = os.path.join(site_path, CONFIG.build_dir)
+            self.watcher.watch(site_path, exclude, self.update)
 
 
-        else:
-            pass
 
-
-
-
+    def update(self):
         pass
+
+
+
