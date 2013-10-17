@@ -1,13 +1,15 @@
+"""Command: watch"""
+
 import os
 import time
 import threading
 
 from . import Command
-from stado import config as CONFIG
-
+from stado import config
 
 
 class Watch(Command):
+    """Watches for changes and rebuilds site."""
 
     name = 'watch'
 
@@ -16,20 +18,18 @@ class Watch(Command):
 
         self.file_monitor = FileMonitor()
 
+
     def install(self, parser):
+        """Add arguments to command line parser."""
+
         parser.add_argument('site', default=None, nargs='?')
         parser.add_argument('--output', '-o')
         parser.set_defaults(function=self.run)
 
 
-
     def run(self, site=None, output=None, wait=True):
         """Command-line interface will execute this method if user type 'watch'
         command."""
-
-        # Command line event.
-        self.event('before_watch')
-
 
         cwd = os.getcwd()
 
@@ -52,14 +52,10 @@ class Watch(Command):
 
         # Monitoring.
         self.file_monitor.start()
-
-        if wait:
-            self.event('before_waiting')
+        if wait: self.event('before_waiting')
 
         while not self.file_monitor.stopped and wait is True:
-            time.sleep(.2)
-
-        self.event('after_watch')
+            time.sleep(config.wait_interval)
 
 
     def watch_site(self, path, site, output=None):
@@ -69,7 +65,7 @@ class Watch(Command):
         if output:
             exclude = [output]
         else:
-            exclude = [os.path.join(path, CONFIG.build_dir)]
+            exclude = [os.path.join(path, config.build_dir)]
 
         self.file_monitor.watch(path, exclude, self.update, site, output)
 

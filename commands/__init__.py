@@ -1,23 +1,28 @@
 import os
+import argparse
+
 
 class Command:
+    """Base class for commands."""
 
     name = ''
     summary = ''
 
-    def __init__(self, user_interface):
-        self.command_line = user_interface
+    def __init__(self, command_line):
+        self.command_line = command_line
 
     def install(self, parser):
-        print('in', self.name)
+        """Overwritten by inheriting class."""
         return parser
 
     def run(self, *args, **kwargs):
+        """Overwritten by inheriting class."""
         pass
 
 
     @staticmethod
     def is_site(path):
+        """Returns True if given path is pointing to site directory."""
 
         if os.path.isdir(path) and 'site.py' in os.listdir(path):
             return True
@@ -25,6 +30,7 @@ class Command:
 
 
     def event(self, name):
+        """Execute event method in CommandLineInterface object."""
 
         method = getattr(self.command_line, name)
 
@@ -38,9 +44,7 @@ class Command:
 
 
 
-import sys
-import argparse
-
+# Commands modules.
 
 from .build import Build
 from .watch import Watch
@@ -105,56 +109,31 @@ class CommandLineInterface:
 
         # Execute command.
         args = vars(args)
-        print(args)
+
         if 'function' in args:
-
-
             cmd = args.pop('function')
             cmd(**args)
 
-            #if cmd(**args):
-            #    sys.exit(0)         # Success.
-            #else:
-            #    sys.exit(1)         # Fail.
-        return False
+
+    # Other methods.
+
+    def set_interval(self, value):
+        """Sets watcher interval."""
+        self.commands['watch'].file_monitor.interval = value
 
 
     # Events:
 
-    def set_interval(self, value):
-        self.commands['watch'].file_monitor.interval = value
-
     def before_waiting(self):
+        """Runs before waiting loop in command run() method."""
         pass
+
     def stop_waiting(self):
-        pass
+        """Stops waiting loop in commands. For example stops development server."""
         self.commands['watch'].stop()
         self.commands['view'].stop()
         self.commands['edit'].stop()
 
     def after_rebuild(self):
-        pass
-
-
-    def before_build(self):
-        pass
-    def after_build(self):
-        pass
-
-
-    def before_watch(self):
-        pass
-    def after_watch(self):
-        pass
-
-
-
-    def before_view(self):
-        pass
-    def after_view(self):
-        pass
-
-    def before_edit(self):
-        pass
-    def after_edit(self):
+        """Runs after site rebuild, usually by watcher."""
         pass

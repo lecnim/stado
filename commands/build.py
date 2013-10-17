@@ -1,3 +1,5 @@
+"""Command: build"""
+
 import os
 import pkgutil
 
@@ -6,10 +8,14 @@ from stado import config as CONFIG
 
 
 class Build(Command):
+    """Builds site or group of sites."""
 
     name = 'build'
 
+
     def install(self, parser):
+        """Add arguments to command line parser."""
+
         parser.add_argument('site', default=None, nargs='?')
         parser.add_argument('--output', '-o')
         parser.set_defaults(function=self.run)
@@ -18,9 +24,6 @@ class Build(Command):
     def run(self, site=None, output=None):
         """Command-line interface will execute this method if user type 'build'
         command."""
-
-        # Run user interface event.
-        self.event('before_build')
 
         # Build all projects.
         if site is None:
@@ -38,9 +41,6 @@ class Build(Command):
 
         # This is default output directory.
         CONFIG.output = None
-
-        # Run user interface event.
-        self.event('after_build')
 
 
     def build_site(self, site: 'site directory'):
