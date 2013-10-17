@@ -32,7 +32,7 @@
 #             i.install(subparsers.add_parser(i.name, add_help=False))
 #
 #
-#    def call(self, arguments=None):
+#    def __call__(self, arguments=None):
 #        """Run stado with given arguments"""
 #
 #        # Show help message if no arguments.
@@ -91,7 +91,7 @@
 #framework = UserInterface()
 #
 #if __name__ == "__main__":
-#    if framework.call():
+#    if framework.__call__():
 #        sys.exit(0)
 #    else:
 #        sys.exit(1)

@@ -33,7 +33,7 @@ from .view import View
 from .run import Run
 
 
-class UserInterface:
+class CommandLineInterface:
 
     def __init__(self):
 
@@ -57,7 +57,7 @@ class UserInterface:
             i.install(parser)
 
 
-    def call(self, arguments=None):
+    def __call__(self, arguments=None):
         """Run stado with given arguments"""
 
         # Show help message if no arguments.

@@ -2,7 +2,7 @@ import os
 import urllib.request
 
 from stado import config
-from commands import UserInterface
+from commands import CommandLineInterface
 from test.test_commands import TestCommand
 
 
@@ -20,14 +20,14 @@ class TestViewWithArguments(TestCommand):
     def setUp(self):
         TestCommand.setUp(self)
 
-        self.ui = UserInterface()
+        self.ui = CommandLineInterface()
 
 
     def test_view_site(self):
         """Build command should create build directory in site directory."""
 
         self.ui.after_build = self._test_view_site
-        self.ui.call('view a')
+        self.ui.__call__('view a')
 
         # temp/a/_build
         build_directory = os.path.join(self.temp_path, 'a', config.build_dir)
@@ -46,7 +46,7 @@ class TestViewWithArguments(TestCommand):
     #def test_page(self):
     #    """Build command should correctly build page from site content."""
     #
-    #    UserInterface().call('build a')
+    #    UserInterface().__call__('build a')
     #
     #    # temp/a/_build
     #    build_directory = os.path.join(self.temp_path, 'a', config.build_dir)
@@ -59,7 +59,7 @@ class TestViewWithArguments(TestCommand):
     #def test_skip_python_script(self):
     #    """Build command should skip python files."""
     #
-    #    UserInterface().call('build a')
+    #    UserInterface().__call__('build a')
     #
     #    # temp/a/_build/site.py
     #    site_py = os.path.join(self.temp_path, 'a', config.build_dir, 'site.py')
@@ -82,7 +82,7 @@ class TestViewWithArguments(TestCommand):
 #        """Build command without arguments should create build directory in each
 #        site."""
 #
-#        UserInterface().call('build')
+#        UserInterface().__call__('build')
 #
 #        a = os.path.join(self.temp_path, 'a', config.build_dir)
 #        b = os.path.join(self.temp_path, 'b', config.build_dir)
@@ -95,7 +95,7 @@ class TestViewWithArguments(TestCommand):
 #        """Build command without arguments should correctly build page in each
 #        site."""
 #
-#        UserInterface().call('build')
+#        UserInterface().__call__('build')
 #
 #        a = os.path.join(self.temp_path, 'a', config.build_dir, 'a.html')
 #        b = os.path.join(self.temp_path, 'b', config.build_dir, 'b.html')
@@ -112,7 +112,7 @@ class TestViewWithArguments(TestCommand):
 #    def test_skip_python_script(self):
 #        """Build command without arguments should skip python files in each site."""
 #
-#        UserInterface().call('build')
+#        UserInterface().__call__('build')
 #
 #        a = os.path.join(self.temp_path, 'a', config.build_dir, 'site.py')
 #        b = os.path.join(self.temp_path, 'b', config.build_dir, 'site.py')

@@ -45,7 +45,7 @@ class BlockProcessor:
     tree. Each processor will need to define it's own ``test`` and ``run``
     methods. The ``test`` method should return True or False, to indicate
     whether the current block should be processed by this processor. If the
-    test passes, the parser will call the processors ``run`` method.
+    test passes, the parser will __call__ the processors ``run`` method.
 
     """
 
@@ -84,7 +84,7 @@ class BlockProcessor:
     def test(self, parent, block):
         """ Test for block type. Must be overridden by subclasses. 
         
-        As the parser loops through processors, it will call the ``test`` method
+        As the parser loops through processors, it will __call__ the ``test`` method
         on each to determine if the given block of text is of that type. This
         method must return a boolean ``True`` or ``False``. The actual method of
         testing is left to the needs of that particular block type. It could 
@@ -105,7 +105,7 @@ class BlockProcessor:
         """ Run processor. Must be overridden by subclasses. 
         
         When the parser determines the appropriate type of a block, the parser
-        will call the corresponding processor's ``run`` method. This method
+        will __call__ the corresponding processor's ``run`` method. This method
         should parse the individual lines of the block and append them to
         the etree. 
 

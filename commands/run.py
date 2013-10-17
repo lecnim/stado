@@ -161,7 +161,7 @@ class Run(Command):
 
         # Build site / sites
         cmd = 'build' if site is None else 'build ' + site
-        self.user_interface.call(cmd)
+        self.user_interface.__call__(cmd)
 
         # Watcher.
         if site:

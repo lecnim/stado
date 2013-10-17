@@ -54,7 +54,7 @@ class RenderEngine(object):
             str or unicode (or a subclass) and return a string of type
             unicode (but not a proper subclass of unicode).
                 This class will only pass basestring instances to this
-            function.  For example, it will call str() on integer variable
+            function.  For example, it will __call__ str() on integer variable
             values prior to passing them to this function.
 
           escape: the function used to escape and convert variable tag
@@ -69,11 +69,11 @@ class RenderEngine(object):
             incoming strings of type markupsafe.Markup differently
             from plain unicode strings.
 
-          resolve_context: the function to call to resolve a name against
+          resolve_context: the function to __call__ to resolve a name against
             a context stack.  The function should accept two positional
             arguments: a ContextStack instance and a name to resolve.
 
-          resolve_partial: the function to call when loading a partial.
+          resolve_partial: the function to __call__ when loading a partial.
             The function should accept a template name string and return a
             template string of type unicode (not a subclass).
 
@@ -132,7 +132,7 @@ class RenderEngine(object):
             data = []
         else:
             # The least brittle way to determine whether something
-            # supports iteration is by trying to call iter() on it:
+            # supports iteration is by trying to __call__ iter() on it:
             #
             #   http://docs.python.org/library/functions.html#iter
             #

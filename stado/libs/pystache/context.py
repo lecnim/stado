@@ -63,7 +63,7 @@ def _get_value(context, key):
             attr = getattr(context, key)
         except AttributeError:
             # TODO: distinguish the case of the attribute not existing from
-            #   an AttributeError being raised by the call to the attribute.
+            #   an AttributeError being raised by the __call__ to the attribute.
             #   See the following issue for implementation ideas:
             #     http://bugs.python.org/issue7559
             pass

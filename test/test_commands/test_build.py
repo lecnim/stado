@@ -2,7 +2,7 @@ import os
 import tempfile
 
 from stado import config
-from commands import UserInterface
+from commands import CommandLineInterface
 from test.test_commands import TestCommand
 
 
@@ -20,7 +20,7 @@ class TestBuildWithSiteArgument(TestCommand):
     def test_build_directory(self):
         """Build command should create build directory in site directory."""
 
-        UserInterface().call('build a')
+        CommandLineInterface().__call__('build a')
 
         # temp/a/_build
         build_directory = os.path.join(self.temp_path, 'a', config.build_dir)
@@ -30,7 +30,7 @@ class TestBuildWithSiteArgument(TestCommand):
     def test_page(self):
         """Build command should correctly build page from site content."""
 
-        UserInterface().call('build a')
+        CommandLineInterface().__call__('build a')
 
         # temp/a/_build
         build_directory = os.path.join(self.temp_path, 'a', config.build_dir)
@@ -43,7 +43,7 @@ class TestBuildWithSiteArgument(TestCommand):
     def test_skip_python_script(self):
         """Build command should skip python files."""
 
-        UserInterface().call('build a')
+        CommandLineInterface().__call__('build a')
 
         # temp/a/_build/site.py
         site_py = os.path.join(self.temp_path, 'a', config.build_dir, 'site.py')
@@ -56,7 +56,7 @@ class TestBuildWithSiteArgument(TestCommand):
         directory."""
 
         output_path = tempfile.mkdtemp()
-        UserInterface().call('build a --output ' + output_path)
+        CommandLineInterface().__call__('build a --output ' + output_path)
 
         self.assertListEqual(['a.html'], os.listdir(output_path))
 
@@ -77,7 +77,7 @@ class TestBuildWithoutArguments(TestCommand):
         """Build command without arguments should create build directory in each
         site."""
 
-        UserInterface().call('build')
+        CommandLineInterface().__call__('build')
 
         a = os.path.join(self.temp_path, 'a', config.build_dir)
         b = os.path.join(self.temp_path, 'b', config.build_dir)
@@ -90,7 +90,7 @@ class TestBuildWithoutArguments(TestCommand):
         """Build command without arguments should correctly build page in each
         site."""
 
-        UserInterface().call('build')
+        CommandLineInterface().__call__('build')
 
         a = os.path.join(self.temp_path, 'a', config.build_dir, 'a.html')
         b = os.path.join(self.temp_path, 'b', config.build_dir, 'b.html')
@@ -107,7 +107,7 @@ class TestBuildWithoutArguments(TestCommand):
     def test_skip_python_script(self):
         """Build command without arguments should skip python files in each site."""
 
-        UserInterface().call('build')
+        CommandLineInterface().__call__('build')
 
         a = os.path.join(self.temp_path, 'a', config.build_dir, 'site.py')
         b = os.path.join(self.temp_path, 'b', config.build_dir, 'site.py')
@@ -121,6 +121,6 @@ class TestBuildWithoutArguments(TestCommand):
         directory."""
 
         output_path = tempfile.mkdtemp()
-        UserInterface().call('build --output ' + output_path)
+        CommandLineInterface().__call__('build --output ' + output_path)
 
         self.assertListEqual(['a', 'b'], os.listdir(output_path))

@@ -128,7 +128,7 @@ class FencedBlockPreprocessor(Preprocessor):
                     lang = LANG_TAG % m.group('lang')
 
                 # If config is not empty, then the codehighlite extension
-                # is enabled, so we call it to highlite the code
+                # is enabled, so we __call__ it to highlite the code
                 if self.codehilite_conf:
                     highliter = CodeHilite(m.group('code'),
                             linenums=self.codehilite_conf['linenums'][0],

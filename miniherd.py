@@ -1943,7 +1943,7 @@ class Context(dict):
     Attributes which starts with '_' are not added to dict.
     >>> a._x = 2
     >>> a['_x']
-    Traceback (most recent call last):
+    Traceback (most recent __call__ last):
         ...
     KeyError: '_x'
     """
@@ -2064,7 +2064,7 @@ class Context(UserDict):
     Attributes which starts with '_' are not added to dict.
     >>> a._x = 2
     >>> a['_x']
-    Traceback (most recent call last):
+    Traceback (most recent __call__ last):
         ...
     KeyError: '_x'
     """

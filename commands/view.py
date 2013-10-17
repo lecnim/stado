@@ -117,7 +117,7 @@ class View(Command):
 
 
             # Build site.
-            self.user_interface.call('build ' + site)
+            self.user_interface.__call__('build ' + site)
 
             # Start server.
             self.server.start(host, port, threaded=True)

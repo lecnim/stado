@@ -82,10 +82,10 @@ class BlockParser:
         
         Given a list of ``blocks``, each blockprocessor is stepped through
         until there are no blocks left. While an extension could potentially
-        call this method directly, it's generally expected to be used internally.
+        __call__ this method directly, it's generally expected to be used internally.
 
         This is a public method as an extension may need to add/alter additional
-        BlockProcessors which call this method to recursively parse a nested
+        BlockProcessors which __call__ this method to recursively parse a nested
         block.
 
         """
