@@ -1,8 +1,35 @@
 import sys
+import logging
+
+
+
+# Custom logger from python logging module.
+def get_logger():
+    """Returns miniherd logger."""
+
+    logger = logging.getLogger('stado')
+    logger.setLevel(logging.INFO)
+
+    # Log into console.
+    ch = logging.StreamHandler()
+    formatter = logging.Formatter('%(message)s')
+    ch.setFormatter(formatter)
+    ch.setLevel(logging.INFO)
+    logger.addHandler(ch)
+    return logger
+
+log = get_logger()
+
+
+
 from .core.site import Site
 from .console import Console
 
 __version__ = '0.1.0'
+
+
+
+
 
 
 # Shortcuts for site.py

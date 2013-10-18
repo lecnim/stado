@@ -9,6 +9,7 @@ import os
 from . import Command
 from .build import Build
 from .. import config
+from .. import log
 import time
 
 
@@ -66,6 +67,8 @@ class View(Command):
             os.chdir(os.path.join(self.cwd, site, config.build_dir))
 
         self.server.start(host, port)
+
+        log.info('You can view site at: http://{}:{}'.format(host, port))
 
         # Waiting loop.
         if wait: self.event('before_waiting')

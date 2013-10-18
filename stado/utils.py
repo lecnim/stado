@@ -1,7 +1,21 @@
 """Some useful functions."""
 
 import os
+import time
 import shutil
+
+
+class Timer:
+    """Timer. Use get() method to get how much time has passed since this
+    object creation."""
+
+    def __init__(self):
+        self.time = time.clock()
+
+    def get(self):
+        """Returns how much time has passed since this object creation."""
+        return round(time.clock() - self.time, 2)
+
 
 def copytree(source, destination):
     """Same as shutil.copytree(), but can copy to already existing directory."""

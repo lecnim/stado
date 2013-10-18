@@ -1,6 +1,7 @@
 import os
 import inspect
 
+from .. import log
 from .. import plugins
 from .. import config as CONFIG
 from .loader import Loader

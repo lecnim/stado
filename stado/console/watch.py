@@ -7,6 +7,7 @@ import threading
 from . import Command
 from .build import Build
 from .. import config
+from .. import log
 
 
 class Watch(Command):
@@ -60,6 +61,8 @@ class Watch(Command):
         # Monitoring.
         self.file_monitor.start()
         if wait: self.event('before_waiting')
+
+        log.info('Watching for changes...')
 
         while not self.file_monitor.stopped and wait is True:
             time.sleep(config.wait_interval)
