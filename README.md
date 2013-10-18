@@ -1,4 +1,4 @@
 stado
 =====
 
-Minimalistic static site generator.
+Minimalistic static site generator powered by python scripts.
