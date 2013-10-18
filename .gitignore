@@ -53,7 +53,7 @@ local.properties
 [Dd]ebug/
 [Rr]elease/
 x64/
-build/
+#build/
 [Bb]in/
 [Oo]bj/
 
@@ -141,7 +141,7 @@ publish/
 
 # Windows Azure Build Output
 csx
-*.build.csdef
+#*.build.csdef
 
 # Windows Store app package directory
 AppPackages/
@@ -200,7 +200,7 @@ $RECYCLE.BIN/
 *.egg
 *.egg-info
 dist/
-build/
+#build/
 eggs/
 parts/
 var/

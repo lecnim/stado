@@ -1,0 +1,1 @@
+Here is compiled (minified and zipped) stado package.
