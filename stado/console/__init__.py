@@ -1,4 +1,5 @@
 import os
+import sys
 import argparse
 
 
@@ -99,9 +100,8 @@ class Console:
 
         # Show help message if no arguments.
 
-        #if len(sys.argv) == 1:
-        #    #self.commands['help'].run()
-        #    sys.exit(0)                         # 0 = successful termination
+        if len(sys.argv) == 1:
+            return self.build()
 
         # Arguments from sys.args or from method arguments.
         if not arguments:
@@ -114,7 +114,11 @@ class Console:
 
         if 'function' in args:
             cmd = args.pop('function')
-            cmd(**args)
+
+            try:
+                cmd(**args)
+            except KeyboardInterrupt:
+                pass
 
 
     # Other methods.
