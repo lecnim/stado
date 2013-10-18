@@ -42,6 +42,16 @@ def get_default_config():
 # Site:
 
 class Site:
+    """
+    This is site. It contains all sites objects like Page, Assets, Loader etc.
+    Use run() method to build site. 
+    
+    Site building:
+    - Loads content using Loader object and saves this loaded content in Cache object.
+    - Renders content from cache using Renderer object.
+    - Write content to file system using Deployer object.
+    
+    """
 
     def __init__(self, path=None, config=None):
 
@@ -57,7 +67,6 @@ class Site:
         # Absolute path to site source directory.
         self.path = os.path.normpath(path)
         # Absolute path to site destination directory.
-        #self._destination = os.path.join(self.path, self.config['destination'])
         self._output = os.path.join(self.path, CONFIG.build_dir)
 
         # Cache for storing content.
@@ -94,7 +103,7 @@ class Site:
 
 
     def run(self):
-        """Creates site: Loads, renders, deploys."""
+        """Creates site: loads, renders, deploys."""
 
         # Create output directory if not exists.
 
@@ -121,7 +130,7 @@ class Site:
 
 
     def load(self):
-        """Loads content from site files."""
+        """Loads content from site source files to cache."""
 
         for content in self.loader.walk(exclude=[self.output]):
             # Save content in cache (where? it depends on cache type).
@@ -130,7 +139,7 @@ class Site:
         return self
 
     def render(self):
-        """Renders content."""
+        """Renders content in cache."""
 
         for content in self.cache.values():
             if content.is_page:
@@ -141,7 +150,7 @@ class Site:
         return self
 
     def deploy(self):
-        """Saves content to destination directory."""
+        """Saves content from cache to output directory."""
 
         for content in self.cache.values():
             self.deployer.deploy(content.destination, content.template)
@@ -151,11 +160,10 @@ class Site:
 
 class Loader(Events):
     """
+    Creates Content objects from files.
 
     Events:
-
-        loader.before_loading_controller
-        loader.after_loading_controller
+    
         loader.before_loading_content
         loader.after_loading_content
 
@@ -194,7 +202,7 @@ class Loader(Events):
         full_path = os.path.join(self.path, path)
         ext = os.path.splitext(path)[1][1:]
 
-        # File is supported by one of loaders.
+        # File is supported by one of loaders => Page or Asset
         if ext in self.loaders:
 
             # Use loader to get file data.
@@ -212,7 +220,7 @@ class Loader(Events):
             content.context = context
             content.template = template
 
-        # File is not supported by loaders.
+        # File is not supported by loaders => Asset
         else:
             content = Asset(path)
 
@@ -237,8 +245,8 @@ class Loader(Events):
 
 
     def walk(self, path='', exclude=None):
-        """Yields Content objects created from files in directory tree. Also
-        imports controller modules depending import_controllers argument."""
+        """Yields Content objects created from files in directory tree. 
+        Argument 'exclude' is list of paths, which will be skipped."""
 
         full_path = os.path.join(self.path, path)
 
@@ -254,6 +262,7 @@ class Loader(Events):
                 # Important! Skip __pycache__ directory!
                 if os.path.isdir(os.path.join(full_path, directory)) \
                     and not directory == '__pycache__':
+                        
                     for content in self.walk(os.path.join(path, directory), exclude):
                         yield content
 
@@ -267,24 +276,33 @@ class Loader(Events):
 #
 
 class Content:
+    """
+    Represents site source file.
+    
+    """
 
     def __init__(self, source):
 
+        # TODO: Remove this property.
         self.path = source
+        # Path to source file relative to site source, for example: 'a/b.html'
         self.source = source
+        # Title of source file, for example: 'b.html'
         self.filename = os.path.split(self.source)[1]
 
+        # Content will be available under this URL.
         self.permalink = '/:path/:filename'
 
+        # Template engine renders page using this variables.
         self.template = ''
         self.context = {}
 
     @property
     def destination(self):
+        """Permalink converted to file system path."""
 
         keywords = re.findall("(:[a-zA-z]*)", self.permalink)
         destination = os.path.normpath(self.permalink)
-
 
         items = {
             'path': os.path.split(self.source)[0],
@@ -292,9 +310,8 @@ class Content:
             'title': os.path.splitext(self.filename)[0],
         }
 
-        # :filename
         for key in keywords:
-            # filename
+            # :filename => filename
             if key[1:] in items:
                 destination = destination.replace(key, str(items[key[1:]]))
 
@@ -308,13 +325,20 @@ class Content:
 
 
 class Asset(Content):
+    """
+    Represents asset file.
+    """
+    
     def is_page(self):
         return False
-
     def is_asset(self):
         return True
 
 class Page(Content):
+    """
+    Represents page file. (Usually *.html)
+    """
+    
     def is_page(self):
         return True
     def is_asset(self):
@@ -326,7 +350,9 @@ class Page(Content):
 # Cache.
 
 class ShelveCache(UserDict):
-    """Cache data in filesystem using shelve module."""
+    """
+    Cache data in filesystem using shelve module.
+    """
 
     def __init__(self, path):
         UserDict.__init__(self)
@@ -339,11 +365,14 @@ class ShelveCache(UserDict):
         self.data.clear()
 
     def clear(self):
+        """Removes cache files."""
         self.data.close()
         shutil.rmtree(self.path)
 
 class DictCache(dict):
-    """Cache data in RAM memory using only python dict object."""
+    """
+    Cache data in RAM memory using only python dict object.
+    """
 
     def clear(self):
         pass
