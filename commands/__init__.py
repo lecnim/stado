@@ -50,6 +50,7 @@ from .build import Build
 from .watch import Watch
 from .view import View
 from .edit import Edit
+from .help import Help
 
 
 
@@ -63,7 +64,8 @@ class CommandLineInterface:
             Build.name: Build(self),
             Watch.name: Watch(self),
             View.name: View(self),
-            Edit.name: Edit(self)
+            Edit.name: Edit(self),
+            Help.name: Help(self),
         }
 
         # Create command line parser.

@@ -5,6 +5,7 @@ import time
 import threading
 
 from . import Command
+from .build import Build
 from stado import config
 
 
@@ -12,6 +13,12 @@ class Watch(Command):
     """Watches for changes and rebuilds site."""
 
     name = 'watch'
+
+    usage = 'watch [site] [options]'
+    summary = 'Build the site and watch for changes.'
+    description = ''
+    options = Build.options
+
 
     def __init__(self, command_line):
         Command.__init__(self, command_line)

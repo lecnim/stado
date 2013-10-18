@@ -1,6 +1,9 @@
 import sys
 from commands import CommandLineInterface
 
+__version__ = ''
+__version_info__ = ()
+
 console = CommandLineInterface()
 
 

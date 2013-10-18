@@ -7,6 +7,7 @@ import socketserver
 
 import os
 from . import Command
+from .build import Build
 from stado import config
 import time
 
@@ -16,6 +17,18 @@ class View(Command):
     """Build and serve site using development server."""
 
     name = 'view'
+
+    usage = "view [site] [options]"
+    summary = "Build the site and start the development web server."
+    description = ''
+    options = [
+        ["-p, --port", "Specify the port to listen on. (default: {})".format(
+            config.port)],
+        ["-h, --host", "Specify the host to listen on. (default: {})".format(
+            config.host)],
+        Build.options[0]
+    ]
+
 
     def __init__(self, user_interface):
         Command.__init__(self, user_interface)
@@ -28,9 +41,9 @@ class View(Command):
         """Add arguments to command line parser."""
 
         parser.add_argument('site')
-        parser.add_argument('--port', '-p', type=int, default=4000)
-        parser.add_argument('--host', '-h', default='')
-        parser.add_argument('--output', default=None)
+        parser.add_argument('--port', '-p', type=int, default=config.port)
+        parser.add_argument('--host', '-h', default=config.host)
+        parser.add_argument('--output', '-o', default=None)
         parser.set_defaults(function=self.run)
 
 

@@ -4,6 +4,7 @@ import os
 import time
 
 from . import Command
+from .view import View
 from stado import config
 
 
@@ -11,6 +12,11 @@ class Edit(Command):
     """Builds site, watches for changes and runs development server."""
 
     name = 'edit'
+
+    usage = 'edit [site] [options]'
+    summary = 'Build the site, watch for changes and run development server.'
+    description = ''
+    options = View.options
 
     def __init__(self, command_line):
         Command.__init__(self, command_line)
@@ -23,8 +29,8 @@ class Edit(Command):
         """Add arguments to command line parser."""
 
         parser.add_argument('site')
-        parser.add_argument('--port', '-p', type=int, default=4000)
-        parser.add_argument('--host', '-h', default='localhost')
+        parser.add_argument('--port', '-p', type=int, default=config.port)
+        parser.add_argument('--host', '-h', default=config.host)
         parser.add_argument('--output', '-o')
         parser.set_defaults(function=self.run)
 
