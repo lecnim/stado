@@ -4,6 +4,7 @@ Source reducing is inspired by "Python code minifier" created by Dan McDougall.
 You can get it from here: http://code.activestate.com/recipes/576704/
 """
 
+import sys
 import os
 import zipfile
 import tokenize
@@ -31,6 +32,8 @@ sys.exit(0) if console() else sys.exit(1)
 def compile_stado():
     """Creates stado.py file with complied source."""
 
+    print('Compiling stado to: ' + output)
+
     minify = Minify()
 
     module = zipfile.PyZipFile(output, mode='w', compression=compression)
@@ -53,6 +56,7 @@ def compile_stado():
                 module.writestr(os.path.join(dir_path, i), data)
 
     module.close()
+    print('Done!')
 
 
 
@@ -128,6 +132,8 @@ class Minify:
 
 if __name__ == "__main__":
 
-    print('Compiling stado...')
-    compile_stado()
-    print('Done!')
+    if sys.version_info[:2] < (3, 2):
+        print('Failed to compile: require python >= 3.2')
+    else:
+        compile_stado()
+
