@@ -19,8 +19,6 @@ class Deployer:
         # Use custom output path instead of default.
         if CONFIG.output:
             full_path = os.path.join(CONFIG.output, path)
-            print('Using CONFIG.output: ' + full_path)
-            print('CONFIG.output: ' + CONFIG.output)
 
         # Create missing directories.
         if not os.path.exists(dir_path):

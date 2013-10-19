@@ -109,18 +109,11 @@ class Console:
 
         print('')
 
-        print('call', arguments)
-
-        #if len(sys.argv) == 1:
-        #    return self.build()
-
         # Arguments from sys.args or from method arguments.
         if not arguments:
             args = self.parser.parse_args()
         else:
             args = self.parser.parse_args(arguments.split())
-
-        print('parsed call', args)
 
         # Execute command.
         args = vars(args)

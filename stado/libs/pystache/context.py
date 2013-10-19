@@ -14,7 +14,7 @@ spec, we define these categories mutually exclusively as follows:
 
 """
 
-from pystache.common import PystacheError
+from .common import PystacheError
 import collections
 
 

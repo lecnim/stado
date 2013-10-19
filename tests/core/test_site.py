@@ -1,12 +1,15 @@
 import os
 
 from stado.core.site import Site
+from stado import core
 from tests import TestTemporaryDirectory
 
 
 class TestSite(TestTemporaryDirectory):
 
     def test_run(self):
+
+        print(core)
 
         path = os.path.dirname(__file__)
 

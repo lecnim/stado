@@ -35,8 +35,8 @@ import sys
 #
 #   ValueError: Attempted relative import in non-package
 #
-from pystache.common import TemplateNotFoundError
-from pystache.renderer import Renderer
+from ..common import TemplateNotFoundError
+from ..renderer import Renderer
 
 
 USAGE = """\
