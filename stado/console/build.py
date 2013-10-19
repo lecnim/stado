@@ -58,6 +58,7 @@ class Build(Command):
 
         # This is default output directory.
         CONFIG.output = None
+        return True
 
 
     def build_site(self, site: 'site directory'):

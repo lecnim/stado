@@ -30,11 +30,16 @@ class TestViewSite(TestCommand):
         self.shell = Console()
 
 
+
+
     def test_server(self):
-        """view [site]: Should run server."""
+        """view [site]: Should run server and return True."""
 
         self.shell.before_waiting = self._test_server
-        self.shell(self.command + ' a')
+        returned = self.shell(self.command + ' a')
+
+        self.assertTrue(returned)
+
 
     def _test_server(self):
 

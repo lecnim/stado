@@ -22,6 +22,13 @@ class TestBuildSite(TestCommand):
 
     """
 
+    def test_returned_value(self):
+        """build [site]: Should return True if building successful."""
+
+        self.assertTrue(Console().__call__('build a'))
+
+
+
     def test_build_directory(self):
         """build [site]: Should create output directory in site directory."""
 
@@ -30,6 +37,7 @@ class TestBuildSite(TestCommand):
         # temp/a/_build
         build_directory = os.path.join(self.temp_path, 'a', config.build_dir)
         self.assertTrue(os.path.exists(build_directory))
+
 
 
     def test_page(self):
@@ -43,6 +51,8 @@ class TestBuildSite(TestCommand):
         self.assertListEqual(['a.html'], os.listdir(build_directory))
         with open(os.path.join(build_directory, 'a.html')) as page:
             self.assertEqual('hello world', page.read())
+
+
 
 
     def test_skip_python_script(self):
@@ -84,6 +94,12 @@ class TestBuildWithoutArguments(TestCommand):
     directory is self.cwd.
 
     """
+
+    def test_returned_value(self):
+        """build: Should return True if building each site in group => successful."""
+
+        self.assertTrue(Console().__call__('build'))
+
 
     def test_build_directory(self):
         """build: Should create output directory in each site directory."""

@@ -47,6 +47,14 @@ class TestWatchSite(TestCommand):
         self.shell.after_rebuild = self.shell.stop_waiting
 
 
+    def test_return_true(self):
+        """watch [site]: Should return True if watching ended successful."""
+
+        self.shell.before_waiting = (modify_file,
+                                     [os.path.join(self.temp_path, 'a', 'a.html')])
+        self.assertTrue(self.shell(self.command + ' a'))
+
+
 
     def test_modify_file(self):
         """watch [site]: Watcher should react on file modifying."""
@@ -107,6 +115,15 @@ class TestWatchGroupOfSites(TestCommand):
         self.shell.set_interval(0.1)
         # After first rebuild stop command.
         self.shell.after_rebuild = self.shell.stop_waiting
+
+
+    def test_return_true(self):
+        """watch : Should return True if watching ended successful."""
+
+        self.shell.before_waiting = (modify_file,
+                                     [os.path.join(self.temp_path, 'a', 'a.html')])
+        self.assertTrue(self.shell('watch'))
+
 
 
 

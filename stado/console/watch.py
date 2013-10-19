@@ -67,6 +67,8 @@ class Watch(Command):
         while not self.file_monitor.stopped and wait is True:
             time.sleep(config.wait_interval)
 
+        return True
+
 
     def watch_site(self, path, site, output=None):
         """Add site files to file monitor."""

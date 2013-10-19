@@ -53,6 +53,8 @@ class Edit(Command):
         while not self.stopped:
             time.sleep(config.wait_interval)
 
+        return True
+
 
 
     def update(self, site, output):

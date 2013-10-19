@@ -76,6 +76,8 @@ class View(Command):
         while not self.server.stopped and wait is True:
             time.sleep(config.wait_interval)
 
+        return True
+
 
     def stop(self):
         """Stops command (stops development server)."""
