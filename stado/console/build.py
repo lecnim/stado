@@ -33,6 +33,8 @@ class Build(Command):
         """Command-line interface will execute this method if user type 'build'
         command."""
 
+        print('build command: ', site, output)
+
         # Build all projects.
         if site is None:
 
