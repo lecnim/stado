@@ -132,4 +132,4 @@ class TestBuildWithoutArguments(TestCommand):
         output_path = tempfile.mkdtemp()
         Console().__call__('build --output ' + output_path)
 
-        self.assertListEqual(['a', 'b'], os.listdir(output_path))
+        self.assertCountEqual(['a', 'b'], os.listdir(output_path))
