@@ -11,7 +11,7 @@ if not nose.run():
 
 # Compiling.
 print('')
-subprocess.call('compile.py', shell=True)
+subprocess.call('python compile.py', shell=True)
 
 # Testing compiled package.
 print('Testing stado compiled package...\n')
