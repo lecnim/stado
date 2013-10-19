@@ -122,6 +122,9 @@ class Site:
     def deploy(self):
         """Saves content from cache to output directory."""
 
+        print('Deploying: ' + self.output)
         for content in self.cache.values():
+
+            print('Deploying content: ' + content.destination)
             self.deployer.deploy(content.destination, content.template)
 
