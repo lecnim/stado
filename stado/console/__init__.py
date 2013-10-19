@@ -111,8 +111,8 @@ class Console:
 
         print('call', arguments)
 
-        if len(sys.argv) == 1:
-            return self.build()
+        #if len(sys.argv) == 1:
+        #    return self.build()
 
         # Arguments from sys.args or from method arguments.
         if not arguments:
