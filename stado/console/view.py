@@ -3,7 +3,7 @@
 import threading
 import http.server
 import socketserver
-socketserver.TCPServer.allow_reuse_address = True
+#socketserver.TCPServer.allow_reuse_address = True
 
 import os
 from . import Command
@@ -96,6 +96,9 @@ class DevelopmentServer:
         self.stopped = True     # Server status.
         self.server = None      # TCPServer object.
 
+        self.host = None
+        self.port = None
+
 
     def restart(self):
         """Restarts development server."""
@@ -103,6 +106,10 @@ class DevelopmentServer:
         # Stop server if not already stopped.
         if not self.stopped:
             self.stop()
+
+        # Server objects.
+        Handler = http.server.SimpleHTTPRequestHandler
+        self.server = socketserver.TCPServer((self.host, self.port), Handler)
 
         # Start a thread with the server.
         server_thread = threading.Thread(target=self.server.serve_forever)
@@ -126,19 +133,10 @@ class DevelopmentServer:
         """
 
         if not self.stopped:
-            #logger.warning('Cannot start server, already running!')
             return False
 
-        #logger.debug('Starting server.')
-
-        # Server objects.
-
-        Handler = http.server.SimpleHTTPRequestHandler
-        self.server = socketserver.TCPServer((host, port), Handler)
-
-        #logger.debug('Serving files from: ' + os.getcwd())
-        #logger.info('You can view at: http://{}:{}'.format(self.host,
-        #                                                   self.port))
+        self.host = host
+        self.port = port
 
         self.restart()
         return True
@@ -150,8 +148,5 @@ class DevelopmentServer:
         if self.server is not None:
 
             self.stopped = True
-
-            #logger.debug('Stopping server.')
-
             self.server.shutdown()
             self.server.server_close()

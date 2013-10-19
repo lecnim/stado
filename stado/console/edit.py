@@ -60,8 +60,8 @@ class Edit(Command):
     def update(self, site, output):
         """Overwrites update method in watch command."""
 
-        # TODO: Stop server here.
-        #self.console.commands['view'].server.stop()
+        # Stop server here.
+        self.console.commands['view'].server.stop()
 
         # Change to previous working directory.
         cwd = os.getcwd()
@@ -70,8 +70,8 @@ class Edit(Command):
         # Change to working directory to site output => server will serve from it.
         os.chdir(cwd)
 
-        # TODO: Start server here.
-        #self.console.commands['view'].server.restart()
+        # Start server here.
+        self.console.commands['view'].server.restart()
 
         self.event('after_rebuild')
 
