@@ -76,6 +76,10 @@ class Build(Command):
             # Import site.py
             for loader, module_name, is_pkg in pkgutil.iter_modules([path]):
                 if module_name == 'site':
-                    loader.find_module(module_name).load_module(module_name)
+                    try:
+                        loader.find_module(module_name).load_module(module_name)
+                    except ImportError:
+                        raise CommandError('Failed to build, cannot load module: '
+                                           + module_name)
 
             log.info("Site built in {}s".format(timer.get()))
