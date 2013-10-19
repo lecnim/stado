@@ -3,7 +3,7 @@
 import threading
 import http.server
 import socketserver
-#socketserver.TCPServer.allow_reuse_address = True
+socketserver.TCPServer.allow_reuse_address = True
 
 import os
 from . import Command
