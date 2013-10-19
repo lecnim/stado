@@ -45,11 +45,9 @@ class Build(Command):
                 log.info('Nothing to build, what about creating a new site?')
 
             for directory in dirs:
-                if os.path.isdir(directory):
-
-                    # Set custom output directory.
-                    if output: CONFIG.output = os.path.join(output, directory)
-                    self.build_site(directory)
+                # Set custom output directory.
+                if output: CONFIG.output = os.path.join(output, directory)
+                self.build_site(directory)
 
         # Build only given project.
         else:
