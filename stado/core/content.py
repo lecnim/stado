@@ -47,7 +47,7 @@ class Content:
             if key[1:] in items:
                 destination = destination.replace(key, str(items[key[1:]]))
 
-        return destination.lstrip('\\')
+        return destination.lstrip(os.sep)
 
 
     def __repr__(self):
