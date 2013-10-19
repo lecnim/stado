@@ -6,6 +6,7 @@ stadø
 Stado is minimalistic static site generator powered by python scripts.
 You just download stado.py and it is ready to work.
 
+
 **What? Why another static site generator?**
 
 Stado is different:
@@ -23,17 +24,36 @@ yaml.
 Stado is best for small, files driven sites. You can use python scripts so the sky
 is the limit, probably.
 
+
 **What do I need?**
 
 Only python3, currently supported versions: 3.2, 3.3
+
 
 **Is it ready?**
 
 No, but it is close to first production release. Just stay tuned.
 
+To be done:
+- Command for creating new site project.
+- Plugins:
+
+    before
+    after
+    layout
+    helper
+    permalink
+    pages
+    assets
+
+- Quick-guide
+- Documentation
+
+
 **Where are docs?**
 
 Actually nowhere ;)
+
 
 **Tests?**
 
