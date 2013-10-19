@@ -1,5 +1,5 @@
 import inspect
-from ..core.events_system import Events
+from ..core.events import Events
 
 
 class Plugin(Events):

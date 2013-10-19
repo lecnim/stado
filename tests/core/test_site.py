@@ -10,7 +10,7 @@ class TestSite(TestTemporaryDirectory):
 
         path = os.path.dirname(__file__)
 
-        site = Site(os.path.join(path, 'data'))
+        site = Site(os.path.join(path, 'data', 'site'))
         site.output = self.temp_path
         returned = site.run()
 
@@ -21,10 +21,6 @@ class TestSite(TestTemporaryDirectory):
         with open(fp) as file:
             self.assertEqual('hello world', file.read())
 
-        self.assertTrue(os.path.exists(os.path.join(self.temp_path, 'b.html')))
-        self.assertTrue(os.path.exists(os.path.join(self.temp_path, 'c.html')))
-        self.assertTrue(os.path.exists(os.path.join(self.temp_path, 'd.jpg')))
-        self.assertTrue(
-            os.path.exists(os.path.join(self.temp_path, 'tree', 'a.html')))
-        self.assertTrue(
-            os.path.exists(os.path.join(self.temp_path, 'tree', 'a', 'b.html')))
+        self.assertTrue(os.path.exists(os.path.join(self.temp_path, 'a.html')))
+        self.assertTrue(os.path.exists(os.path.join(self.temp_path, 'b.jpg')))
+        self.assertTrue(os.path.exists(os.path.join(self.temp_path, 'a', 'a.html')))

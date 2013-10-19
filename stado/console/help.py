@@ -44,7 +44,7 @@ class Help(Command):
                                                          description)
 
             msg = (
-                "\n  Usage:"
+                "  Usage:"
                 "\n"
                 "\n    " + command.usage +
                 "\n"
@@ -69,7 +69,7 @@ class Help(Command):
                                                           i.summary)
 
         return (
-            "\nStado is a simple static site generator with python script support."
+            "Stado is a simple static site generator with python script support."
             "\n"
             "\n  Commands:"
             "\n  " + commands +

@@ -1,9 +1,15 @@
 import os
 
+from .events import Events
+from .content import Page, Asset
 from .. import config as CONFIG
 from .. import loaders
-from .events_system import Events
-from .content import Page, Asset
+from ..errors import StadoError
+
+
+class LoaderError(StadoError):
+    """Raises when loader cannot load file."""
+    pass
 
 
 class Loader(Events):
@@ -55,7 +61,14 @@ class Loader(Events):
 
             # Use loader to get file data.
             loader = self.loaders[ext]
-            template, context = loader.load(full_path)
+
+            try:
+                template, context = loader.load(full_path)
+            except KeyboardInterrupt:
+                raise KeyboardInterrupt
+            except Exception as e:
+                msg = 'Failed to load file: {}\nError: {}'.format(path, e)
+                raise LoaderError(msg)
 
             # Loader modify Content destination path.
             # For example markdown loader change *.md to *.html

@@ -1,7 +1,7 @@
 import unittest
 import os
 
-from stado.core.loader import Loader, Page, Asset
+from stado.core.loader import Loader, Page, Asset, LoaderError
 
 
 class TestLoader(unittest.TestCase):
@@ -82,3 +82,14 @@ class TestLoader(unittest.TestCase):
         a = Loader(self.path).load_file('d.jpg')
 
         self.assertIsInstance(a, Asset)
+
+
+    # Error handling.
+
+    def test_load_bad_file(self):
+
+        path = os.path.join(self.path, 'bad')
+        a = Loader(path).load_file
+
+        self.assertRaises(LoaderError, a, 'bad.json')
+

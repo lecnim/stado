@@ -3,7 +3,7 @@
 import os
 import pkgutil
 
-from . import Command
+from . import Command, CommandError
 from .. import log
 from .. import config as CONFIG
 from .. import utils
@@ -67,7 +67,7 @@ class Build(Command):
         path = os.path.join(os.getcwd(), site)
 
         if not os.path.exists(path):
-            raise IOError('Failed to build, site not found: ' + path)
+            raise CommandError('Failed to build, site not found: ' + path)
 
         if self.is_site(path):
 

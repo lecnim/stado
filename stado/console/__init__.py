@@ -2,6 +2,13 @@ import os
 import sys
 import argparse
 
+from ..errors import StadoError
+from .. import log
+
+
+class CommandError(StadoError):
+    """Raises when command generates error."""
+    pass
 
 class Command:
     """Base class for commands."""
@@ -100,6 +107,8 @@ class Console:
 
         # Show help message if no arguments.
 
+        print('')
+
         if len(sys.argv) == 1:
             return self.build()
 
@@ -116,9 +125,12 @@ class Console:
             cmd = args.pop('function')
 
             try:
-                cmd(**args)
+                return cmd(**args)
             except KeyboardInterrupt:
-                pass
+                return True
+            except StadoError as error:
+                log.error(error)
+                return False
 
 
     # Other methods.
