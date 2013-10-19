@@ -3,4 +3,4 @@ python:
   - "3.2"
   - "3.3"
 # command to run tests
-script: python tests/runtests.py
+script: python -m unittest discover
