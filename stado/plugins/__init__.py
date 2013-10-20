@@ -17,6 +17,7 @@ class Plugin(Events):
 # Plugins.
 
 from . import ignore
+from . import before
 
 
 def load(select=None):

@@ -70,6 +70,8 @@ class Loader(Events):
                 msg = 'Failed to load file: {}\nError: {}'.format(path, e)
                 raise LoaderError(msg)
 
+            if context is None: context = {}
+
             # Loader modify Content destination path.
             # For example markdown loader change *.md to *.html
             if loader.output == 'html':
@@ -86,6 +88,14 @@ class Loader(Events):
             content = Asset(path)
 
         self.event('loader.after_loading_content', content)
+
+        # Dumping
+        #if ext in self.loaders:
+        #    try:
+        #        content.template = self.loaders[ext].dump(content.context)
+        #    except AttributeError:
+        #        pass
+
         return content
 
 
