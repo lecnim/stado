@@ -69,7 +69,7 @@ class TestBefore(TestTemporaryDirectory):
         # tests
 
         with open(os.path.join(self.temp_path, 'c.html')) as page:
-            self.assertAlmostEquals('hello: hello before\none: 1\n', page.read())
+            self.assertCountEqual('hello: hello before\none: 1\n', page.read())
 
 
 
@@ -88,5 +88,5 @@ class TestBefore(TestTemporaryDirectory):
         # tests
 
         with open(os.path.join(self.temp_path, 'd.html')) as page:
-            self.assertAlmostEquals('{"hello": "hello before", "one": 1}',
+            self.assertCountEqual('{"hello": "hello before", "one": 1}',
                                     page.read())
