@@ -54,6 +54,27 @@ class TestBefore(TestTemporaryDirectory):
 
 
 
+    def test_paths_re(self):
+        """Before plugin should support like-re syntax."""
+
+        # site.py
+
+        @self.app.before('*.html')
+        def test(path):
+            return {'hello': 'hello before'}
+
+        self.app.run()
+
+
+        # tests
+
+        with open(os.path.join(self.temp_path, 'a.html')) as page:
+            self.assertEqual('hello before', page.read())
+        with open(os.path.join(self.temp_path, 'b.html')) as page:
+            self.assertEqual('hello before', page.read())
+
+
+
     def test_overwrite_yaml(self):
         """Before plugin should overwrite yaml or json file context."""
 

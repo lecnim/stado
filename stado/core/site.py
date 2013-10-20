@@ -1,7 +1,7 @@
 import os
 import inspect
 
-from .. import log
+from .events import Events
 from .. import plugins
 from .. import config as CONFIG
 from .loader import Loader
@@ -11,7 +11,7 @@ from .cache import DictCache, ShelveCache
 
 
 
-class Site:
+class Site(Events):
     """
     This is site. It contains all sites objects like Page, Assets, Loader etc.
     Use run() method to build site.
@@ -24,6 +24,7 @@ class Site:
     """
 
     def __init__(self, path=None, config=None):
+        Events.__init__(self)
 
         # Set path to file path from where Site is used.
         if path is None:
@@ -56,9 +57,11 @@ class Site:
             self.plugins[plugin.name] = plugin
 
             # Bind plugin as a object method.
-            setattr(self, plugin.name, plugin)
+            if plugin.is_callable is True:
+                setattr(self, plugin.name, plugin)
 
             self.loader.events.subscribe(plugin)
+            self.events.subscribe(plugin)
 
     @property
     def output(self):
@@ -115,6 +118,7 @@ class Site:
             if content.is_page:
                 data = self.rendered.render(content.template, content.context)
                 content.template = data
+                self.event('renderer.after_rendering_content', content)
                 self.cache[content.source] = content
 
         return self
