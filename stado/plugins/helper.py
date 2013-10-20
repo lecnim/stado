@@ -6,9 +6,13 @@ class Helper(Plugin):
 
     name = 'helper'
 
+    # Plugin must be run before layout rendering.
+    order = 0
+
 
     def __init__(self, site):
         Plugin.__init__(self, site)
+
 
 
         # Bind events to plugin methods.

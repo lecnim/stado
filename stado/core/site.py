@@ -46,7 +46,7 @@ class Site(Events):
         # Main components.
 
         self.loader = Loader(self.path)
-        self.rendered = Rendered(self.path)
+        self.renderer = Rendered(self.path)
         self.deployer = Deployer(self.output)
 
         # Plugins
@@ -117,7 +117,7 @@ class Site(Events):
         for content in self.cache.values():
             if content.is_page:
                 self.event('renderer.before_rendering_content', content)
-                data = self.rendered.render(content.template, content.context)
+                data = self.renderer.render(content.template, content.context)
                 content.template = data
                 self.event('renderer.after_rendering_content', content)
                 self.cache[content.source] = content

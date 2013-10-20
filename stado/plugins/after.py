@@ -10,7 +10,7 @@ class After(Plugin):
 
     name = 'after'
 
-    # PLugin must run before yaml page dump plugin.
+    # Plugin must be run before yaml or json page dump plugin.
     order = 0
 
 
