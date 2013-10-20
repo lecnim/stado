@@ -37,16 +37,13 @@ No, but it is close to first production release. Just stay tuned.
 To be done:
 ```
 
-- Command for creating new site project.
-- Plugins:
-
-    layout,
-    helper,
-    pages,
-    assets,
-
-- Quick-guide
-- Documentation
+- [ ] Command for creating new site project
+- [ ] plugin layout
+- [ ] plugin helper
+- [ ] plugin pages
+- [ ] plugin assets
+- [ ] Quick-guide
+- [ ] Basic documentation
 
 ```
 
