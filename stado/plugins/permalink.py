@@ -1,3 +1,4 @@
+import fnmatch
 from . import Plugin
 
 
@@ -21,13 +22,15 @@ class Permalink(Plugin):
 
     def update_permalink(self, content):
 
-        if content.source in self.paths:
-            permalink = self.paths[content.source]
+        for path in self.paths:
 
-            if permalink == 'pretty':
-                permalink = '/:path/:name/index.html'
-            elif permalink == 'default' or permalink == 'ugly':
-                permalink = '/:path/:filename'
+            if fnmatch.fnmatch(content.source, path):
+                permalink = self.paths[path]
 
-            content.permalink = permalink
+                if permalink == 'pretty':
+                    permalink = '/:path/:name/index.html'
+                elif permalink == 'default' or permalink == 'ugly':
+                    permalink = '/:path/:filename'
+
+                content.permalink = permalink
 

@@ -31,6 +31,23 @@ class TestPermalink(TestPlugin):
         self.assertTrue(os.path.exists('test.jpg'))
 
 
+    def test_filename_matching(self):
+
+        # site.py
+
+        self.app.permalink('*.*', '/test/:path/:filename')
+        self.app.run()
+
+        # tests
+
+        self.assertTrue(os.path.exists('test'))
+        self.assertIn('image.jpg', os.listdir('test'))
+        self.assertIn('page.html', os.listdir('test'))
+        self.assertIn('a', os.listdir('test'))
+
+
+    # Styles.
+
     def test_style_pretty(self):
         """Permalink plugins should correctly change url using built-in styles."""
 
