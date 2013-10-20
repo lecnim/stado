@@ -31,6 +31,36 @@ class TestPermalink(TestPlugin):
         self.assertTrue(os.path.exists('test.jpg'))
 
 
+    def test_style_pretty(self):
+        """Permalink plugins should correctly change url using built-in styles."""
+
+        # site.py
+
+        self.app.permalink('page.html', 'pretty')
+        self.app.run()
+
+        # tests
+
+        self.assertTrue(os.path.exists('page'))
+        self.assertIn('index.html', os.listdir('page'))
+
+    def test_style_default(self):
+        """Permalink plugins should correctly change url using built-in styles."""
+
+        # site.py
+
+        self.app.permalink('page.html', 'default')
+        self.app.permalink('image.jpg', 'ugly')
+        self.app.run()
+
+        # tests
+
+        self.assertTrue(os.path.exists('page.html'))
+        self.assertTrue(os.path.exists('image.jpg'))
+
+
+    # Keywords.
+
     def test_keywords_path(self):
         """Permalink plugins should correctly change url using keywords."""
 
@@ -53,6 +83,7 @@ class TestPermalink(TestPlugin):
 
         # tests
 
+        self.assertTrue(os.path.exists('test'))
         self.assertIn('page', os.listdir('test'))
 
     def test_keywords_filename(self):

@@ -22,5 +22,12 @@ class Permalink(Plugin):
     def update_permalink(self, content):
 
         if content.source in self.paths:
-            content.permalink = self.paths[content.source]
+            permalink = self.paths[content.source]
+
+            if permalink == 'pretty':
+                permalink = '/:path/:name/index.html'
+            elif permalink == 'default' or permalink == 'ugly':
+                permalink = '/:path/:filename'
+
+            content.permalink = permalink
 
