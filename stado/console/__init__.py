@@ -59,6 +59,7 @@ from .watch import Watch
 from .view import View
 from .edit import Edit
 from .help import Help
+from .new import New
 
 
 
@@ -74,6 +75,7 @@ class Console:
             View.name: View(self),
             Edit.name: Edit(self),
             Help.name: Help(self),
+            New.name: New(self),
         }
 
         # Create command line parser.
