@@ -9,8 +9,6 @@ class TestSite(TestTemporaryDirectory):
 
     def test_run(self):
 
-        print(core)
-
         path = os.path.dirname(__file__)
 
         site = Site(os.path.join(path, 'data', 'site'))
