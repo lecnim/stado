@@ -47,7 +47,7 @@ class TestLoader(unittest.TestCase):
 
         self.assertIsInstance(a, Page)
         self.assertEqual(a.template, 'hello world')
-        self.assertEqual(a.context, None)
+        self.assertEqual(a.context, {})
 
 
     def test_load_markdown_file(self):
@@ -56,7 +56,7 @@ class TestLoader(unittest.TestCase):
 
         self.assertIsInstance(a, Page)
         self.assertEqual(a.template, '<p>hello world</p>')
-        self.assertEqual(a.context, None)
+        self.assertEqual(a.context, {})
 
 
     def test_load_yaml_file(self):
