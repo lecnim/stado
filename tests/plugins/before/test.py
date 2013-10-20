@@ -1,113 +1,89 @@
-
-import os
-from tests import TestTemporaryDirectory
-from stado import Stado
+from tests.plugins import TestPlugin
 
 
-class TestBefore(TestTemporaryDirectory):
+class TestBefore(TestPlugin):
 
-    def setUp(self):
-        TestTemporaryDirectory.setUp(self)
-
-        self.path = os.path.dirname(__file__)
-        self.app = Stado(os.path.join(self.path, 'data'))
-        self.app.output = self.temp_path
-
-
-    def test_one_path(self):
-        """Before plugin should correctly pass path argument and get context."""
+    def test_path_argument(self):
+        """Before plugin should call function with correct path argument."""
 
         # site.py
 
-        @self.app.before('a.html')
+        @self.app.before('page.html')
         def test(path):
-            return {'hello': path}
-
+            return {'badger': path}
         self.app.run()
-
 
         # tests
 
-        with open(os.path.join(self.temp_path, 'a.html')) as page:
-            self.assertEqual('a.html', page.read())
+        with open('page.html') as page:
+            self.assertEqual('page.html', page.read())
 
 
-
-    def test_multiple_paths(self):
-        """Before plugin should add context to multiple contents."""
+    def test_multiple_path_arguments(self):
+        """Before plugin should call function with multiple path arguments."""
 
         # site.py
 
-        @self.app.before('a.html', 'b.html')
+        @self.app.before('page.html', 'html.html')
         def test(path):
-            return {'hello': 'hello before'}
-
+            return {'badger': 'test'}
         self.app.run()
-
 
         # tests
 
-        with open(os.path.join(self.temp_path, 'a.html')) as page:
-            self.assertEqual('hello before', page.read())
-        with open(os.path.join(self.temp_path, 'b.html')) as page:
-            self.assertEqual('hello before', page.read())
+        with open('page.html') as page:
+            self.assertEqual('test', page.read())
+        with open('html.html') as page:
+            self.assertEqual('test', page.read())
 
 
-
-    def test_paths_re(self):
-        """Before plugin should support like-re syntax."""
+    def test_filename_matching(self):
+        """Before plugin should support filename matching."""
 
         # site.py
 
-        @self.app.before('*.html')
+        @self.app.before('*.*')
         def test(path):
-            return {'hello': 'hello before'}
-
+            return {'badger': 'test'}
         self.app.run()
-
 
         # tests
 
-        with open(os.path.join(self.temp_path, 'a.html')) as page:
-            self.assertEqual('hello before', page.read())
-        with open(os.path.join(self.temp_path, 'b.html')) as page:
-            self.assertEqual('hello before', page.read())
-
+        with open('page.html') as page:
+            self.assertEqual('test', page.read())
+        with open('html.html') as page:
+            self.assertEqual('test', page.read())
+        with open('markdown.html') as page:
+            self.assertEqual('<p>test</p>', page.read())
 
 
     def test_overwrite_yaml(self):
-        """Before plugin should overwrite yaml or json file context."""
+        """Before plugin should overwrite context from yaml file."""
 
         # site.py
 
-        @self.app.before('c.yaml')
+        @self.app.before('yaml.yaml')
         def test(path):
-            return {'hello': 'hello before'}
-
+            return {'badger': 'test'}
         self.app.run()
-
 
         # tests
 
-        with open(os.path.join(self.temp_path, 'c.html')) as page:
-            self.assertCountEqual('hello: hello before\none: 1\n', page.read())
-
+        with open('yaml.html') as page:
+            self.assertCountEqual('badger: test\none: 1\n', page.read())
 
 
     def test_overwrite_json(self):
-        """Before plugin should overwrite yaml or json file context."""
+        """Before plugin should overwrite context from json file."""
 
         # site.py
 
-        @self.app.before('d.json')
+        @self.app.before('json.json')
         def test(path):
-            return {'hello': 'hello before'}
-
+            return {'badger': 'test'}
         self.app.run()
-
 
         # tests
 
-        with open(os.path.join(self.temp_path, 'd.html')) as page:
-            self.assertCountEqual('{"hello": "hello before", "one": 1}',
-                                    page.read())
+        with open('json.html') as page:
+            self.assertCountEqual('{"badger": "test", "one": 1}', page.read())

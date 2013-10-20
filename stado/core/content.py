@@ -39,7 +39,8 @@ class Content:
         items = {
             'path': os.path.split(self.source)[0],
             'filename': self.filename,
-            'title': os.path.splitext(self.filename)[0],
+            'name': os.path.splitext(self.filename)[0],
+            'extension': os.path.splitext(self.filename)[1][1:],
         }
 
         for key in keywords:

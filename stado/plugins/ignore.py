@@ -1,4 +1,5 @@
 import fnmatch
+
 from . import Plugin
 
 
@@ -14,18 +15,19 @@ class Ignore(Plugin):
         # Bind events to plugin methods.
         self.events.bind({
             'loader.before_loading_content': self.ignore_file,
+            'loader.before_loading_directory': self.ignore_file,
         })
 
         # List of ignored paths.
-        self.paths = []
+        self.ignored_paths = []
 
 
     def __call__(self, *paths):
-        self.paths.extend(paths)
+        self.ignored_paths.extend(paths)
 
 
     def ignore_file(self, path):
 
-        for i in self.paths:
+        for i in self.ignored_paths:
             if fnmatch.fnmatch(path, i):
                 return False

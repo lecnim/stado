@@ -1,32 +1,43 @@
-
-import os
-from tests import TestTemporaryDirectory
-from stado import Stado
+from tests.plugins import TestPlugin
 
 
-class TestHelper(TestTemporaryDirectory):
-
-    def setUp(self):
-        TestTemporaryDirectory.setUp(self)
-
-        self.path = os.path.dirname(__file__)
-        self.app = Stado(os.path.join(self.path, 'data'))
-        self.app.output = self.temp_path
-
+class TestHelper(TestPlugin):
 
     def test_one_path(self):
-        """Before plugin should correctly pass path argument and get context."""
+        """Helper plugin should works correctly."""
 
         # site.py
 
         @self.app.helper
         def hello():
             return 'hello world'
-
         self.app.run()
-
 
         # tests
 
-        with open(os.path.join(self.temp_path, 'a.html')) as page:
+        with open('page.html') as page:
             self.assertEqual('hello world', page.read())
+
+
+    def test_do_not_overwrite_context(self):
+        """Helper plugin should not overwrite already existing context key."""
+
+        # site.py
+
+        @self.app.before('page.html')
+        def page(path):
+            return {'hello': 'hello world'}
+
+        @self.app.helper
+        def hello():
+            return 'test'
+        self.app.run()
+
+        # tests
+
+        with open('page.html') as page:
+            self.assertEqual('hello world', page.read())
+        with open('yaml.html') as page:
+            self.assertEqual('hello: hello world\n', page.read())
+        with open('json.html') as page:
+            self.assertEqual('{"hello": "hello world"}', page.read())

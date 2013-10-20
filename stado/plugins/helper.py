@@ -32,7 +32,8 @@ class Helper(Plugin):
         """Updates content context with all available helper functions."""
 
         for name, function in self.functions.items():
-            content.context[name] = function
+            if not name in content.context:
+                content.context[name] = function
 
     def remove_helpers_from_context(self, content):
         """Removes all helpers methods from content context."""

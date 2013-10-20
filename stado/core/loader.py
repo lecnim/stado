@@ -79,7 +79,7 @@ class Loader(Events):
             else:
                 content = Asset(path)
 
-            content.permalink = '/:path/:title.' + loader.output
+            content.permalink = '/:path/:name.' + loader.output
             content.context = context
             content.template = template
 
@@ -88,31 +88,26 @@ class Loader(Events):
             content = Asset(path)
 
         self.event('loader.after_loading_content', content)
-
-        # Dumping
-        #if ext in self.loaders:
-        #    try:
-        #        content.template = self.loaders[ext].dump(content.context)
-        #    except AttributeError:
-        #        pass
-
         return content
 
 
     def load_dir(self, path=''):
         """Yields Content objects created from files in directory."""
 
-        full_path = os.path.join(self.path, path)
-        list_dirs = os.listdir(full_path)
+        # Event can cancel loading file.
+        if not False in self.event('loader.before_loading_directory', path):
 
-        # Load contents.
-        for file_name in list_dirs:
+            full_path = os.path.join(self.path, path)
+            list_dirs = os.listdir(full_path)
 
-            # Path must points to file, file should not be python script.
-            if os.path.isfile(os.path.join(full_path, file_name)) and \
-                    not file_name.endswith('.py'):
-                content = self.load_file(os.path.join(path, file_name))
-                if content: yield content
+            # Load contents.
+            for file_name in list_dirs:
+
+                # Path must points to file, file should not be python script.
+                if os.path.isfile(os.path.join(full_path, file_name)) and \
+                        not file_name.endswith('.py'):
+                    content = self.load_file(os.path.join(path, file_name))
+                    if content: yield content
 
 
     def walk(self, path='', exclude=None):

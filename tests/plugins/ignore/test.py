@@ -1,61 +1,75 @@
-import unittest
 import os
-from tests import TestTemporaryDirectory
-from stado import Stado
+from tests.plugins import TestPlugin
 
 
-class TestIgnore(TestTemporaryDirectory):
+class TestIgnore(TestPlugin):
 
-    def setUp(self):
-        TestTemporaryDirectory.setUp(self)
-
-        self.path = os.path.dirname(__file__)
-        self.app = Stado(os.path.join(self.path, 'data'))
-        self.app.output = self.temp_path
-
-
-    def test_file(self):
+    def test_path_argument(self):
         """Ignore plugin should correctly ignore files."""
+
+        # site.py
 
         self.app.ignore('a.html')
         self.app.run()
 
-        self.assertNotIn('a.html', os.listdir(self.temp_path))
+        # tests
 
-    def test_multiple_files(self):
+        self.assertNotIn('a.html', os.listdir())
+
+
+    def test_multiple_path_arguments(self):
         """Ignore plugin should correctly ignore multiple files."""
+
+        # site.py
 
         self.app.ignore('a.html', os.path.join('b', 'b.html'))
         self.app.run()
 
-        self.assertFalse(os.path.exists(os.path.join(self.temp_path, 'a.html')))
-        self.assertFalse(os.path.exists(os.path.join(self.temp_path, 'b', 'b.html')))
+        # tests
 
-    @unittest.skip
+        self.assertFalse(os.path.exists('a.html'))
+        self.assertFalse(os.path.exists(os.path.join('b', 'b.html')))
+        self.assertTrue(os.path.exists('b.html'))
+
+
     def test_dir(self):
         """Ignore plugin should correctly ignore directories."""
+
+        # site.py
 
         self.app.ignore('b')
         self.app.run()
 
-        self.assertNotIn('b', os.listdir(self.temp_path))
+        # tests
+
+        self.assertNotIn('b', os.listdir())
+        self.assertTrue(os.path.exists('b.html'))
 
 
     def test_pattern_matching(self):
         """Ignore plugin should correctly ignore files using pattern matching."""
 
+        # site.py
+
         self.app.ignore('*.html')
         self.app.run()
 
-        self.assertNotIn('a.html', os.listdir(self.temp_path))
-        self.assertFalse(os.path.exists(os.path.join(self.temp_path, 'b', 'b.html')))
+        # tests
+
+        self.assertNotIn('a.html', os.listdir())
+        self.assertFalse(os.path.exists(os.path.join('b', 'b.html')))
+
 
     def test_pattern_matching_tree(self):
         """Ignore plugin should correctly ignore files using pattern matching with
         subdirectories."""
 
+        # site.py
+
         self.app.ignore('b/*.html')
         self.app.run()
 
-        self.assertIn('a.html', os.listdir(self.temp_path))
-        self.assertFalse(os.path.exists(os.path.join(self.temp_path, 'b', 'b.html')))
+        # tests
+
+        self.assertIn('a.html', os.listdir())
+        self.assertFalse(os.path.exists(os.path.join('b', 'b.html')))

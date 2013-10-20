@@ -48,5 +48,5 @@ class After(Plugin):
         for function, paths in self.functions:
             for path in paths:
                 if fnmatch.fnmatch(content.source, path):
-                    template = function(path, content.template)
+                    template = function(content.source, content.template)
                     content.template = template
