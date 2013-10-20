@@ -12,6 +12,9 @@ class Before(Plugin):
 
     name = 'before'
 
+    # PLugin must run before yaml page dump plugin.
+    order = 0
+
 
     def __init__(self, site):
         Plugin.__init__(self, site)

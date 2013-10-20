@@ -5,6 +5,9 @@ from ..core.events import Events
 class Plugin(Events):
     """Base plugin class."""
 
+    is_callable = True
+    order = 10
+
     def __init__(self, site):
         Events.__init__(self)
         self.site = site
@@ -18,6 +21,8 @@ class Plugin(Events):
 
 from . import ignore
 from . import before
+from . import yaml_page_dump
+from . import json_page_dump
 
 
 def load(select=None):

@@ -54,7 +54,7 @@ class TestBefore(TestTemporaryDirectory):
 
 
 
-    def test_overwrite(self):
+    def test_overwrite_yaml(self):
         """Before plugin should overwrite yaml or json file context."""
 
         # site.py
@@ -69,4 +69,24 @@ class TestBefore(TestTemporaryDirectory):
         # tests
 
         with open(os.path.join(self.temp_path, 'c.html')) as page:
-            print(page.read())
+            self.assertAlmostEquals('hello: hello before\none: 1\n', page.read())
+
+
+
+    def test_overwrite_json(self):
+        """Before plugin should overwrite yaml or json file context."""
+
+        # site.py
+
+        @self.app.before('d.json')
+        def test(path):
+            return {'hello': 'hello before'}
+
+        self.app.run()
+
+
+        # tests
+
+        with open(os.path.join(self.temp_path, 'd.html')) as page:
+            self.assertAlmostEquals('{"hello": "hello before", "one": 1}',
+                                    page.read())
