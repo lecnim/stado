@@ -3,7 +3,7 @@
 import os
 
 from stado.console.new import script, index
-from stado.console import Console
+from stado.console import Console, CommandError
 from tests.console import TestCommand
 
 
@@ -25,6 +25,7 @@ class TestBuildSite(TestCommand):
 
         self.assertTrue(Console().__call__('new test'))
 
+
     def test(self):
         """new [site]: Should correctly creates new site files."""
 
@@ -38,3 +39,9 @@ class TestBuildSite(TestCommand):
 
         with open(os.path.join(self.temp_path, 'test', 'index.html')) as file:
             self.assertEqual(index, file.read())
+
+
+    def test_site_exists(self):
+        """new [site]: Should raise error when creating site which already exits."""
+
+        self.assertFalse(Console().__call__('new a'))
