@@ -35,19 +35,21 @@ Only python3, currently supported versions: 3.2, 3.3
 No, but it is close to first production release. Just stay tuned.
 
 To be done:
+```
+
 - Command for creating new site project.
 - Plugins:
 
-    before
-    after
-    layout
-    helper
-    permalink
-    pages
-    assets
+    layout,
+    helper,
+    pages,
+    assets,
 
 - Quick-guide
 - Documentation
+
+```
+
 
 
 **Where are docs?**
