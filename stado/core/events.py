@@ -24,8 +24,8 @@ class EventsHandler:
 
         if not obj in self.subscribers:
             self.subscribers.append(obj)
-            self.subscribers.sort(key=lambda x: x.order)
-            print(self.subscribers)
+            self.subscribers.sort(key=lambda x: getattr(x, 'order', 10))
+
 
     def notify(self, event, *args, **kwargs):
         for obj in self.subscribers:
