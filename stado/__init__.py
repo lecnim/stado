@@ -9,13 +9,13 @@ def get_logger():
     """Returns miniherd logger."""
 
     logger = logging.getLogger('stado')
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
 
     # Log into console.
     ch = logging.StreamHandler()
     formatter = logging.Formatter('%(message)s')
     ch.setFormatter(formatter)
-    ch.setLevel(logging.INFO)
+    ch.setLevel(logging.DEBUG)
     logger.addHandler(ch)
     return logger
 

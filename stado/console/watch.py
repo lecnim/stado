@@ -44,6 +44,7 @@ class Watch(Command):
         # Watch only given site.
         if site:
             path = os.path.join(cwd, site)
+            print(site, path, output)
             self.watch_site(path, site, output)
 
         # Watch all sites.
@@ -63,6 +64,8 @@ class Watch(Command):
         if wait: self.event('before_waiting')
 
         log.info('Watching for changes...')
+        for i in self.file_monitor.observers:
+            log.debug('Watching: {}, excluded: {}'.format(i.path, i.exclude))
 
         while not self.file_monitor.stopped and wait is True:
             time.sleep(config.wait_interval)
@@ -85,6 +88,8 @@ class Watch(Command):
     def update(self, site, output):
         """This method is run by file monitor each time when site files were
         changed."""
+
+        log.info('Rebuilding site: {} to {}'.format(site, output))
 
         self.console.build(site, output)
         self.event('after_rebuild')

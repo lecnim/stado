@@ -43,9 +43,12 @@ class Edit(Command):
         self.stopped = False
 
         # Use custom update method.
+        self.console.build(site, output)
         self.console.commands['watch'].update = self.update
         self.console.watch(site, output, wait=False)
-        self.console.view(site, host, port, output, wait=False)
+        self.console.view(site, host, port, output, wait=False, build=False)
+
+
 
         # Monitoring.
         self.event('before_waiting')

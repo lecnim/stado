@@ -48,7 +48,7 @@ class View(Command):
         parser.set_defaults(function=self.run)
 
 
-    def run(self, site, host, port, output=None, wait=True):
+    def run(self, site, host, port, output=None, wait=True, build=True):
         """Command-line interface will execute this method if user type 'view'
         command."""
 
@@ -57,7 +57,8 @@ class View(Command):
         self.cwd = os.getcwd()
 
         # Build site.
-        self.console.build(site, output)
+        if build:
+            self.console.build(site, output)
 
         # Server will serve files from current working directory.
         # So change current working directory to site output.
