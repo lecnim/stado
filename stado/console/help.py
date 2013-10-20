@@ -1,7 +1,7 @@
 """Command: help"""
 
 from . import Command
-
+from .. import version
 
 
 class Help(Command):
@@ -74,5 +74,5 @@ class Help(Command):
             "\n  Commands:"
             "\n  " + commands +
             "\n  "
-            "\n  Version: " + ''
+            "\n  Version: " + str(version)
         )
