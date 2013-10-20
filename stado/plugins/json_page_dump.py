@@ -1,7 +1,7 @@
 from . import Plugin
 import json
 
-class YamlPageDump(Plugin):
+class JsonPageDump(Plugin):
 
     name = 'json-pages'
     is_callable = False
