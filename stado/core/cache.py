@@ -16,7 +16,7 @@ class ShelveCache(UserDict):
         if not os.path.exists(self.path):
             os.makedirs(self.path)
 
-        self.data = shelve.open(os.path.join(self.path, 'contents'))
+        self.data = shelve.open(os.path.join(self.path, 'contents.obj'))
         # Removes previous data.
         self.data.clear()
 
