@@ -3,6 +3,9 @@ import logging
 
 from . import libs
 
+__version__ = '0.3.0'
+version = __version__
+
 
 # Custom logger from python logging module.
 def get_logger():
@@ -26,8 +29,7 @@ log = get_logger()
 from .core.site import Site
 from .console import Console
 
-__version__ = '0.3.0'
-version = __version__
+
 
 
 
