@@ -16,6 +16,9 @@ class ShelveCache(UserDict):
         if not os.path.exists(self.path):
             os.makedirs(self.path)
 
+        # List of all files in cache.
+        self.files = []
+
         self.data = shelve.open(os.path.join(self.path, 'contents.obj'))
         # Removes previous data.
         self.data.clear()
@@ -24,6 +27,18 @@ class ShelveCache(UserDict):
         """Removes cache files."""
         self.data.close()
         shutil.rmtree(self.path)
+
+    def __setitem__(self, key, value):
+
+        UserDict.__setitem__(self, key, value)
+        self.files.append(key)
+
+    def __delitem__(self, key):
+
+        del self.data[key]
+        self.files.remove(key)
+
+
 
 class DictCache(dict):
     """
