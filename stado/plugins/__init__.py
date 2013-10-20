@@ -23,6 +23,7 @@ from . import ignore
 from . import before
 from . import after
 from . import permalink
+from . import helper
 from . import yaml_page_dump
 from . import json_page_dump
 
