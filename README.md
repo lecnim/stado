@@ -11,15 +11,17 @@ You just download stado.py and it is ready to work.
 
 Stado is different:
 
-- No dependencies, batteries are included: markdown support, mustache templates,
-yaml.
+- No dependencies, batteries are included: 
+  - markdown support using great [`Python-Markdown`](https://github.com/waylan/Python-Markdown)
+  - mustache templates using great [`pystache`](https://github.com/defunkt/pystache)
+  - yaml parsing using great [`pyyaml`](https://github.com/yaml/pyyaml)
 - Only one file (actually less than **100kb**).
 - Pages creation powered by python scripts.
 - Site content from **yaml** or **json** files.
 - Development server.
 - File watcher for site auto-rebuilding.
-- Manage group of sites (can build or watch more than one site).
-- Easy and minimalistic.
+- Manage group of sites *(can build or watch more than one site)*.
+- **Easy** and minimalistic.
 
 Stado is best for small, files driven sites. You can use python scripts so the sky
 is the limit, probably.
@@ -35,19 +37,18 @@ Only python3, currently supported versions: 3.2, 3.3
 No, but it is close to first production release. Just stay tuned.
 
 To be done:
-- Command for creating new site project.
-- Plugins:
+```
 
-    before
-    after
-    layout
-    helper
-    permalink
-    pages
-    assets
+- [ ] Command for creating new site project
+- [ ] plugin layout
+- [ ] plugin helper
+- [ ] plugin pages
+- [ ] plugin assets
+- [ ] Quick-guide
+- [ ] Basic documentation
 
-- Quick-guide
-- Documentation
+```
+
 
 
 **Where are docs?**
