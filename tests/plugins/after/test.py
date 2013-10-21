@@ -3,6 +3,23 @@ from tests.plugins import TestPlugin
 
 class TestAfter(TestPlugin):
 
+
+    def test_no_arguments(self):
+        """Plugin after should call function with correct path argument."""
+
+        # site.py
+
+        @self.app.after('page.html')
+        def test():
+            return 'test'
+        self.app.run()
+
+        # tests
+
+        with open('page.html') as page:
+            self.assertEqual('test', page.read())
+
+
     def test_path_argument(self):
         """Plugin after should call function with correct path argument."""
 
@@ -25,7 +42,7 @@ class TestAfter(TestPlugin):
         # site.py
 
         @self.app.after('page.html')
-        def test(path, data):
+        def test(data):
             return data
         self.app.run()
 

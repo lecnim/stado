@@ -1,4 +1,5 @@
 import fnmatch
+import inspect
 from . import Plugin
 
 
@@ -48,5 +49,16 @@ class After(Plugin):
         for function, paths in self.functions:
             for path in paths:
                 if fnmatch.fnmatch(content.source, path):
-                    template = function(content.source, content._content)
+
+                    # Runs function with different arguments depending on their
+                    # amount.
+
+                    args = len(inspect.getfullargspec(function)[0])
+                    if args == 0:
+                        template = function()
+                    elif args == 1:
+                        template = function(content._content)
+                    elif args == 2:
+                        template = function(content.source, content._content)
+
                     content._content = template
