@@ -29,12 +29,11 @@ class ShelveCache(UserDict):
         shutil.rmtree(self.path)
 
     def __setitem__(self, key, value):
-
         UserDict.__setitem__(self, key, value)
-        self.files.append(key)
+        if not key in self.files:
+            self.files.append(key)
 
     def __delitem__(self, key):
-
         del self.data[key]
         self.files.remove(key)
 
