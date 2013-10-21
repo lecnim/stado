@@ -5,6 +5,23 @@ from tests.plugins import TestPlugin
 class TestPermalink(TestPlugin):
 
     def test_page(self):
+        """Permalink plugins should correctly change Content object url."""
+
+        # site.py
+
+        @self.app.before('page.html')
+        def url(page):
+            self.app.permalink(page, '/b')
+        self.app.run()
+
+        # tests
+
+        with open('b') as page:
+            self.assertEqual('badger', page.read())
+
+
+
+    def test_page(self):
         """Permalink plugins should correctly change page url."""
 
         # site.py

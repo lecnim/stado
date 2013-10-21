@@ -16,8 +16,9 @@ class Permalink(Plugin):
 
         self.paths = {}
 
-    def __call__(self, path, url):
+    def __call__(self, target, url):
 
+        path = target if isinstance(target, str) else target.source
         self.paths[path] = url
 
     def update_permalink(self, content):

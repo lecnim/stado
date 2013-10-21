@@ -23,7 +23,10 @@ class Ignore(Plugin):
 
 
     def __call__(self, *paths):
-        self.ignored_paths.extend(paths)
+
+        for path in paths:
+            if not path in self.ignored_paths:
+                self.ignored_paths.append(path)
 
 
     def ignore_file(self, path):

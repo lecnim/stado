@@ -57,6 +57,23 @@ class TestBefore(TestPlugin):
             self.assertEqual('test', page.read())
 
 
+    def test_no_return(self):
+        """Before plugin should works even if nothing is returned from called
+        function."""
+
+        # site.py
+
+        @self.app.before('page.html')
+        def test():
+            pass
+        self.app.run()
+
+        # tests
+
+        with open('page.html') as page:
+            self.assertEqual('', page.read())
+
+
     def test_filename_matching(self):
         """Before plugin should support filename matching."""
 

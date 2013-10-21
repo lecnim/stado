@@ -4,7 +4,7 @@ from tests.plugins import TestPlugin
 
 class TestLayout(TestPlugin):
 
-    def test(self):
+    def test_str(self):
         """Layout plugin should render page template using given layout."""
 
         # site.py
@@ -16,6 +16,24 @@ class TestLayout(TestPlugin):
 
         with open('page.html') as page:
             self.assertEqual('layout badger', page.read())
+
+
+    def test_content_object(self):
+        """Layout plugin should accept Content objects as a argument."""
+
+        # site.py
+
+        @self.app.before('page.html')
+        def set_layout(page):
+            self.app.layout(page, 'layout.html')
+
+        self.app.run()
+
+        # tests
+
+        with open('page.html') as page:
+            self.assertEqual('layout badger', page.read())
+
 
 
     def test_multiple_layouts(self):

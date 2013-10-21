@@ -17,6 +17,21 @@ class TestIgnore(TestPlugin):
         self.assertNotIn('a.html', os.listdir())
 
 
+    #def test_content_object(self):
+    #    """Ignore plugin should correctly ignore files from Content object."""
+    #
+    #    # site.py
+    #
+    #    @self.app.before('a.html')
+    #    def ignore_content(page):
+    #        self.app.ignore(page)
+    #    self.app.run()
+    #
+    #    # tests
+    #
+    #    self.assertNotIn('a.html', os.listdir())
+
+
     def test_multiple_path_arguments(self):
         """Ignore plugin should correctly ignore multiple files."""
 

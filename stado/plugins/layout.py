@@ -18,17 +18,19 @@ class Layout(Plugin):
         })
 
         # TODO: remove
-        self.layouts = []
+        #self.layouts = []
 
-        self.contents = {}
+        self.paths = {}
 
 
 
-    def __call__(self, path, *layouts, **kwargs):
+    def __call__(self, target, *layouts, **kwargs):
         """Calling plugin."""
 
+        path = target if isinstance(target, str) else target.source
+
         # 'a.html': 'layout.html'
-        self.contents[path] = (layouts, kwargs.get('context', {}))
+        self.paths[path] = (layouts, kwargs.get('context', {}))
 
         # Prevents layouts files in output.
         for i in layouts:
@@ -41,14 +43,14 @@ class Layout(Plugin):
         So this method only adds things to Content.template.
         """
 
-        for path in self.contents:
+        for path in self.paths:
 
             #
             if not fnmatch.fnmatch(content.source, path):
                 continue
 
 
-            layouts, layout_context = self.contents[path]
+            layouts, layout_context = self.paths[path]
             template = content.template
 
             for layout_path in layouts:

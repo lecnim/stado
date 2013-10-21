@@ -61,4 +61,5 @@ class Before(Plugin):
                     else:
                         context = function(content)
 
-                    content.context.update(context)
+                    if context:
+                        content.context.update(context)

@@ -127,6 +127,8 @@ class Site(Events):
                     # Some plugin overwrite content.template.
                     if result is not None:
                         template = result
+                    elif result is False:
+                        continue
 
 
                 data = self.renderer.render(template, content.context)
