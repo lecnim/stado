@@ -59,6 +59,6 @@ class After(Plugin):
                     elif args == 1:
                         template = function(content._content)
                     elif args == 2:
-                        template = function(content.source, content._content)
+                        template = function(content, content._content)
 
                     content._content = template

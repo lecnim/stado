@@ -59,6 +59,6 @@ class Before(Plugin):
                     if len(args) == 0:
                         context = function()
                     else:
-                        context = function(path)
+                        context = function(content)
 
                     content.context.update(context)

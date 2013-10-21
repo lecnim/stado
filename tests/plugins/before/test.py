@@ -1,3 +1,4 @@
+from stado.core.content import Content
 from tests.plugins import TestPlugin
 
 
@@ -5,7 +6,7 @@ class TestBefore(TestPlugin):
 
 
     def test_without_argument(self):
-        """Before plugin should call function with correct path argument."""
+        """Before plugin should call function without argument."""
 
         # site.py
 
@@ -22,13 +23,14 @@ class TestBefore(TestPlugin):
 
 
     def test_path_argument(self):
-        """Before plugin should call function with correct path argument."""
+        """Before plugin should call function with correct page argument."""
 
         # site.py
 
         @self.app.before('page.html')
-        def test(path):
-            return {'badger': path}
+        def test(page):
+            self.assertIsInstance(page, Content)
+            return {'badger': page.source}
         self.app.run()
 
         # tests
@@ -38,12 +40,12 @@ class TestBefore(TestPlugin):
 
 
     def test_multiple_path_arguments(self):
-        """Before plugin should call function with multiple path arguments."""
+        """Before plugin should call function with multiple page arguments."""
 
         # site.py
 
         @self.app.before('page.html', 'html.html')
-        def test(path):
+        def test():
             return {'badger': 'test'}
         self.app.run()
 
@@ -61,7 +63,7 @@ class TestBefore(TestPlugin):
         # site.py
 
         @self.app.before('*.*')
-        def test(path):
+        def test():
             return {'badger': 'test'}
         self.app.run()
 
@@ -81,7 +83,7 @@ class TestBefore(TestPlugin):
         # site.py
 
         @self.app.before('yaml.yaml')
-        def test(path):
+        def test():
             return {'badger': 'test'}
         self.app.run()
 
@@ -97,7 +99,7 @@ class TestBefore(TestPlugin):
         # site.py
 
         @self.app.before('json.json')
-        def test(path):
+        def test():
             return {'badger': 'test'}
         self.app.run()
 

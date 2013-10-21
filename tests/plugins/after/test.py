@@ -1,3 +1,4 @@
+from stado.core.content import Content
 from tests.plugins import TestPlugin
 
 
@@ -5,7 +6,7 @@ class TestAfter(TestPlugin):
 
 
     def test_no_arguments(self):
-        """Plugin after should call function with correct path argument."""
+        """Plugin after should call function without arguments."""
 
         # site.py
 
@@ -20,14 +21,15 @@ class TestAfter(TestPlugin):
             self.assertEqual('test', page.read())
 
 
-    def test_path_argument(self):
-        """Plugin after should call function with correct path argument."""
+    def test_page_argument(self):
+        """Plugin after should call function with page and data arguments."""
 
         # site.py
 
         @self.app.after('page.html')
-        def test(path, data):
-            return path
+        def test(page, data):
+            self.assertIsInstance(page, Content)
+            return page.source
         self.app.run()
 
         # tests
