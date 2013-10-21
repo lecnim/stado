@@ -11,7 +11,10 @@ class TestPages(TestPlugin):
 
         @self.app.helper
         def pages():
-            return sorted([i for i in self.app.pages('*.*')], key=lambda x: x.source)
+
+            i = sorted([i for i in self.app.pages('*.*')], key=lambda x: x.source)
+            for k in i:
+                print(k.source)
         self.app.run()
 
         # tests
