@@ -7,6 +7,7 @@ from . import Command, CommandError
 from .. import log
 from .. import config as CONFIG
 from .. import utils
+from .. import default_site
 
 
 class Build(Command):
@@ -65,6 +66,9 @@ class Build(Command):
         """Returns imported site.py module from site directory."""
 
         path = os.path.join(os.getcwd(), site)
+
+        # Default site.
+        default_site(path)
 
         if not os.path.exists(path):
             raise CommandError('Failed to build, site not found: ' + path)

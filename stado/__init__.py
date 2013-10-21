@@ -26,11 +26,29 @@ log = get_logger()
 
 
 
+
+# Default app.
+
+app = None
+run = None
+
+def default_site(path):
+    global app
+    global run
+
+    app = Site(path)
+    run = app.run
+
+    module = sys.modules[__name__]
+
+    for name, plugin in app.plugins.items():
+        setattr(module, name, plugin)
+
+
+
+
 from .core.site import Site
 from .console import Console
-
-
-
 
 
 
