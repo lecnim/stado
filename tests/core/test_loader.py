@@ -18,7 +18,7 @@ class TestLoader(unittest.TestCase):
         contents = [i for i in Loader(path).load_dir()]
 
         self.assertEqual(1, len(contents))
-        self.assertTrue(contents[0].path.endswith('a.html'))
+        self.assertTrue(contents[0].source.endswith('a.html'))
 
 
     def test_load_file(self):
@@ -34,8 +34,8 @@ class TestLoader(unittest.TestCase):
         contents = [i for i in Loader(path).walk()]
 
         self.assertEqual(2, len(contents))
-        self.assertTrue(contents[0].path.endswith('a.html'))
-        self.assertTrue(contents[1].path.endswith('b.html'))
+        self.assertTrue(contents[0].source.endswith('a.html'))
+        self.assertTrue(contents[1].source.endswith('b.html'))
 
 
     # Test file loading.

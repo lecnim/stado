@@ -72,7 +72,7 @@ class Loader(Events):
 
             if context is None: context = {}
 
-            # Loader modify Content destination path.
+            # Loader modify Content output path.
             # For example markdown loader change *.md to *.html
             if loader.output == 'html':
                 content = Page(path)
