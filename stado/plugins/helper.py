@@ -1,20 +1,6 @@
 from . import Plugin
 
 
-class HelpersCollection:
-    """This class is base class for class which stores all helpers methods."""
-    pass
-
-
-class HelperFunction:
-    """Stores helper function as a property."""
-
-    def __init__(self, function):
-        self.function = function
-    def __get__(self, obj, objtype):
-        return self.function()
-
-
 class Helper(Plugin):
 
     name = 'helper'
@@ -34,23 +20,14 @@ class Helper(Plugin):
         })
 
         # Available helper methods gather from site.py file.
-
         self.functions = {}
-
-        # Stores helper functions as a Class properties.
-        # It is because pystache execute functions in context in different way than
-        # stado supports it.
-
-        self.properties = type('HelpersCollection', (HelpersCollection,), {})
 
 
     def __call__(self, function):
         """Decorator @helper. Stores function which is decorated by @helper."""
 
         # Stores function as a property.
-        setattr(self.properties, function.__name__, HelperFunction(function))
-        self.functions[function.__name__] = getattr(self.properties,
-                                                    function.__name__)
+        self.functions[function.__name__] = function
         return function
 
 

@@ -3,6 +3,26 @@ from tests.plugins import TestPlugin
 
 class TestHelper(TestPlugin):
 
+
+    def test_executing(self):
+        """Helper plugin should run function only when template is calling."""
+
+        # site.py
+
+        self.was_executed = False
+
+        @self.app.helper
+        def not_executed():
+            self.was_executed = True
+        self.app.run()
+
+        # tests
+
+        self.assertFalse(self.was_executed)
+
+
+    # Test types.
+
     def test_str(self):
         """Helper plugin should works correctly if string returned."""
 
@@ -67,6 +87,7 @@ class TestHelper(TestPlugin):
             self.assertEqual('value', page.read())
 
 
+    # Other tests.
 
     def test_do_not_overwrite_context(self):
         """Helper plugin should not overwrite already existing context key."""
