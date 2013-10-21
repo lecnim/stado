@@ -25,6 +25,7 @@ from . import after
 from . import permalink
 from . import helper
 from . import layout
+from . import pages
 from . import yaml_page_dump
 from . import json_page_dump
 
@@ -38,12 +39,6 @@ def load(select=None):
         module object
     """
 
-    for key, module in globals().items():
-        if inspect.ismodule(module) and key != 'inspect':
-            if select is None or module.name in select:
-
-                for class_name, class_obj in inspect.getmembers(module,
-                                                                inspect.isclass):
-                    if class_name is not 'Plugin':
-                        yield class_obj
-
+    for class_obj in Plugin.__subclasses__():
+        if select is None or class_obj.name in select:
+            yield class_obj
