@@ -17,16 +17,18 @@ class Layout(Plugin):
             'renderer.before_rendering_content': self.render,
         })
 
+        # TODO: remove
         self.layouts = []
+
         self.contents = {}
 
 
 
-    def __call__(self, path, *layouts):
+    def __call__(self, path, *layouts, **kwargs):
         """Calling plugin."""
 
         # 'a.html': 'layout.html'
-        self.contents[path] = layouts
+        self.contents[path] = (layouts, kwargs.get('context', {}))
 
         # Prevents layouts files in output.
         for i in layouts:
@@ -34,17 +36,30 @@ class Layout(Plugin):
 
 
     def render(self, content):
+        """
+        Returns template rendered using each layout. Content.template is NOT rendered.
+        So this method only adds things to Content.template.
+        """
 
         for path in self.contents:
 
-            if fnmatch.fnmatch(content.source, path):
+            #
+            if not fnmatch.fnmatch(content.source, path):
+                continue
 
-                for layout_path in self.contents[path]:
 
-                    with open(os.path.join(self.site.path, layout_path)) as layout:
+            layouts, layout_context = self.contents[path]
+            template = content.template
 
-                        # Add {{ content }}
-                        content.context['content'] = content.template
-                        html = self.site.renderer.render(layout.read(), content.context)
-                        content.template = html
+            for layout_path in layouts:
+                with open(os.path.join(self.site.path, layout_path)) as layout:
 
+                    context = {
+                        'page': content.context,
+                        'content': template
+                    }
+                    context.update(layout_context)
+
+                    template = self.site.renderer.render(layout.read(), context)
+
+            return template

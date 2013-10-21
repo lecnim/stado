@@ -32,6 +32,25 @@ class TestLayout(TestPlugin):
             self.assertEqual('layout sub-layout badger', page.read())
 
 
+    def test_context(self):
+        """Layout plugin should correctly use own context."""
+
+        # site.py
+
+        @self.app.before('page.html')
+        def a():
+            return {'title': 'page'}
+
+        self.app.layout('page.html', 'context-layout.html', 'layout.html',
+                        context={'title': 'title'})
+        self.app.run()
+
+        # tests
+
+        with open('page.html') as page:
+            self.assertEqual('layout title page badger', page.read())
+
+
     def test_ignore_layouts(self):
         """Layout plugin should prevent layout files in output."""
 
