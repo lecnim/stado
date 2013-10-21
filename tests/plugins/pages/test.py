@@ -1,4 +1,3 @@
-import os
 from tests.plugins import TestPlugin
 
 
@@ -9,21 +8,18 @@ class TestPages(TestPlugin):
 
         # site.py
 
+        @self.app.before('*')
+        def set_title():
+            return {'title': 'badger'}
+
         @self.app.helper
         def pages():
-            print([i for i in self.app.cache.keys()])
-            print('...')
-            print(self.app.cache.files)
-            print('...')
-
-            i = sorted([i for i in self.app.pages('*.*')], key=lambda x: x.source)
-            for k in i:
-                print(k.source)
-            return i
+            return sorted([i for i in self.app.pages('*.*')], key=lambda x: x.source)
         self.app.run()
 
         # tests
 
         with open('page.html') as file:
-            a = os.path.join('a', 'page.html')
-            self.assertEqual(a + "\nmarkdown.md\npage.html\n", file.read())
+            self.assertEqual("badger\nbadger\nbadger\n", file.read())
+
+
