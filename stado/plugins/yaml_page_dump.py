@@ -24,4 +24,4 @@ class YamlPageDump(Plugin):
     def dump(self, content):
 
         if content.filename.endswith('.yaml') or content.filename.endswith('.yml'):
-            content.template = yaml.dump(content.context, default_flow_style=False)
+            content.template = yaml.dump(content.dump(), default_flow_style=False)

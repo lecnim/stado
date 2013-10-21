@@ -79,8 +79,8 @@ class Loader(Events):
             else:
                 content = Asset(path)
 
-            content.permalink = '/:path/:name.' + loader.output
-            content.context = context
+            content._permalink = '/:path/:name.' + loader.output
+            content.context.update(context)
             content.template = template
 
         # File is not supported by loaders => Asset

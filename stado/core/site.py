@@ -90,7 +90,6 @@ class Site(Events):
         elif self.config['cache'] == 'shelve':
             self.cache = ShelveCache(self.output)
 
-
         self.load()
         self.render()
         self.deploy()
@@ -130,10 +129,9 @@ class Site(Events):
                     elif result is False:
                         continue
 
-
                 data = self.renderer.render(template, content.context)
 
-                # TODO: To be removed!
+                # TODO: Something better storing content than this.
                 content._content = data
 
                 self.event('renderer.after_rendering_content', content)

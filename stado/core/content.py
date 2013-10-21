@@ -26,45 +26,28 @@ class Content(dict):
 
         # Template engine renders page using this variables.
         self.template = ''
-        self._context = {}
 
 
-    # Setting and getting context using dict brackets.
-    # content['title'] = content.context['title']
+    def dump(self):
+        """Returns dict with context."""
 
-    #def __setitem__(self, key, value):
-    #    dict.__setitem__(self, key, value)
-    #    self._context[key] = value
-    #
-    def __getitem__(self, item):
-        return dict.__getitem__(self, item)
-
+        i = {}
+        i.update(self)
+        return i
 
     @property
     def context(self):
-        print('>', self._context)
-        print('d', self)
-        return self._context
         return self
-
-    @context.setter
-    def context(self, value):
-
-        if isinstance(value, dict):
-            self._context = value
-            self.clear()
-            self.update(value)
-        else:
-            raise TypeError('Content.context must be dict!')
 
 
     @property
-    def permalink(self):
+    def url(self):
         return '/' + self.output
 
-    @permalink.setter
-    def permalink(self, value):
+    @url.setter
+    def url(self, value):
         self._permalink = value
+
 
 
     @property
@@ -90,8 +73,8 @@ class Content(dict):
         return destination.lstrip(os.sep)
 
 
-    #def __repr__(self):
-    #    return "<Content:  '{}'>".format(self.source)
+    def __repr__(self):
+        return "<Content:  '{}'>".format(self.source)
 
 
 
@@ -105,8 +88,8 @@ class Asset(Content):
         return False
     def is_asset(self):
         return True
-    #def __repr__(self):
-    #    return "<Asset: '{}'>".format(self.source)
+    def __repr__(self):
+        return "<Asset: '{}'>".format(self.source)
 
 class Page(Content):
     """
@@ -117,6 +100,6 @@ class Page(Content):
         return True
     def is_asset(self):
         return False
-    #def __repr__(self):
-    #    return "<Page: '{}'>".format(self.source)
+    def __repr__(self):
+        return "<Page: '{}'>".format(self.source)
 

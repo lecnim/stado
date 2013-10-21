@@ -3,17 +3,11 @@ import inspect
 from . import Plugin
 
 
-
-
-
-
-
-
 class Before(Plugin):
 
     name = 'before'
 
-    # PLugin must run before yaml page dump plugin.
+    # Plugin must run before yaml page dump plugin.
     order = 0
 
 
@@ -63,5 +57,3 @@ class Before(Plugin):
 
                     if context:
                         content.context.update(context)
-                        content.context = content.context
-                        pass
