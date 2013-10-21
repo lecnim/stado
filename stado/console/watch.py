@@ -44,7 +44,6 @@ class Watch(Command):
         # Watch only given site.
         if site:
             path = os.path.join(cwd, site)
-            print(site, path, output)
             self.watch_site(path, site, output)
 
         # Watch all sites.
