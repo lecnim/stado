@@ -14,4 +14,6 @@ class Pages(Plugin):
             for path in paths:
                 for file in self.site.cache.files:
                     if fnmatch.fnmatch(file, path):
-                        yield self.site.cache[file]
+                        content = self.site.cache[file]
+                        if content.is_page():
+                            yield self.site.cache[file]
