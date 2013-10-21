@@ -14,6 +14,8 @@ class TestPages(TestPlugin):
 
             print([i for i in self.app.cache.keys()])
             print('...')
+            print(self.app.site.cache.files)
+            print('...')
 
             i = sorted([i for i in self.app.pages('*.*')], key=lambda x: x.source)
             for k in i:
