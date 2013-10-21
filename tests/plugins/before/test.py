@@ -3,6 +3,24 @@ from tests.plugins import TestPlugin
 
 class TestBefore(TestPlugin):
 
+
+    def test_without_argument(self):
+        """Before plugin should call function with correct path argument."""
+
+        # site.py
+
+        @self.app.before('page.html')
+        def test():
+            return {'badger': 'badger'}
+        self.app.run()
+
+        # tests
+
+        with open('page.html') as page:
+            self.assertEqual('badger', page.read())
+
+
+
     def test_path_argument(self):
         """Before plugin should call function with correct path argument."""
 
