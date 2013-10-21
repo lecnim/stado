@@ -37,7 +37,7 @@ class Site(Events):
 
         # Absolute path to site source directory.
         self.path = os.path.normpath(path)
-        # Absolute path to site destination directory.
+        # Absolute path to site output directory.
         self._output = os.path.join(self.path, CONFIG.build_dir)
 
         # Cache for storing content.
@@ -111,22 +111,38 @@ class Site(Events):
 
         return self
 
+
     def render(self):
         """Renders content in cache."""
 
         for content in self.cache.values():
             if content.is_page:
-                self.event('renderer.before_rendering_content', content)
-                data = self.renderer.render(content.template, content.context)
-                content.template = data
+
+                template = content.template
+
+                # Render using template from event.
+                for result in self.event('renderer.before_rendering_content',
+                                         content):
+
+                    # Some plugin overwrite content.template.
+                    if result is not None:
+                        template = result
+
+
+                data = self.renderer.render(template, content.context)
+
+                # TODO: To be removed!
+                content._content = data
+
                 self.event('renderer.after_rendering_content', content)
                 self.cache[content.source] = content
 
         return self
 
+
     def deploy(self):
         """Saves content from cache to output directory."""
 
         for content in self.cache.values():
-            self.deployer.deploy(content.destination, content.template)
+            self.deployer.deploy(content.output, content._content)
 
