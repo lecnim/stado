@@ -63,3 +63,5 @@ class Before(Plugin):
 
                     if context:
                         content.context.update(context)
+                        content.context = content.context
+                        pass

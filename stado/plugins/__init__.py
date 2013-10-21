@@ -26,6 +26,7 @@ from . import permalink
 from . import helper
 from . import layout
 from . import pages
+from . import assets
 from . import yaml_page_dump
 from . import json_page_dump
 

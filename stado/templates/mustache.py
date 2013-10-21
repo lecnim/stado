@@ -49,17 +49,18 @@ class TemplateEngine:
         helpers = {}
 
         for key, value in context.items():
-
+            print(key, value)
             # Install each callable object as a context class property.
             if callable(value):
                 setattr(context_class, 'helper_' + key, Helper(value))
                 helpers[key] = value
 
         # Helper function is run only when context dict has it name as a key.
-        for i in helpers:
-            context[i] = '__helper__'
+        #for i in helpers:
+        #    context[i] = '__helper__'
 
         # Use template context class to create dict.
         render_context = context_class(context)
+        #print('>', render_context.helper_assets[0]['title'])
 
         return pystache.render(source, render_context)

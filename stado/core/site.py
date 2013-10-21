@@ -116,7 +116,7 @@ class Site(Events):
         """Renders content in cache."""
 
         for content in self.cache.values():
-            if content.is_page:
+            if content.is_page():
 
                 template = content.template
 
@@ -146,5 +146,10 @@ class Site(Events):
         """Saves content from cache to output directory."""
 
         for content in self.cache.values():
-            self.deployer.deploy(content.output, content._content)
+
+            if content.is_page():
+                self.deployer.deploy(content.output, content._content)
+            else:
+                source = os.path.join(self.path, content.source)
+                self.deployer.copy(source, content.output)
 

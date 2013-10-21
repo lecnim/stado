@@ -1,4 +1,6 @@
 import os
+from .. import utils
+import shutil
 from .. import config as CONFIG
 
 
@@ -26,3 +28,15 @@ class Deployer:
 
         with open(full_path, mode='w', encoding='utf-8') as file:
             file.write(content)
+
+    def copy(self, source, output):
+
+        full_output = os.path.join(self.path, output)
+        dir_path = os.path.split(full_output)[0]
+
+        # Create missing directories.
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path, exist_ok=True)
+
+        shutil.copy(source, full_output)
+

@@ -107,7 +107,9 @@ class Loader(Events):
                 if os.path.isfile(os.path.join(full_path, file_name)) and \
                         not file_name.endswith('.py'):
                     content = self.load_file(os.path.join(path, file_name))
-                    if content: yield content
+
+                    if not content is None:
+                        yield content
 
 
     def walk(self, path='', exclude=None):
