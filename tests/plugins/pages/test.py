@@ -12,9 +12,13 @@ class TestPages(TestPlugin):
         @self.app.helper
         def pages():
 
+            print([i for i in self.app.cache.keys()])
+            print('...')
+
             i = sorted([i for i in self.app.pages('*.*')], key=lambda x: x.source)
             for k in i:
                 print(k.source)
+            return i
         self.app.run()
 
         # tests
