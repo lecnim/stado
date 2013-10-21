@@ -3,8 +3,8 @@ from tests.plugins import TestPlugin
 
 class TestHelper(TestPlugin):
 
-    def test_one_path(self):
-        """Helper plugin should works correctly."""
+    def test_str(self):
+        """Helper plugin should works correctly if string returned."""
 
         # site.py
 
@@ -15,8 +15,57 @@ class TestHelper(TestPlugin):
 
         # tests
 
-        with open('page.html') as page:
+        with open('str.html') as page:
             self.assertEqual('hello world', page.read())
+
+
+    def test_list(self):
+        """Helper plugin should works correctly if list returned."""
+
+        # site.py
+
+        @self.app.helper
+        def test():
+            return [1, 2, 3]
+        self.app.run()
+
+        # tests
+
+        with open('list.html') as page:
+            self.assertEqual('1\n2\n3\n', page.read())
+
+
+    def test_list_of_dict(self):
+        """Helper plugin should works correctly if list of dict returned."""
+
+        # site.py
+
+        @self.app.helper
+        def test():
+            return [{'a': 1}, {'a': 2}, {'a':3}]
+        self.app.run()
+
+        # tests
+
+        with open('list_of_dict.html') as page:
+            self.assertEqual('1\n2\n3\n', page.read())
+
+
+    def test_dict(self):
+        """Helper plugin should works correctly if dict returned."""
+
+        # site.py
+
+        @self.app.helper
+        def test():
+            return {'key': 'value'}
+        self.app.run()
+
+        # tests
+
+        with open('dict.html') as page:
+            self.assertEqual('value', page.read())
+
 
 
     def test_do_not_overwrite_context(self):
@@ -24,7 +73,7 @@ class TestHelper(TestPlugin):
 
         # site.py
 
-        @self.app.before('page.html')
+        @self.app.before('str.html')
         def page(path):
             return {'hello': 'hello world'}
 
@@ -35,7 +84,7 @@ class TestHelper(TestPlugin):
 
         # tests
 
-        with open('page.html') as page:
+        with open('str.html') as page:
             self.assertEqual('hello world', page.read())
         with open('yaml.html') as page:
             self.assertEqual('hello: hello world\n', page.read())
