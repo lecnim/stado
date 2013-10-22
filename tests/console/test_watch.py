@@ -19,8 +19,21 @@ def modify_file(path):
 def create_file(path):
     """Creates new file with 'hello world' data."""
     with open(path, 'w') as file:
-        file.write('hello world')
+       file.write('hello world')
 
+def modify_script(path):
+    """Changes python script."""
+    with open(path, 'w') as file:
+        script = \
+        (
+             '\nfrom stado import Stado'
+             '\napp = Stado()'
+             '\n@app.before("a.html")'
+             '\ndef update(page):'
+             '\n    page.template = "updated"'
+             '\napp.run()'
+        )
+        file.write(script)
 
 
 class TestWatchSite(TestCommand):
@@ -78,6 +91,18 @@ class TestWatchSite(TestCommand):
         path = os.path.join(self.temp_path, 'a', config.build_dir, 'new.html')
         with open(path) as file:
             self.assertEqual('hello world', file.read())
+
+
+    def test_modify_script(self):
+        """watch [site]: Watcher should correctly re-import site.py"""
+
+        self.shell.before_waiting = (modify_script,
+                                     [os.path.join(self.temp_path, 'a', 'site.py')])
+        self.shell(self.command + ' a')
+
+        path = os.path.join(self.temp_path, 'a', config.build_dir, 'a.html')
+        with open(path) as file:
+            self.assertEqual('updated', file.read())
 
 
     def test_output_option(self):
