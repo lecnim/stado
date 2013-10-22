@@ -70,7 +70,7 @@ project/
     image.jpg           # asset
 ```
 
-**File** `project/site.py`:
+*File `project/site.py`:*
 ```python
 from stado import run
 run()                   # start building site.
@@ -81,10 +81,10 @@ Controllers objects like `@before` are available to control rendering process.*
 
 **Run stado:**
 ```
-stado.py project
+stado.py build project
 ```
 
-**Stado renders site to `output` directory:**
+*Stado renders site to `output` directory:*
 ```
 project/
     site.py
@@ -98,6 +98,66 @@ project/
 By default all `html`, `md`, `json`, `yaml` files are rendered using template engine
 and saves as a `html` pages. These are called **pages**.
 Other files like `image.jpg` are just copied. These are called **assets**.
+
+
+Commands
+--------
+
+#### help ####
+
+
+Shows help about commands.
+
+`help build`
+
+Shows general help.
+
+`help`
+
+
+
+#### edit ####
+
+Auto rebuild on save, and start development server.
+
+`edit project`
+
+Use custom output directory.
+
+`edit project --output /www/project`
+
+
+
+#### build ####
+
+Build site.
+
+`build project`
+
+Build all sites in stado directory.
+
+`build`
+
+Use custom output directory.
+
+`build project --output /www/project`
+
+
+
+#### watch ####
+
+Rebuild site on save.
+
+`watch project`
+
+Watch all sites in stado directory and rebuild on save.
+
+`watch`
+
+Use custom output directory.
+
+`watch --output /www`
+
 
 
 
@@ -136,20 +196,20 @@ Hello
 
 #### Details: ####
 
-`@before` can take any number of paths and also supports file matching.
-```python
-@before('index.html', '*.html')
-def add_title():
-    return {'title': 'Hello'}
-```
+- `@before` can take any number of paths and also supports file matching.
+  ```python
+  @before('index.html', '*.html')
+  def add_title():
+      return {'title': 'Hello'}
+  ```
 
 
-`@before` can pass page object to function using function first argument.
-```python
-@before('index.html')
-def add_title(page):
-    page['title'] = page.source
-```
+- `@before` can pass page object to function using function first argument.
+  ```python
+  @before('index.html')
+  def add_title(page):
+      page['title'] = page.source
+  ```
 
 
 `@after`
@@ -182,9 +242,9 @@ HELLO WORLD
 
 #### Details ####
 
-`@after` as like `@before` can take any number of paths and also supports file matching.
-`@after` can pass page object to function using it **second** argument.
+- `@after` as like `@before` can take any number of paths and also supports file matching.
 
+- `@after` can pass page object to function using it **second** argument.
 ```python
 @after('*.html')
 def censure(content, page):
@@ -226,89 +286,94 @@ run()
 
 #### Details ####
 
-`layout` can be used inside function decorated by `@before`.
-```python
-@before('index.html')
-def set_layout(page):
-    layout(page, 'layout.html')
-```
+- `layout` can be used inside function decorated by `@before`.
+  ```python
+  @before('index.html')
+  def set_layout(page):
+      layout(page, 'layout.html')
+  ```
 
-`layout` can render page using multiple layout files.
-```python
-layout('index.html', 'sub-layout.html', 'layout.html')
-```
+- `layout` can render page using multiple layout files.
+  ```python
+  layout('index.html', 'sub-layout.html', 'layout.html')
+  ```
+  
+  *File `index.html`:*
+  ```
+  Hello badger!
+  ```
+  
+  *File `sub-layout.html`:*
+  ```jinja
+  Hello sub-layout!
+  {{{ content }}}
+  ```
+  
+  *File `layout.html`:*
+  ```jinja
+  Hello layout!
+  {{{ content }}}
+  ```
+  
+  *Rendered file `output/index.html`:*
+  ```
+  Hello layout!
+  Hello sub-layout!
+  Hello badger!
+  ```
 
-*File `index.html`:*
-```
-Hello badger!
-```
 
-*File `sub-layout.html`:*
-```jinja
-Hello sub-layout!
-{{{ content }}}
-```
+- `layout` has access to page context using `{{ page }}` variable.
+  ```jinja
+  {{ page.title }}
+  {{{ content }}}
+  {{ page.footer }}
+  ```
 
-*File `layout.html`:*
-```jinja
-Hello layout!
-{{{ content }}}
-```
-
-*Rendered file `output/index.html`:*
-```
-Hello layout!
-Hello sub-layout!
-Hello badger!
-```
-
-
-`layout` has access to page context using `{{ page }}` variable.
-```jinja
-{{ page.title }}
-{{{ content }}}
-{{ page.footer }}
-```
-
-You can pass custom context to layout using `context` argument.
-```python
-layout('index.html', 'layout.html', context={'title': 'Badger'})
-```
-
-Then you can use this context in `layout.html`:
-```jinja
-{{ title }}
-```
+- You can pass custom context to layout using `context` argument.
+  ```python
+  layout('index.html', 'layout.html', context={'title': 'Badger'})
+  ```
+  
+  Then you can use this context in `layout.html`:
+  ```jinja
+  {{ title }}
+  ```
 
 
 `permalink`
 -----------
 
-Use `permalink` to change page or asset url. For example:
+Use `permalink` to change page or asset url.
+
+#### Example ####
+
 ```python
 permalink('index.html', '/welcome.html')
 ```
-Page `index.html` will be written in output as a `welcome.html`.
+
+*Page `index.html` will be written in output as a `welcome.html`.*
+
+#### Details ####
+
+- Permalink supports keyword variables like:
+  - `:path`, relative path to content, example: `images/face.jpg`
+  - `:filename`, content filename, example: `face.jpg`
+  - `:name`, name of file without extension, example: `name`
+  - `:extension`, file extension, example: `jpg`
+
+  *Use of permalink keyword variables:*
+  ```python
+  permalink('index.html', '/:path/:name/index.html')
+  ```
+
+- You can use predefined permalink styles like:
+  - `pretty => /:path/:name/index.html`
+  - `default => /:path/:filename`
 
 
-Permalink supports keyword variables like:
-- `:path`, relative path to content, example: `images/face.jpg`
-- `:filename`, content filename, example: `face.jpg`
-- `:name`, name of file without extension, example: `name`
-- `:extension`, file extension, example: `jpg`
-
-Use of permalink keyword variables:
-```python
-permalink('index.html', '/:path/:name/index.html')
-```
-
-You can use predefined permalink styles like:
-- `pretty => /:path/:name/index.html`
-- `default => /:path/:filename`
-
-
-Ignore
-------
+`ignore`
+--------
 
 Use `ignore` to ignore certain paths. For example ignore file names with an underscore
 at the beginning:
@@ -316,12 +381,12 @@ at the beginning:
 ignore('_*')
 ```
 
-Helpers
--------
+`@helper`
+---------
 
 Use `@helper` decorator to have access to function during template rendering.
 
-For example:
+#### Example ####
 
 ```python
 @helper
@@ -339,63 +404,64 @@ Rendered template:
 Hello badger!
 ```
 
+#### Details ####
 
-Helper function can return `list`, `dict` or other objects:
-```python
-@helper
-def numbers():
-    return [1, 2, 3, 4]
-```
+- Helper function can return `list`, `dict` or other objects:
+  ```python
+  @helper
+  def numbers():
+      return [1, 2, 3, 4]
+  ```
+  
+  *Template:*
+  ```jinja
+  {{# numbers }}{{.}}{{/ numbers }}
+  ```
+  
+  *Rendered template:*
+  ```
+  1234
+  ```
 
-Template:
-```handelbars
-{{# numbers }}{{.}}{{/ numbers }}
-```
 
-Rendered template:
-```
-1234
-```
-
-
-Function decorated by `@helper` can use `pages` and `assets`. This plugins returns list
-of Pages object or Assets objects. For example:
-
-Example project structure:
-
-```
-    project/
-        site.py
-        index.html
-        welcome.html
-        contact.html
-```
-
-File `site.py`:
-```python
-from stado import helper, run
-
-@helper
-def menu():
-    return [i for i in pages('*.html')]
-
-run()
-```
-
-File `index.html`:
-```jinja
-{{# menu }}
-<a href='{{ url }}'>Page</a>
-{{/ menu }}
-
-```
-
-Rendered `output/index.html`:
-```HTML
-<a href='index.html'>Page</a>
-<a href='welcome.html'>Page</a>
-<a href='contact.html'>Page</a>
-```
+- Function decorated by `@helper` can use `pages` and `assets`. This controllers returns list
+  of Pages object or Assets objects. For example:
+  
+  Example project structure:
+  
+  ```
+      project/
+          site.py
+          index.html
+          welcome.html
+          contact.html
+  ```
+  
+  *File `site.py`:*
+  ```python
+  from stado import helper, run
+  
+  @helper
+  def menu():
+      return [i for i in pages('*.html')]
+  
+  run()
+  ```
+  
+  *File `index.html`:*
+  ```jinja
+  {{# menu }}
+  <a href='{{ url }}'>Page</a>
+  {{/ menu }}
+  
+  ```
+  
+  *Rendered file `output/index.html`:*
+  ```HTML
+  <a href='index.html'>Page</a>
+  <a href='welcome.html'>Page</a>
+  <a href='contact.html'>Page</a>
+  ```
 
 
 
