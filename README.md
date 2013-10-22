@@ -60,7 +60,7 @@ Example
 Stado uses `stado.py` - python script file to build site. Pages are rendered using
 template engine, it is Mustache by default.
 
-Example directory structure:
+**Example directory structure:**
 
 ```
 stado.py
@@ -70,18 +70,21 @@ project/
     image.jpg           # asset
 ```
 
-File `project/site.py`:
+**File** `project/site.py`:
 ```python
 from stado import run
 run()                   # start building site.
 ```
+*This python script is controlling site rendering. Use `run()` method to start it.
+Controllers objects like `@before` are available to control rendering process.*
 
-Run stado:
+
+**Run stado:**
 ```
 stado.py project
 ```
 
-Stado renders site to `output` directory:
+**Stado renders site to `output` directory:**
 ```
 project/
     site.py
@@ -98,20 +101,19 @@ Other files like `image.jpg` are just copied. These are called **assets**.
 
 
 
-site.py
--------
 
-This python script is controlling site rendering. Use `run()` method to start it.
-Plugins are available to control rendering process.
+Controllers
+===========
 
 
-@before
--------
+`@before`
+---------
 
 Use `@before` decorator to execute function before page rendering. It is used
 to add variables to page context.
 
-Simple usage:
+#### Example: ####
+
 ```python
 from stado import run, before
 
@@ -122,18 +124,19 @@ def add_title():
 run()
 ```
 
-File `index.html`:
+*File `index.html`:*
 ```jinja
 {{ title }}
 ```
 
-Rendered `output/index.html`:
+*Rendered file `output/index.html`:*
 ```HTML
 Hello
 ```
 
+#### Details: ####
 
-Before can take any number of paths and also supports file matching.
+`@before` can take any number of paths and also supports file matching.
 ```python
 @before('index.html', '*.html')
 def add_title():
@@ -141,7 +144,7 @@ def add_title():
 ```
 
 
-Before can pass page object to function using function first argument.
+`@before` can pass page object to function using function first argument.
 ```python
 @before('index.html')
 def add_title(page):
@@ -149,13 +152,13 @@ def add_title(page):
 ```
 
 
-@after
-------
+`@after`
+--------
 
 Use `@after` decorator to execute function **after** pages rendering. It is used to
 modify page content before writing it in output.
 
-Simple usage:
+#### Example ####
 
 ```python
 from stado import run, after
@@ -167,19 +170,21 @@ def capitalize(content):
 run()
 ```
 
-File `index.html`:
+*File `index.html`:*
 ```
 hello world
 ```
 
-Rendered `output/index.html`:
+*Rendered file `output/index.html`:*
 ```
 HELLO WORLD
 ```
 
+#### Details ####
 
-After as like `@before` can take any number of paths and also supports file matching.
-After can pass page object to function using function **second** argument.
+`@after` as like `@before` can take any number of paths and also supports file matching.
+`@after` can pass page object to function using it **second** argument.
+
 ```python
 @after('*.html')
 def censure(content, page):
@@ -189,12 +194,12 @@ def censure(content, page):
 
 
 
-Layouts
--------
+`layout`
+--------
 
 Use `layout` to render page content using layouts files.
 
-For example:
+#### Example ####
 
 ```python
 from stado import run, layout
@@ -202,54 +207,55 @@ layout('index.html', 'layout.html')
 run()
 ```
 
-File `index.html`:
+*File `index.html`:*
 ```HTML
 <p>Hello badger!</p>
 ```
 
-File `layout.html`:
+*File `layout.html`:*
 ```jinja
 <h1>Layout</h1>
 {{{ content }}}
 ```
 
-Rendered `output/index.html`:
+*Rendered file `output/index.html`:*
 ```HTML
 <h1>Layout</h1>
 <p>Hello badger!</p>
 ```
 
+#### Details ####
 
-Layout can be used inside function decorated by `@before`.
+`layout` can be used inside function decorated by `@before`.
 ```python
 @before('index.html')
 def set_layout(page):
     layout(page, 'layout.html')
 ```
 
-Layout can render page using multiple layout files.
+`layout` can render page using multiple layout files.
 ```python
 layout('index.html', 'sub-layout.html', 'layout.html')
 ```
 
-File `index.html`:
+*File `index.html`:*
 ```
 Hello badger!
 ```
 
-File `sub-layout.html`:
+*File `sub-layout.html`:*
 ```jinja
 Hello sub-layout!
 {{{ content }}}
 ```
 
-File `layout.html`:
+*File `layout.html`:*
 ```jinja
 Hello layout!
 {{{ content }}}
 ```
 
-Rendered `output/index.html`:
+*Rendered file `output/index.html`:*
 ```
 Hello layout!
 Hello sub-layout!
@@ -257,14 +263,14 @@ Hello badger!
 ```
 
 
-Layout has access to page context using `{{ page }}` variable. For example:
+`layout` has access to page context using `{{ page }}` variable.
 ```jinja
 {{ page.title }}
 {{{ content }}}
 {{ page.footer }}
 ```
 
-You can pass custom context to layout using `context` argument. For example:
+You can pass custom context to layout using `context` argument.
 ```python
 layout('index.html', 'layout.html', context={'title': 'Badger'})
 ```
@@ -275,8 +281,8 @@ Then you can use this context in `layout.html`:
 ```
 
 
-Permalink
----------
+`permalink`
+-----------
 
 Use `permalink` to change page or asset url. For example:
 ```python
