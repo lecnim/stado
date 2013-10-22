@@ -17,21 +17,6 @@ class TestIgnore(TestPlugin):
         self.assertNotIn('a.html', os.listdir())
 
 
-    #def test_content_object(self):
-    #    """Ignore plugin should correctly ignore files from Content object."""
-    #
-    #    # site.py
-    #
-    #    @self.app.before('a.html')
-    #    def ignore_content(page):
-    #        self.app.ignore(page)
-    #    self.app.run()
-    #
-    #    # tests
-    #
-    #    self.assertNotIn('a.html', os.listdir())
-
-
     def test_multiple_path_arguments(self):
         """Ignore plugin should correctly ignore multiple files."""
 
@@ -59,6 +44,7 @@ class TestIgnore(TestPlugin):
 
         self.assertNotIn('b', os.listdir())
         self.assertTrue(os.path.exists('b.html'))
+        self.assertTrue(os.path.exists('_b'))
 
 
     def test_pattern_matching(self):
@@ -88,3 +74,16 @@ class TestIgnore(TestPlugin):
 
         self.assertIn('a.html', os.listdir())
         self.assertFalse(os.path.exists(os.path.join('b', 'b.html')))
+
+
+    def test_ignore_underscore(self):
+        """Ignore plugin should correctly ignore files using pattern."""
+
+        # site.py
+
+        self.app.ignore('_*')
+        self.app.run()
+
+        # tests
+        self.assertNotIn('_a.css', os.listdir())
+        self.assertFalse(os.path.exists(os.path.join('_b', 'b.html')))
