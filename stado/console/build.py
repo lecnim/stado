@@ -1,7 +1,7 @@
 """Command: build"""
 
 import os
-import pkgutil
+import runpy
 
 from . import Command, CommandError
 from .. import log
@@ -67,7 +67,8 @@ class Build(Command):
 
         path = os.path.join(os.getcwd(), site)
 
-        # Default site.
+        # Create default site as a shortcut.
+        # Now you can directly import: "from stado import run, before"
         default_site(path)
 
         if not os.path.exists(path):
@@ -78,13 +79,11 @@ class Build(Command):
             log.info('Building site {}...'.format(site))
             timer = utils.Timer()
 
-            # Import site.py
-            for loader, module_name, is_pkg in pkgutil.iter_modules([path]):
-                if module_name == 'site':
-                    try:
-                        loader.find_module(module_name).load_module(module_name)
-                    except ImportError:
-                        raise CommandError('Failed to build, cannot load module: '
-                                           + module_name)
+            # Run site.py
+            script_path = os.path.join(path, 'site.py')
+            try:
+                runpy.run_path(script_path)
+            except FileNotFoundError:
+               raise CommandError('Failed to build, file not found: ' + script_path)
 
             log.info("Site built in {}s".format(timer.get()))
