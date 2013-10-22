@@ -82,13 +82,14 @@ class Build(Command):
 
             # Run site.py
             script_path = os.path.join(path, 'site.py')
+
             try:
                 runpy.run_path(script_path)
             except FileNotFoundError:
                raise CommandError('Failed to build, file not found: ' + script_path)
 
-            log.info("Site built in {}s".format(timer.get()))
+            log.info("Done! Site built in {}s".format(timer.get()))
 
         clear_default_site()
-        log.debug('Removing unreachable objects: {}'.format(gc.collect()))
+        log.debug('\tRemoving unreachable objects: {}'.format(gc.collect()))
 

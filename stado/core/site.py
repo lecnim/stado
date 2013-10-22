@@ -8,6 +8,7 @@ from .loader import Loader
 from .renderer import Rendered
 from .deployer import Deployer
 from .cache import DictCache, ShelveCache
+from .. import log
 
 
 
@@ -78,6 +79,8 @@ class Site(Events):
     def run(self):
         """Creates site: loads, renders, deploys."""
 
+        log.debug('Starting building site: {}'.format(self.path))
+
         # Create output directory if not exists.
 
         if not os.path.exists(self.output):
@@ -104,7 +107,12 @@ class Site(Events):
     def load(self):
         """Loads content from site source files to cache."""
 
+        log.debug('\tLoading site content...')
+
         for content in self.loader.walk(exclude=[self.output]):
+
+            log.debug('\t\t[ {0.model} ]  {0.source}'.format(content))
+
             # Save content in cache (where? it depends on cache type).
             self.cache[content.source] = content
 
@@ -113,6 +121,8 @@ class Site(Events):
 
     def render(self):
         """Renders content in cache."""
+
+        log.debug('\tRendering content...')
 
         for content in self.cache.values():
             if content.is_page():
@@ -129,6 +139,8 @@ class Site(Events):
                     elif result is False:
                         continue
 
+                log.debug('\t\t[ {0.model} ]  {0.source}'.format(content))
+
                 data = self.renderer.render(template, content.context)
 
                 # TODO: Something better storing content than this.
@@ -143,7 +155,11 @@ class Site(Events):
     def deploy(self):
         """Saves content from cache to output directory."""
 
+        log.debug('\tDeploying content...')
+
         for content in self.cache.values():
+
+            log.debug('\t\t{} => {}'.format(content.source, content.output))
 
             if content.is_page():
                 self.deployer.deploy(content.output, content._content)

@@ -3,6 +3,7 @@
 import os
 import time
 import threading
+import datetime
 
 from . import Command
 from .build import Build
@@ -64,7 +65,10 @@ class Watch(Command):
 
         log.info('Watching for changes...')
         for i in self.file_monitor.observers:
-            log.debug('Watching: {}, excluded: {}'.format(i.path, i.exclude))
+            log.debug('\tWatching: {}'.format(i.path))
+            for e in i.exclude:
+                log.debug('\t\tExclude: {}'.format(e))
+
 
         while not self.file_monitor.stopped and wait is True:
             time.sleep(config.wait_interval)
@@ -81,22 +85,29 @@ class Watch(Command):
         else:
             exclude = [os.path.join(path, config.build_dir)]
 
-        self.file_monitor.watch(path, exclude, self.update, site, output)
+        self.file_monitor.watch(path, exclude, self.event_update, site, output)
 
 
-    def update(self, site, output):
+    def event_update(self, site, output):
+        self.update(site, output)
+
+    def update(self, site, output, events=True):
         """This method is run by file monitor each time when site files were
         changed."""
 
-        log.info('Rebuilding site: {} to {}'.format(site, output))
+        t = time.strftime('%H:%M:%S')
+        log.info('{} - Rebuilding site: {}.'.format(t, site))
 
         self.console.build(site, output)
-        self.event('after_rebuild')
+
+        if events:
+            self.event('after_rebuild')
 
 
     def stop(self):
         """Stop watching."""
 
+        log.debug('Files watching stopped.')
         self.file_monitor.stop()
 
 

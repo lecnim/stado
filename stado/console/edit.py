@@ -42,13 +42,11 @@ class Edit(Command):
         self.cwd = os.getcwd()
         self.stopped = False
 
-        # Use custom update method.
         self.console.build(site, output)
-        self.console.commands['watch'].update = self.update
+        # Use custom update method.
+        self.console.commands['watch'].event_update = self.update
         self.console.watch(site, output, wait=False)
         self.console.view(site, host, port, output, wait=False, build=False)
-
-
 
         # Monitoring.
         self.event('before_waiting')
@@ -57,7 +55,6 @@ class Edit(Command):
             time.sleep(config.wait_interval)
 
         return True
-
 
 
     def update(self, site, output):
@@ -69,7 +66,10 @@ class Edit(Command):
         # Change to previous working directory.
         cwd = os.getcwd()
         os.chdir(self.cwd)
-        self.console.build(site, output)
+
+        # Run rebuild from watch command, but without triggering events.
+        self.console.commands['watch'].update(site, output, events=False)
+
         # Change to working directory to site output => server will serve from it.
         os.chdir(cwd)
 

@@ -67,7 +67,10 @@ class View(Command):
         else:
             os.chdir(os.path.join(self.cwd, site, config.build_dir))
 
+        log.debug('Starting development server...')
+        log.debug('\tPath: {}'.format(os.getcwd()))
         self.server.start(host, port)
+
 
         log.info('You can view site at: http://{}:{}'.format(host, port))
 
@@ -83,9 +86,13 @@ class View(Command):
     def stop(self):
         """Stops command (stops development server)."""
 
+        log.debug('Stopping development server...')
+
         # Change current working directory to previous directory.
         os.chdir(self.cwd)
         self.server.stop()
+
+        log.debug('Done!')
 
 
 

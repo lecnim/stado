@@ -83,6 +83,8 @@ class Asset(Content):
     """
     Represents asset file.
     """
+
+    model = 'asset'
     
     def is_page(self):
         return False
@@ -95,6 +97,8 @@ class Page(Content):
     """
     Represents page file. (Usually *.html)
     """
+
+    model = 'page'
     
     def is_page(self):
         return True

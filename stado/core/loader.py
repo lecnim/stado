@@ -3,8 +3,9 @@ import os
 from .events import Events
 from .content import Page, Asset
 from .. import config as CONFIG
-from .. import loaders
+from .. import loaders, log
 from ..errors import StadoError
+
 
 
 class LoaderError(StadoError):
@@ -51,7 +52,9 @@ class Loader(Events):
 
         # Event can cancel loading file.
         if False in self.event('loader.before_loading_content', path):
+            log.debug('\t\t[ ignored ] {}'.format(path))
             return None
+
 
         full_path = os.path.join(self.path, path)
         ext = os.path.splitext(path)[1][1:]
