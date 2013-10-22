@@ -151,3 +151,16 @@ class Site(Events):
                 source = os.path.join(self.path, content.source)
                 self.deployer.copy(source, content.output)
 
+
+    def clear(self):
+        """Clearing site components."""
+
+        for i in self.plugins.values():
+            del i.site
+        del self.plugins
+
+        del self.loader
+        del self.renderer
+        del self.deployer
+
+        del self.cache

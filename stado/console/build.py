@@ -2,12 +2,13 @@
 
 import os
 import runpy
+import gc
 
 from . import Command, CommandError
 from .. import log
 from .. import config as CONFIG
 from .. import utils
-from .. import default_site
+from .. import default_site, clear_default_site
 
 
 class Build(Command):
@@ -87,3 +88,7 @@ class Build(Command):
                raise CommandError('Failed to build, file not found: ' + script_path)
 
             log.info("Site built in {}s".format(timer.get()))
+
+        clear_default_site()
+        log.debug('Removing unreachable objects: {}'.format(gc.collect()))
+

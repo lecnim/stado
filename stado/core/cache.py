@@ -25,6 +25,9 @@ class ShelveCache(UserDict):
 
     def clear(self):
         """Removes cache files."""
+
+        # Removes temporary data.
+        self.data.clear()
         self.data.close()
         shutil.rmtree(self.path)
 

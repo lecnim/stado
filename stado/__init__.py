@@ -45,6 +45,19 @@ def default_site(path):
         setattr(module, name, plugin)
 
 
+def clear_default_site():
+    global app
+    global run
+
+    module = sys.modules[__name__]
+
+    for name, plugin in app.plugins.items():
+        setattr(module, name, None)
+
+    app.clear()
+    app = None
+    run = None
+
 
 
 from .core.site import Site
