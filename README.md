@@ -1,11 +1,16 @@
-stadø
-[![Build Status](https://travis-ci.org/dendek/stado.png?branch=master)](https://travis-ci.org/dendek/stado)
-=====
+*stadø*
+=======
+
+
 
 **What is stado?**
 
 Stado is minimalistic static site generator powered by python scripts.
-You just download stado.py and it is ready to work.
+You just download `stado.py` and it is ready to work.
+
+
+
+[![Build Status](https://travis-ci.org/dendek/stado.png?branch=master)](https://travis-ci.org/dendek/stado)
 
 
 **What? Why another static site generator?**
@@ -30,13 +35,14 @@ is the limit, probably.
 
 **What do I need?**
 
-Only python3, currently supported versions: 3.2, 3.3
+> Only python3, currently supported versions: `3.2`, `3.3`
 
 
 **Is it ready?**
 
-No, but it is close to first production release. Just stay tuned.
+Very, very close to first production release. Only code cleaning and some testing left.
 
+![gg](logo.jpg)
 
 Quick guide
 ===========
