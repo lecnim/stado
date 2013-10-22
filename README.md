@@ -57,23 +57,23 @@ Just download `stado.py` file to empty directory.
 Example
 -------
 
-Stado uses `stado.py` - python script file to render site. Pages are rendered using
+Stado uses `stado.py` - python script file to build site. Pages are rendered using
 template engine, it is Mustache by default.
 
 Example directory structure:
 
 ```
-    stado.py
-    project/
-        site.py
-        index.html
-        image.jpg
+stado.py
+project/
+    site.py             # python script which builds site
+    index.html          # page
+    image.jpg           # asset
 ```
 
-Example `project/site.py`:
-```
+File `project/site.py`:
+```python
 from stado import run
-run()
+run()                   # start building site.
 ```
 
 Run stado:
@@ -87,7 +87,7 @@ project/
     site.py
     index.html
     image.jpg
-    output/
+    output/             # rendered site is here
         index.html
         image.jpg
 ```
@@ -101,7 +101,7 @@ Other files like `image.jpg` are just copied. These are called **assets**.
 site.py
 -------
 
-This python script is controlling site rendering. Use run() method to start it.
+This python script is controlling site rendering. Use `run()` method to start it.
 Plugins are available to control rendering process.
 
 
@@ -112,7 +112,7 @@ Use `@before` decorator to execute function before page rendering. It is used
 to add variables to page context.
 
 Simple usage:
-```
+```python
 from stado import run, before
 
 @before('index.html')
@@ -123,18 +123,18 @@ run()
 ```
 
 File `index.html`:
-```
+```jinja
 {{ title }}
 ```
 
-Rendered 'index.html`:
-```
+Rendered `output/index.html`:
+```HTML
 Hello
 ```
 
 
 Before can take any number of paths and also supports file matching.
-```
+```python
 @before('index.html', '*.html')
 def add_title():
     return {'title': 'Hello'}
@@ -142,7 +142,7 @@ def add_title():
 
 
 Before can pass page object to function using function first argument.
-```
+```python
 @before('index.html')
 def add_title(page):
     page['title'] = page.source
@@ -152,12 +152,12 @@ def add_title(page):
 @after
 ------
 
-Use @after decorator to execute function **after** pages rendering. It is used to
+Use `@after` decorator to execute function **after** pages rendering. It is used to
 modify page content before writing it in output.
 
 Simple usage:
 
-```
+```python
 from stado import run, after
 
 @after('index.html')
@@ -172,15 +172,15 @@ File `index.html`:
 hello world
 ```
 
-Rendered 'index.html`:
+Rendered `output/index.html`:
 ```
 HELLO WORLD
 ```
 
 
-After like before can take any number of paths and also supports file matching.
+After as like `@before` can take any number of paths and also supports file matching.
 After can pass page object to function using function **second** argument.
-```
+```python
 @after('*.html')
 def censure(content, page):
     if page.filename == 'index.html'
@@ -192,43 +192,43 @@ def censure(content, page):
 Layouts
 -------
 
-Use layout to render page content using layouts files.
+Use `layout` to render page content using layouts files.
 
 For example:
 
-```
+```python
 from stado import run, layout
 layout('index.html', 'layout.html')
 run()
 ```
 
 File `index.html`:
-```
+```HTML
 <p>Hello badger!</p>
 ```
 
-File 'layout.html':
-```
+File `layout.html`:
+```jinja
 <h1>Layout</h1>
 {{{ content }}}
 ```
 
-Rendered 'index.html`:
-```
+Rendered `output/index.html`:
+```HTML
 <h1>Layout</h1>
 <p>Hello badger!</p>
 ```
 
 
-Layout can be used inside function decorated by @before.
-```
+Layout can be used inside function decorated by `@before`.
+```python
 @before('index.html')
 def set_layout(page):
     layout(page, 'layout.html')
 ```
 
 Layout can render page using multiple layout files.
-```
+```python
 layout('index.html', 'sub-layout.html', 'layout.html')
 ```
 
@@ -237,39 +237,40 @@ File `index.html`:
 Hello badger!
 ```
 
-File 'sub-layout.html'
-```
+File `sub-layout.html`:
+```jinja
 Hello sub-layout!
 {{{ content }}}
 ```
 
-File 'layout.html'
-```
+File `layout.html`:
+```jinja
 Hello layout!
 {{{ content }}}
 ```
 
-Result:
+Rendered `output/index.html`:
 ```
 Hello layout!
 Hello sub-layout!
 Hello badger!
 ```
 
+
 Layout has access to page context using `{{ page }}` variable. For example:
-```
+```jinja
 {{ page.title }}
 {{{ content }}}
 {{ page.footer }}
 ```
 
-You can pass custom context to layout using context argument. For example:
+You can pass custom context to layout using `context` argument. For example:
 ```python
 layout('index.html', 'layout.html', context={'title': 'Badger'})
 ```
 
 Then you can use this context in `layout.html`:
-```
+```jinja
 {{ title }}
 ```
 
@@ -277,21 +278,21 @@ Then you can use this context in `layout.html`:
 Permalink
 ---------
 
-Use permalink to change page or asset url. For example:
-```
+Use `permalink` to change page or asset url. For example:
+```python
 permalink('index.html', '/welcome.html')
 ```
-Page 'index.html' will be written in output as a 'welcome.html'.
+Page `index.html` will be written in output as a `welcome.html`.
 
 
 Permalink supports keyword variables like:
-- `:path`, relative path to content, example: `images/face.jpg'
-- `:filename`, content filename, example: 'face.jpg'
-- `:name`, name of file without extension, example: 'name'
-- `:extension`, file extension, example: 'jpg'
+- `:path`, relative path to content, example: `images/face.jpg`
+- `:filename`, content filename, example: `face.jpg`
+- `:name`, name of file without extension, example: `name`
+- `:extension`, file extension, example: `jpg`
 
 Use of permalink keyword variables:
-```
+```python
 permalink('index.html', '/:path/:name/index.html')
 ```
 
@@ -303,55 +304,55 @@ You can use predefined permalink styles like:
 Ignore
 ------
 
-Use ignore to ignore certain paths. For example ignore file names with an underscore
+Use `ignore` to ignore certain paths. For example ignore file names with an underscore
 at the beginning:
-```
+```python
 ignore('_*')
 ```
 
 Helpers
 -------
 
-Use @helper decorator to have access to function during template rendering.
+Use `@helper` decorator to have access to function during template rendering.
 
 For example:
 
-```
+```python
 @helper
 def hello():
     return 'Hello badger!'
 ```
 
-Template file:
-```
+Template:
+```jinja
 {{ hello }}
 ```
 
-Output:
+Rendered template:
 ```
 Hello badger!
 ```
 
 
-Helper function can return list, dict or other objects:
-```
+Helper function can return `list`, `dict` or other objects:
+```python
 @helper
 def numbers():
     return [1, 2, 3, 4]
 ```
 
 Template:
-```
+```handelbars
 {{# numbers }}{{.}}{{/ numbers }}
 ```
 
-Output:
+Rendered template:
 ```
 1234
 ```
 
 
-Function decorated by @helper can use pages and assets. This plugins returns list
+Function decorated by `@helper` can use `pages` and `assets`. This plugins returns list
 of Pages object or Assets objects. For example:
 
 Example project structure:
@@ -365,7 +366,7 @@ Example project structure:
 ```
 
 File `site.py`:
-```
+```python
 from stado import helper, run
 
 @helper
@@ -376,15 +377,15 @@ run()
 ```
 
 File `index.html`:
-```
+```jinja
 {{# menu }}
 <a href='{{ url }}'>Page</a>
 {{/ menu }}
 
 ```
 
-Output:
-```
+Rendered `output/index.html`:
+```HTML
 <a href='index.html'>Page</a>
 <a href='welcome.html'>Page</a>
 <a href='contact.html'>Page</a>
@@ -413,9 +414,9 @@ output
 ```
 
 You can access page context using dict brackets:
-'''
+```python
 page[title] == page.context['title']
-'''
+```
 
 
 
