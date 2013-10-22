@@ -22,7 +22,7 @@ class TestBefore(TestPlugin):
 
 
 
-    def test_path_argument(self):
+    def test_page_argument(self):
         """Before plugin should call function with correct page argument."""
 
         # site.py
@@ -37,6 +37,22 @@ class TestBefore(TestPlugin):
 
         with open('page.html') as page:
             self.assertEqual('page.html', page.read())
+
+
+    def test_update_page_variables(self):
+        """Before plugin can change page variables directly."""
+
+        # site.py
+
+        @self.app.before('page.html')
+        def test(page):
+            page.template = 'TEST'
+        self.app.run()
+
+        # tests
+
+        with open('page.html') as page:
+            self.assertEqual('TEST', page.read())
 
 
     def test_multiple_path_arguments(self):
