@@ -6,6 +6,8 @@ output = None
 host = 'localhost'
 port = 4000
 
+log_level = 'DEBUG'
+
 
 wait_interval = 0.2
 watch_interval = 1

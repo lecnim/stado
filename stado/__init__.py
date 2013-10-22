@@ -2,6 +2,7 @@ import sys
 import logging
 
 from . import libs
+from . import config
 
 __version__ = '0.4.0'
 version = __version__
@@ -12,13 +13,13 @@ def get_logger():
     """Returns miniherd logger."""
 
     logger = logging.getLogger('stado')
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(config.log_level)
 
     # Log into console.
     ch = logging.StreamHandler()
     formatter = logging.Formatter('%(message)s')
     ch.setFormatter(formatter)
-    ch.setLevel(logging.DEBUG)
+    ch.setLevel('DEBUG')
     logger.addHandler(ch)
     return logger
 

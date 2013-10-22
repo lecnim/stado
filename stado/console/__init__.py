@@ -1,9 +1,8 @@
 import os
-import sys
 import argparse
 
 from ..errors import StadoError
-from .. import log
+from .. import log, config
 
 
 class CommandError(StadoError):
@@ -87,6 +86,7 @@ class Console:
 
         for i in self.commands.values():
             parser = subparsers.add_parser(i.name, add_help=False)
+            parser.add_argument('-d', '--debug', action="store_true")
             i.install(parser)
 
 
@@ -120,16 +120,27 @@ class Console:
         # Execute command.
         args = vars(args)
 
+        # Enable debug mode.
+        debug_mode = args.pop('debug')
+        if debug_mode:
+            log.setLevel('DEBUG')
+
+
+        result = None
         if 'function' in args:
-            cmd = args.pop('function')
 
             try:
-                return cmd(**args)
+                cmd = args.pop('function')
+                result = cmd(**args)
             except KeyboardInterrupt:
                 return True
             except StadoError as error:
                 log.error(error)
                 return False
+
+        log.setLevel(config.log_level)
+        return result
+
 
 
     # Other methods.
