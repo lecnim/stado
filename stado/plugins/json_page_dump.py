@@ -1,6 +1,7 @@
 from . import Plugin
 import json
 
+
 class JsonPageDump(Plugin):
 
     name = 'json-pages'

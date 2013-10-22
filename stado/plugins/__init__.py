@@ -1,4 +1,3 @@
-import inspect
 from ..core.events import Events
 
 

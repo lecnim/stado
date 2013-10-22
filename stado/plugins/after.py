@@ -3,10 +3,6 @@ import inspect
 from . import Plugin
 
 
-
-
-
-
 class After(Plugin):
 
     name = 'after'

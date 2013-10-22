@@ -13,6 +13,7 @@ class Assets(Plugin):
 
             for path in paths:
                 for file in self.site.cache.files:
+
                     if fnmatch.fnmatch(file, path):
                         content = self.site.cache[file]
                         if content.is_asset():

@@ -47,7 +47,7 @@ class TestLoader(unittest.TestCase):
 
         self.assertIsInstance(a, Page)
         self.assertEqual(a.template, 'hello world')
-        self.assertEqual(a.context, {})
+        self.assertEqual(a, {})
 
 
     def test_load_markdown_file(self):
@@ -56,7 +56,7 @@ class TestLoader(unittest.TestCase):
 
         self.assertIsInstance(a, Page)
         self.assertEqual(a.template, '<p>hello world</p>')
-        self.assertEqual(a.context, {})
+        self.assertEqual(a, {})
 
 
     def test_load_yaml_file(self):
@@ -65,7 +65,7 @@ class TestLoader(unittest.TestCase):
 
         self.assertIsInstance(a, Page)
         self.assertEqual(a.template, None)
-        self.assertEqual(a.context, {'hello': 'hello world'})
+        self.assertEqual(a, {'hello': 'hello world'})
 
 
     def test_load_json_file(self):
@@ -74,7 +74,7 @@ class TestLoader(unittest.TestCase):
 
         self.assertIsInstance(a, Page)
         self.assertEqual(a.template, None)
-        self.assertEqual(a.context, {'hello': 'hello world'})
+        self.assertEqual(a, {'hello': 'hello world'})
 
 
     def test_load_asset_file(self):

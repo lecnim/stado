@@ -44,5 +44,3 @@ class Events:
 
     def event(self, name, *args, **kwargs):
         return [i for i in self.events.notify(name, *args, **kwargs)]
-        #for result in self.events.notify(name, *args, **kwargs):
-        #    yield result

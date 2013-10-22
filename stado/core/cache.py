@@ -19,7 +19,7 @@ class ShelveCache(UserDict):
         # List of all files in cache.
         self.files = []
 
-        self.data = shelve.open(os.path.join(self.path, 'contents.obj'))
+        self.data = shelve.open(os.path.join(self.path, 'contents'))
         # Removes previous data.
         self.data.clear()
 
@@ -34,11 +34,11 @@ class ShelveCache(UserDict):
             self.files.append(key)
 
     def __delitem__(self, key):
-        del self.data[key]
+        UserDict.__delitem__(self, key)
         self.files.remove(key)
 
 
-
+# TODO: DictCache
 class DictCache(dict):
     """
     Cache data in RAM memory using only python dict object.

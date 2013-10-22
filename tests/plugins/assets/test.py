@@ -10,7 +10,6 @@ class TestAssets(TestPlugin):
 
         @self.app.before('*.jpg')
         def set_title(page):
-            print(page)
             return {'title': 'badger'}
 
         @self.app.helper

@@ -17,9 +17,7 @@ class Layout(Plugin):
             'renderer.before_rendering_content': self.render,
         })
 
-        # TODO: remove
-        #self.layouts = []
-
+        # Key is path to file, value is path to layout.
         self.paths = {}
 
 
@@ -48,7 +46,6 @@ class Layout(Plugin):
             #
             if not fnmatch.fnmatch(content.source, path):
                 continue
-
 
             layouts, layout_context = self.paths[path]
             template = content.template

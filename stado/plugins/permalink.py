@@ -33,5 +33,5 @@ class Permalink(Plugin):
                 elif permalink == 'default' or permalink == 'ugly':
                     permalink = '/:path/:filename'
 
-                content.permalink = permalink
+                content._permalink = permalink
 
