@@ -1,5 +1,5 @@
 import os
-from tests.plugins import TestPlugin
+from tests.controllers import TestPlugin
 
 
 class TestLayout(TestPlugin):

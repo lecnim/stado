@@ -1,20 +1,20 @@
-from tests.plugins import TestPlugin
+from tests.controllers import TestPlugin
 
 
-class TestAssets(TestPlugin):
+class TestPages(TestPlugin):
 
     def test(self):
         """Pages plugin should correctly yields pages from path."""
 
         # site.py
 
-        @self.app.before('*.jpg')
+        @self.app.before('*')
         def set_title(page):
             return {'title': 'badger'}
 
         @self.app.helper
-        def assets():
-            return [i for i in self.app.assets('*')]
+        def pages():
+            return [i for i in self.app.pages('*')]
         self.app.run()
 
         # tests

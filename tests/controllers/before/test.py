@@ -1,5 +1,5 @@
 from stado.core.content import Content
-from tests.plugins import TestPlugin
+from tests.controllers import TestPlugin
 
 
 class TestBefore(TestPlugin):

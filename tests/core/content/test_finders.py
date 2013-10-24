@@ -1,0 +1,36 @@
+import os
+
+from stado.core.content.finders import FileSystemContentFinder
+from tests import TestInCurrentDirectory
+
+
+class TestFileSystemContentFinder(TestInCurrentDirectory):
+    """
+    This test case change current working directory to __file__ location.
+    """
+
+    def test_search(self):
+
+        finder = FileSystemContentFinder()
+        files = [i for i in finder.search('data')]
+
+        self.assertEqual(3, len(files))
+        self.assertIn(os.path.join('data', 'a.html'), files)
+        self.assertIn(os.path.join('data', 'b.html'), files)
+        self.assertIn(os.path.join('data', 'b', 'b.md'), files)
+
+
+    def test_search_excluded_dirs(self):
+
+        finder = FileSystemContentFinder()
+        files = [i for i in finder.search('data', excluded_paths=['b'])]
+
+        self.assertEqual(2, len(files))
+
+
+    def test_search_excluded_files(self):
+
+        finder = FileSystemContentFinder()
+        files = [i for i in finder.search('data', excluded_paths=['a.html'])]
+
+        self.assertEqual(2, len(files))

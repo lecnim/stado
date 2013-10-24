@@ -1,11 +1,11 @@
 import os
-from tests.plugins import TestPlugin
+from tests.controllers import TestPlugin
 
 
 class TestPermalink(TestPlugin):
 
     def test_page(self):
-        """Permalink plugins should correctly change Content object url."""
+        """Permalink controllers should correctly change Content object url."""
 
         # site.py
 
@@ -22,7 +22,7 @@ class TestPermalink(TestPlugin):
 
 
     def test_page(self):
-        """Permalink plugins should correctly change page url."""
+        """Permalink controllers should correctly change page url."""
 
         # site.py
 
@@ -36,7 +36,7 @@ class TestPermalink(TestPlugin):
 
 
     def test_asset(self):
-        """Permalink plugins should correctly change asset url."""
+        """Permalink controllers should correctly change asset url."""
 
         # site.py
 
@@ -66,7 +66,7 @@ class TestPermalink(TestPlugin):
     # Styles.
 
     def test_style_pretty(self):
-        """Permalink plugins should correctly change url using built-in styles."""
+        """Permalink controllers should correctly change url using built-in styles."""
 
         # site.py
 
@@ -79,7 +79,7 @@ class TestPermalink(TestPlugin):
         self.assertIn('index.html', os.listdir('page'))
 
     def test_style_default(self):
-        """Permalink plugins should correctly change url using built-in styles."""
+        """Permalink controllers should correctly change url using built-in styles."""
 
         # site.py
 
@@ -96,7 +96,7 @@ class TestPermalink(TestPlugin):
     # Keywords.
 
     def test_keywords_path(self):
-        """Permalink plugins should correctly change url using keywords."""
+        """Permalink controllers should correctly change url using keywords."""
 
         # site.py
 
@@ -108,7 +108,7 @@ class TestPermalink(TestPlugin):
         self.assertTrue(os.path.exists('test.html'))
 
     def test_keywords_name(self):
-        """Permalink plugins should correctly change url using keywords."""
+        """Permalink controllers should correctly change url using keywords."""
 
         # site.py
 
@@ -121,7 +121,7 @@ class TestPermalink(TestPlugin):
         self.assertIn('page', os.listdir('test'))
 
     def test_keywords_filename(self):
-        """Permalink plugins should correctly change url using keywords."""
+        """Permalink controllers should correctly change url using keywords."""
 
         # site.py
 
@@ -133,7 +133,7 @@ class TestPermalink(TestPlugin):
         self.assertIn('page.html', os.listdir())
 
     def test_keywords_extension(self):
-        """Permalink plugins should correctly change url using keywords."""
+        """Permalink controllers should correctly change url using keywords."""
 
         # site.py
 
