@@ -1,14 +1,18 @@
 import os
 import inspect
 
-from .events import Events
-from .. import plugins
-from .. import config as CONFIG
-from .loader import Loader
-from .renderer import Rendered
-from .deployer import Deployer
-from .cache import DictCache, ShelveCache
-from .. import log
+from ..content.loaders import FileSystemContentLoader
+from ..content import ContentTypes
+from ...templates.mustache import TemplateEngine
+
+from ..events import Events
+from ... import controllers
+from ... import config as CONFIG
+from ..loader import Loader
+from ..renderer import Rendered
+from ..deployer import Deployer
+from ..cache import DictCache, ShelveCache
+from ... import log
 
 
 
@@ -24,8 +28,14 @@ class Site(Events):
 
     """
 
-    def __init__(self, path=None, config=None):
+    def __init__(self, path=None, config=None,
+                 template_engine=TemplateEngine):
         Events.__init__(self)
+
+
+
+
+
 
         # Set path to file path from where Site is used.
         if path is None:
@@ -50,10 +60,28 @@ class Site(Events):
         self.renderer = Rendered(self.path)
         self.deployer = Deployer(self.output)
 
+
+
+
+
+
+        # NEW
+
+        # Template engine used as a renderer in Content.
+        self.template_engine = template_engine(self.path)
+
+
+        self.content_loaders = [FileSystemContentLoader()]
+        self.content_types = ContentTypes(self.template_engine)
+
+
+
+
+
         # Plugins
 
         self.plugins = {}
-        for class_object in plugins.load(self.config['plugins']):
+        for class_object in controllers.load(self.config['controllers']):
             plugin = class_object(self)
             self.plugins[plugin.name] = plugin
 
@@ -63,6 +91,9 @@ class Site(Events):
 
             self.loader.events.subscribe(plugin)
             self.events.subscribe(plugin)
+
+
+
 
     @property
     def output(self):
@@ -109,6 +140,11 @@ class Site(Events):
 
         log.debug('\tLoading site content...')
 
+        #loader = self.config['site_loader']
+
+
+
+
         for content in self.loader.walk(exclude=[self.output]):
 
             log.debug('\t\t[ {0.model} ]  {0.source}'.format(content))
@@ -140,8 +176,9 @@ class Site(Events):
                         continue
 
                 log.debug('\t\t[ {0.model} ]  {0.source}'.format(content))
-
                 data = self.renderer.render(template, content.context)
+
+                # Here loader.load()
 
                 # TODO: Something better storing content than this.
                 content._content = data

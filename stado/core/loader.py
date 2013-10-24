@@ -18,7 +18,6 @@ class Loader(Events):
     Creates Content objects from files.
 
     Events:
-
         loader.before_loading_content
         loader.after_loading_content
 

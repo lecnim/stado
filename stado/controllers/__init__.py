@@ -31,7 +31,7 @@ from . import json_page_dump
 
 
 def load(select=None):
-    """Yields plugins modules.
+    """Yields controllers modules.
 
     Args:
         select (None or list): Loads only given modules, or if None loads all modules.

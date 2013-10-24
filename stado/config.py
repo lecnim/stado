@@ -21,6 +21,6 @@ def get_default_site_config():
 
         # List of loaders names. If None, all loader are loaded.
         'loaders': None,
-        # List of plugins names. If None, all plugins are loaded.
-        'plugins': None,
+        # List of controllers names. If None, all controllers are loaded.
+        'controllers': None,
     }
