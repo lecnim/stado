@@ -1,18 +1,18 @@
 import fnmatch
 import inspect
-from . import Plugin
+from . import Controller
 
 
-class After(Plugin):
+class After(Controller):
 
     name = 'after'
 
-    # Plugin must be run before yaml or json page dump plugin.
+    # Controller must be run before yaml or json page dump plugin.
     order = 0
 
 
     def __init__(self, site):
-        Plugin.__init__(self, site)
+        Controller.__init__(self, site)
 
 
         # Bind events to plugin methods.

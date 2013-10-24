@@ -1,8 +1,8 @@
 import fnmatch
-from . import Plugin
+from . import Controller
 
 
-class Pages(Plugin):
+class Pages(Controller):
 
     name = 'pages'
 

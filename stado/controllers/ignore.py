@@ -1,15 +1,15 @@
 import fnmatch
 
-from . import Plugin
+from . import Controller
 
 
-class Ignore(Plugin):
+class Ignore(Controller):
 
     name = 'ignore'
 
 
     def __init__(self, site):
-        Plugin.__init__(self, site)
+        Controller.__init__(self, site)
 
 
         # Bind events to plugin methods.

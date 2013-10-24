@@ -1,18 +1,18 @@
 import fnmatch
 import inspect
-from . import Plugin
+from . import Controller
 
 
-class Before(Plugin):
+class Before(Controller):
 
     name = 'before'
 
-    # Plugin must run before yaml page dump plugin.
+    # Controller must run before yaml page dump plugin.
     order = 0
 
 
     def __init__(self, site):
-        Plugin.__init__(self, site)
+        Controller.__init__(self, site)
 
 
         # Bind events to plugin methods.

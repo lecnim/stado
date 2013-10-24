@@ -1,13 +1,13 @@
 import fnmatch
-from . import Plugin
+from . import Controller
 
 
-class Permalink(Plugin):
+class Permalink(Controller):
 
     name = 'permalink'
 
     def __init__(self, site):
-        Plugin.__init__(self, site)
+        Controller.__init__(self, site)
 
         # Bind events to plugin methods.
         self.events.bind({
@@ -18,8 +18,20 @@ class Permalink(Plugin):
 
     def __call__(self, target, url):
 
-        path = target if isinstance(target, str) else target.source
-        self.paths[path] = url
+        # Target is Content id. Try to get Content object by id, or if it is not
+        # exists, save permalink and try to set it later.
+        if isinstance(target, str):
+            content = self.site.content.cache.load(target)
+            if content:
+                content.url = url
+                self.site.content.cache.save(content)
+            else:
+                self.paths[target] = url
+
+        # Target is Content object. Change url directly.
+        else:
+            target.url = url
+
 
     def update_permalink(self, content):
 

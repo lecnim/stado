@@ -1,8 +1,8 @@
 import fnmatch
-from . import Plugin
+from . import Controller
 
 
-class Assets(Plugin):
+class Assets(Controller):
 
     name = 'assets'
 

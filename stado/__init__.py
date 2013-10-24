@@ -42,7 +42,7 @@ def default_site(path):
 
     module = sys.modules[__name__]
 
-    for name, plugin in app.plugins.items():
+    for name, plugin in app.controllers.items():
         setattr(module, name, plugin)
 
 
@@ -52,7 +52,7 @@ def clear_default_site():
 
     module = sys.modules[__name__]
 
-    for name, plugin in app.plugins.items():
+    for name, plugin in app.controllers.items():
         setattr(module, name, None)
 
     app.clear()

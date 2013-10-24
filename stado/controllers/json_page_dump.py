@@ -1,19 +1,19 @@
-from . import Plugin
+from . import Controller
 import json
 
 
-class JsonPageDump(Plugin):
+class JsonPageDump(Controller):
 
     name = 'json-pages'
     is_callable = False
 
 
-    # Plugin must run after @before plugin.
+    # Controller must run after @before plugin.
     order = 1
 
 
     def __init__(self, site):
-        Plugin.__init__(self, site)
+        Controller.__init__(self, site)
 
 
         # Bind events to plugin methods.

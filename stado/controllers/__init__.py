@@ -1,7 +1,7 @@
 from ..core.events import Events
 
 
-class Plugin(Events):
+class Controller(Events):
     """Base plugin class."""
 
     is_callable = True
@@ -10,8 +10,11 @@ class Plugin(Events):
     def __init__(self, site):
         Events.__init__(self)
         self.site = site
+
+        # TODO: remove
         self.setup()
 
+    # TODO: remove
     def setup(self):
         pass
 
@@ -39,6 +42,6 @@ def load(select=None):
         module object
     """
 
-    for class_obj in Plugin.__subclasses__():
+    for class_obj in Controller.__subclasses__():
         if select is None or class_obj.name in select:
             yield class_obj

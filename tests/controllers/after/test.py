@@ -6,7 +6,7 @@ class TestAfter(TestPlugin):
 
 
     def test_no_arguments(self):
-        """Plugin after should call function without arguments."""
+        """Controller after should call function without arguments."""
 
         # site.py
 
@@ -22,7 +22,7 @@ class TestAfter(TestPlugin):
 
 
     def test_page_argument(self):
-        """Plugin after should call function with page and data arguments."""
+        """Controller after should call function with page and data arguments."""
 
         # site.py
 
@@ -39,7 +39,7 @@ class TestAfter(TestPlugin):
 
 
     def test_data_argument(self):
-        """Plugin after should call function with correct data argument."""
+        """Controller after should call function with correct data argument."""
 
         # site.py
 
@@ -55,7 +55,7 @@ class TestAfter(TestPlugin):
 
 
     def test_filename_matching(self):
-        """Plugin after should supports file matching."""
+        """Controller after should supports file matching."""
 
         # site.py
 

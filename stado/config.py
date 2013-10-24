@@ -6,7 +6,7 @@ output = None
 host = 'localhost'
 port = 4000
 
-log_level = 'INFO'
+log_level = 'DEBUG'
 
 
 wait_interval = 0.2
@@ -23,4 +23,5 @@ def get_default_site_config():
         'loaders': None,
         # List of controllers names. If None, all controllers are loaded.
         'controllers': None,
+        'plugins': None,
     }

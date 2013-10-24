@@ -1,18 +1,18 @@
-from . import Plugin
+from . import Controller
 from ..libs import yaml
 
 
-class YamlPageDump(Plugin):
+class YamlPageDump(Controller):
 
     name = 'yaml-pages'
     is_callable = False
 
-    # Plugin must run after @before plugin.
+    # Controller must run after @before plugin.
     order = 1
 
 
     def __init__(self, site):
-        Plugin.__init__(self, site)
+        Controller.__init__(self, site)
 
 
         # Bind events to plugin methods.

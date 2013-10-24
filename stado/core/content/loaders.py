@@ -2,10 +2,11 @@ import os
 
 from . import Content, ContentData
 from .finders import FileSystemContentFinder
+from ..events import Events
 
 
 
-class ContentLoader:
+class ContentLoader(Events):
     pass
 
 
@@ -49,6 +50,8 @@ class FileContent(ContentData):
 
     def __init__(self, path, output, id):
         ContentData.__init__(self, path, output, id=id)
+
+        self.type = os.path.splitext(path)[1][1:]
         self._data = None
 
     @property

@@ -1,16 +1,16 @@
-from . import Plugin
+from . import Controller
 
 
-class Helper(Plugin):
+class Helper(Controller):
 
     name = 'helper'
 
-    # Plugin must be run before layout rendering.
+    # Controller must be run before layout rendering.
     order = 0
 
 
     def __init__(self, site):
-        Plugin.__init__(self, site)
+        Controller.__init__(self, site)
 
 
         # Bind events to plugin methods.

@@ -1,15 +1,15 @@
 import fnmatch
 import os
-from . import Plugin
+from . import Controller
 
 
-class Layout(Plugin):
+class Layout(Controller):
 
     name = 'layout'
 
 
     def __init__(self, site):
-        Plugin.__init__(self, site)
+        Controller.__init__(self, site)
 
 
         # Bind events to plugin methods.

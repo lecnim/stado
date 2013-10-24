@@ -1,48 +1,45 @@
 import os
 import re
+import urllib.request
+from .cache import ShelveCache
 
-# Content events:
-#
-# content.before_creating
-# content.after_creating
-#
-
+# TODO: comments
 
 class ContentTypes:
+    """
+    Storing content type models.
 
-    def __init__(self, template_engine=None):
+    """
+
+    def __init__(self, models=None):
+
+        self.models = {}
+
+        if models:
+            for i in models: self.set(**i)
+
+    def __call__(self, extension):
+        return self.get(extension)
+
+    def get(self, extension):
+
+        # Try to get type model by extension.
+
+        if extension in self.models:
+            return self.models[extension]
+
+        # Try to get default model.
+
+        if None in self.models:
+            return self.models[None]
+
+        raise KeyError('Default content type model not found!')
 
 
-        self.template_engine = template_engine
+    def set(self, extension, loaders, renderers, deployers):
 
-        # This module is used if extension matching failed.
-
-        self.default = {
-            'is_page': False,
-            'loaders': [],
-            'renderers': [],
-            'deployers': [],
-        }
-
-        self.registered = {
-
-            # HTML
-
-            'html': {
-                'is_page': True,
-                'loaders': [],
-                'renderers': [],
-                'deployers': []
-            }
-        }
-
-    def get(self, type):
-        self.registered.get(type)
-
-    def register(self, type, loaders, renderers, deployers, is_page=False):
-
-        self.registered[type] = {
-            'is_page': is_page,
+        self.models[extension] = {
+            'extension': extension,
             'loaders': loaders,
             'renderers': renderers,
             'deployers': deployers,
@@ -51,8 +48,51 @@ class ContentTypes:
 
 
 
+class ContentCache:
 
-class ContentData:
+    def __init__(self, cache):
+        self.cache = cache
+        self.ids = []
+
+    def __iter__(self):
+        for i in self.ids[:]:
+            yield self.cache.get(i)
+
+    def save(self, content):
+        self.ids.append(content.id)
+        self.cache.save(content.id, content)
+
+    def load(self, content_id):
+        return self.cache.load(content_id)
+
+    def clear(self):
+        self.cache.clear()
+
+
+
+
+
+
+
+class ContentManager:
+
+    def __init__(self, loaders, types, cache):
+
+        self.ids = []
+
+        self.loaders = loaders
+        self.types = ContentTypes(types)
+        self.cache = ContentCache(cache)
+
+
+
+
+
+
+
+
+
+class ContentData(dict):
     def __init__(self, source, output=None, type=None, id=None):
         """
         Args:
@@ -66,6 +106,9 @@ class ContentData:
                 Controllers objects can get Content using its id.
 
         """
+
+        self.data = None
+        self.metadata = None
 
         self.source = source
 
@@ -90,6 +133,38 @@ class ContentData:
         self.template = ''
 
 
+    def set_type(self, type):
+
+        self.type = type['extension']
+        self.loaders = type['loaders']
+        self.renderers = type['renderers']
+        self.deployers = type['deployers']
+
+    #
+
+    def load(self):
+        """Load content metadata and data using each loader."""
+
+        for loader in self.loaders:
+            metadata, data = loader.load(self.data)
+
+            self.data = data
+            self.metadata = metadata
+
+    def render(self):
+        """Renders content data using each renderer. After each rendering previous
+        data is overwritten with new rendered one."""
+
+        for renderer in self.renderers:
+            self.data = renderer.render(self.data, self.metadata)
+
+
+    def deploy(self, path):
+
+        for deployer in self.deployers:
+            deployer.deploy(self, os.path.join(path, self.output))
+
+
 
 
     def dump(self):
@@ -106,11 +181,19 @@ class ContentData:
 
     @property
     def url(self):
-        return '/' + self.output
+        url_path = urllib.request.pathname2url(self.output)
+        # Url should starts with leading slash.
+        if not url_path.startswith('/'):
+            url_path = '/' + url_path
+
+        return url_path
 
     @url.setter
     def url(self, value):
-        self._permalink = value
+        path = urllib.request.url2pathname(value)
+
+        # Output directory should be relative.
+        self.output = path.rstrip(os.sep)
 
 
 

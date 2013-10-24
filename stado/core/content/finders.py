@@ -12,17 +12,17 @@ from ..events import Events
 class ContentFinder(Events):
     """Base for classes which are used to find content."""
 
-    def event_found_file(self, path):
+    def event_found_content(self, path):
         """Finder found file."""
 
-        if False in self.event('finder.found_directory', path):
+        if False in self.event('finder.found_content', path):
             return False
         return True
 
     def event_found_directory(self, path):
         """Finder found directory."""
 
-        if False in self.event('finder.found_file', path):
+        if False in self.event('finder.found_directory', path):
             return False
         return True
 
@@ -70,7 +70,7 @@ class FileSystemContentFinder(ContentFinder):
 
                 # Notify other objects that finder found file.
                 # File yielding can be stopped by event result.
-                if self.event_found_file(file_path):
+                if self.event_found_content(file_path):
                     yield file_path
 
 

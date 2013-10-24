@@ -1,6 +1,6 @@
 import os
 
-from stado.core.cache import ShelveCache
+from stado.core.content.cache import ShelveCache
 from tests import TestTemporaryDirectory
 
 
