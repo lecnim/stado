@@ -1,6 +1,6 @@
 import os
 
-from . import Content, ContentData
+from . import ContentData
 from .finders import FileSystemContentFinder
 from ..events import Events
 

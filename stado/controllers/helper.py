@@ -35,8 +35,11 @@ class Helper(Controller):
         """Updates content context with all available helper functions."""
 
         for name, function in self.functions.items():
+            if not self.site.template_engine in content.renderers:
+                continue
+
             if not name in content:
-                content.context[name] = function
+                content.metadata[name] = function
 
     def remove_helpers_from_context(self, content):
         """Removes all helpers methods from content context."""
@@ -44,11 +47,11 @@ class Helper(Controller):
         # Use helping list, to avoid dict changing size during iteration.
         remove = []
 
-        for key, value in content.context.items():
+        for key, value in content.metadata.items():
             for name, function in self.functions.items():
 
                 if key == name and value == function:
                     remove.append(key)
 
         for key in remove:
-            del content.context[key]
+            del content.metadata[key]

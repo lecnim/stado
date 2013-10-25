@@ -1,19 +1,18 @@
 import os
 import inspect
 
-from ..content.loaders import FileSystemContentLoader
-from ..content import ContentManager
-from ...templates.mustache import TemplateEngine
+from .content.loaders import FileSystemContentLoader
+from .content import ContentManager
+from ..templates.mustache import TemplateEngine
 
-from ..events import Events
-from ... import controllers
-from ... import plugins
-from ... import config as CONFIG
-from ..loader import Loader
-from ..renderer import Rendered
-from ..deployer import Deployer
-from ..content.cache import ShelveCache
-from ... import log
+from .events import Events
+from .. import controllers
+from .. import plugins
+from .. import config as CONFIG
+
+
+from .content.cache import ShelveCache
+from .. import log
 
 
 
@@ -29,15 +28,15 @@ class Site(Events):
 
     """
 
-    def __init__(self, path=None, config=None,
+    def __init__(self, source=None, output=None, config=None,
                  template_engine=TemplateEngine):
         Events.__init__(self)
 
 
 
         # Set path to file path from where Site is used.
-        if path is None:
-            path = os.path.split(inspect.stack()[1][1])[0]
+        if source is None:
+            source = os.path.split(inspect.stack()[1][1])[0]
 
         # Configuration loading.
         self.config = CONFIG.get_default_site_config()
@@ -45,9 +44,12 @@ class Site(Events):
             self.config.update(config)
 
         # Absolute path to site source directory.
-        self.path = os.path.normpath(path)
+        self.path = os.path.normpath(source)
         # Absolute path to site output directory.
-        self._output = os.path.join(self.path, CONFIG.build_dir)
+        if output:
+            self._output = output
+        else:
+            self._output = os.path.join(self.path, CONFIG.build_dir)
 
 
         self.excluded_paths = []
@@ -97,9 +99,9 @@ class Site(Events):
             return CONFIG.output
         return self._output
 
-    @output.setter
-    def output(self, value):
-        self._output = value
+    #@output.setter
+    #def output(self, value):
+    #    self._output = value
 
 
 

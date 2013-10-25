@@ -1,4 +1,4 @@
-from stado.core.content import Content
+from stado.core.content import ContentData
 from tests.controllers import TestPlugin
 
 
@@ -29,8 +29,8 @@ class TestBefore(TestPlugin):
 
         @self.app.before('page.html')
         def test(page):
-            self.assertIsInstance(page, Content)
-            return {'badger': page.source}
+            self.assertIsInstance(page, ContentData)
+            return {'badger': page.id}
         self.app.run()
 
         # tests
@@ -46,7 +46,7 @@ class TestBefore(TestPlugin):
 
         @self.app.before('page.html')
         def test(page):
-            page.template = 'TEST'
+            page.data = 'TEST'
         self.app.run()
 
         # tests
@@ -122,7 +122,7 @@ class TestBefore(TestPlugin):
 
         # tests
 
-        with open('yaml.html') as page:
+        with open('yaml.yaml') as page:
             self.assertCountEqual('badger: test\none: 1\n', page.read())
 
 
@@ -138,5 +138,5 @@ class TestBefore(TestPlugin):
 
         # tests
 
-        with open('json.html') as page:
+        with open('json.json') as page:
             self.assertCountEqual('{"badger": "test", "one": 1}', page.read())

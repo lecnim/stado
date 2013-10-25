@@ -44,7 +44,7 @@ class After(Controller):
 
         for function, paths in self.functions:
             for path in paths:
-                if fnmatch.fnmatch(content.source, path):
+                if fnmatch.fnmatch(content.id, path):
 
                     # Runs function with different arguments depending on their
                     # amount.
@@ -53,8 +53,8 @@ class After(Controller):
                     if args == 0:
                         template = function()
                     elif args == 1:
-                        template = function(content._content)
+                        template = function(content.data)
                     elif args == 2:
-                        template = function(content, content._content)
+                        template = function(content, content.data)
 
-                    content._content = template
+                    content.data = template

@@ -14,6 +14,14 @@ class Controller(Events):
         # TODO: remove
         self.setup()
 
+
+    def get_content(self, content_id):
+        return self.site.content.cache.load(content_id)
+
+    def save_content(self, content):
+        self.site.content.cache.save(content)
+
+
     # TODO: remove
     def setup(self):
         pass

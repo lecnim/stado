@@ -11,8 +11,7 @@ class TestSite(TestTemporaryDirectory):
 
         path = os.path.dirname(__file__)
 
-        site = Site(os.path.join(path, 'data', 'site'))
-        site.output = self.temp_path
+        site = Site(source=os.path.join(path, 'data', 'site'), output=self.temp_path)
         returned = site.run()
 
         self.assertTrue(returned)

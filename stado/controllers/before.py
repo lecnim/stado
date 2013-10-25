@@ -8,7 +8,7 @@ class Before(Controller):
     name = 'before'
 
     # Controller must run before yaml page dump plugin.
-    order = 0
+    order = -1
 
 
     def __init__(self, site):
@@ -17,7 +17,7 @@ class Before(Controller):
 
         # Bind events to plugin methods.
         self.events.bind({
-            'loader.after_loading_content': self.add_context,
+            'renderer.before_rendering_content': self.add_context,
         })
 
         self.functions = []
@@ -44,7 +44,7 @@ class Before(Controller):
 
         for function, paths in self.functions:
             for path in paths:
-                if fnmatch.fnmatch(content.source, path):
+                if fnmatch.fnmatch(content.id, path):
 
                     # Runs function with different arguments depending on their
                     # amount.
@@ -56,4 +56,5 @@ class Before(Controller):
                         context = function(content)
 
                     if context:
-                        content.context.update(context)
+                        print(content.id, content.metadata)
+                        content.metadata.update(context)

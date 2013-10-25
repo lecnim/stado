@@ -1,8 +1,8 @@
-from .. import ContenTypePlugin
+from .. import Extension
 from ...core import CopyDeployer
 
 
-class Default(ContenTypePlugin):
+class Default(Extension):
 
     name = 'default_extension'
     extensions = None

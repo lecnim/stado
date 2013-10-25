@@ -1,4 +1,4 @@
-from stado.core.content import Content
+from stado.core.content import ContentData
 from tests.controllers import TestPlugin
 
 
@@ -28,8 +28,8 @@ class TestAfter(TestPlugin):
 
         @self.app.after('page.html')
         def test(page, data):
-            self.assertIsInstance(page, Content)
-            return page.source
+            self.assertIsInstance(page, ContentData)
+            return page.id
         self.app.run()
 
         # tests
@@ -68,9 +68,9 @@ class TestAfter(TestPlugin):
 
         with open('page.html') as page:
             self.assertEqual('test', page.read())
-        with open('yaml.html') as page:
+        with open('yaml.yaml') as page:
             self.assertEqual('test', page.read())
-        with open('json.html') as page:
+        with open('json.json') as page:
             self.assertEqual('test', page.read())
         with open('markdown.html') as page:
             self.assertEqual('test', page.read())

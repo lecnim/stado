@@ -1,21 +1,20 @@
-from .. import ContenTypePlugin
+from .html import HTMLDeployer
+from .. import Extension
 from ...libs import markdown
 
 
-class MarkdownRenderer:
-
-    def render(self, source):
-        return markdown.markdown(source)
+def render(source, metadata):
+    return markdown.markdown(source)
 
 
-class Markdown(ContenTypePlugin):
+class Markdown(Extension):
 
     name = 'markdown'
     extensions = ['md', 'markdown']
 
     loaders = []
-    renderers = ['template_engine', MarkdownRenderer]
-    deployers = []
+    renderers = ['template_engine', render]
+    deployers = [HTMLDeployer]
 
 
 

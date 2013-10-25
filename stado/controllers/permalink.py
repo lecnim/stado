@@ -21,10 +21,12 @@ class Permalink(Controller):
         # Target is Content id. Try to get Content object by id, or if it is not
         # exists, save permalink and try to set it later.
         if isinstance(target, str):
+
+
             content = self.site.content.cache.load(target)
             if content:
                 content.url = url
-                self.site.content.cache.save(content)
+                self.save_content(content)
             else:
                 self.paths[target] = url
 
