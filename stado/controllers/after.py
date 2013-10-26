@@ -4,16 +4,24 @@ from . import Controller
 
 
 class After(Controller):
+    """
+    Access to item content after rendering. Use:
+
+        @after('a.html', 'b.html')
+        def method(content, item):
+            ...
+
+    """
 
     name = 'after'
 
+    #TODO: remove this?
     # Controller must be run before yaml or json page dump plugin.
     order = 0
 
 
     def __init__(self, site):
         Controller.__init__(self, site)
-
 
         # Bind events to plugin methods.
         self.events.bind({
@@ -24,14 +32,11 @@ class After(Controller):
 
 
     def __call__(self, *paths):
-        """Reads function and paths from decorator.
-        Example:
+        """Reads function and paths from decorator. Example:
 
-        @before('a.html', 'b.html')
+        @after('a.html', 'b.html')
         def page(path):
             ...
-
-        Writes [page, ['a.html', 'b.html']] to self.functions.
 
         """
 
@@ -40,11 +45,11 @@ class After(Controller):
         return wrap
 
 
-    def add_context(self, content):
+    def add_context(self, item):
 
         for function, paths in self.functions:
             for path in paths:
-                if fnmatch.fnmatch(content.id, path):
+                if fnmatch.fnmatch(item.source, path):
 
                     # Runs function with different arguments depending on their
                     # amount.
@@ -53,8 +58,8 @@ class After(Controller):
                     if args == 0:
                         template = function()
                     elif args == 1:
-                        template = function(content.data)
+                        template = function(item.data)
                     elif args == 2:
-                        template = function(content, content.data)
+                        template = function(item, item.data)
 
-                    content.data = template
+                    item.content = template

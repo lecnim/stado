@@ -29,7 +29,7 @@ class TestAfter(TestPlugin):
         @self.app.after('page.html')
         def test(page, data):
             self.assertIsInstance(page, SiteItem)
-            return page.id
+            return page.source
         self.app.run()
 
         # tests
