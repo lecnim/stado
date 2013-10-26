@@ -15,8 +15,8 @@ class Helper(Controller):
 
         # Bind events to plugin methods.
         self.events.bind({
-            'renderer.before_rendering_content': self.add_helpers_to_context,
-            'renderer.after_rendering_content': self.remove_helpers_from_context
+            'content.before_rendering': self.add_helpers_to_context,
+            'content.after_rendering': self.remove_helpers_from_context
         })
 
         # Available helper methods gather from site.py file.
@@ -31,27 +31,33 @@ class Helper(Controller):
         return function
 
 
-    def add_helpers_to_context(self, content):
+    def add_helpers_to_context(self, item, renderer):
         """Updates content context with all available helper functions."""
 
-        for name, function in self.functions.items():
-            if not self.site.template_engine in content.renderers:
-                continue
+        if self.site.template_engine == renderer:
 
-            if not name in content:
-                content.metadata[name] = function
-
-    def remove_helpers_from_context(self, content):
-        """Removes all helpers methods from content context."""
-
-        # Use helping list, to avoid dict changing size during iteration.
-        remove = []
-
-        for key, value in content.metadata.items():
             for name, function in self.functions.items():
 
-                if key == name and value == function:
-                    remove.append(key)
+                #if not self.site.template_engine in item.renderers:
+                #    continue
 
-        for key in remove:
-            del content.metadata[key]
+                if not name in item:
+                    item.metadata[name] = function
+                    print(item)
+
+    def remove_helpers_from_context(self, item, renderer):
+        """Removes all helpers methods from content context."""
+
+        if self.site.template_engine == renderer:
+
+            # Use helping list, to avoid dict changing size during iteration.
+            remove = []
+
+            for key, value in item.metadata.items():
+                for name, function in self.functions.items():
+
+                    if key == name and value == function:
+                        remove.append(key)
+
+            for key in remove:
+                del item.metadata[key]

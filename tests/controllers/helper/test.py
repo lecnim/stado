@@ -107,7 +107,7 @@ class TestHelper(TestPlugin):
 
         with open('str.html') as page:
             self.assertEqual('hello world', page.read())
-        with open('yaml.html') as page:
+        with open('yaml.yaml') as page:
             self.assertEqual('hello: hello world\n', page.read())
-        with open('json.html') as page:
+        with open('json.json') as page:
             self.assertEqual('{"hello": "hello world"}', page.read())

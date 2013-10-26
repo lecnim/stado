@@ -2,6 +2,7 @@ import os
 import re
 import urllib.request
 from .cache import ShelveCache
+from ..events import Events
 
 # TODO: comments
 
@@ -51,19 +52,39 @@ class ItemTypes:
 class ItemCache:
 
     def __init__(self, cache):
+
+        self.items = {}
         self.cache = cache
         self.ids = []
 
     def __iter__(self):
-        for i in self.ids[:]:
-            yield self.cache.get(i)
+        for i in self.items.keys():
+            yield self.load(i)
 
-    def save(self, content):
-        self.ids.append(content.source)
-        self.cache.save(content.source, content)
+
+    def save(self, item):
+        self.ids.append(item.source)
+
+        # Store item object.
+        self.items[item.source] = item
+
+        # Store item data and metadata in cache.
+        self.cache.save(item.source, item.data)
+        self.cache.save(item.source + '/metadata', item.metadata.dump())
+
+        # Clear data and metadata to free memory.
+        item.data = None
+        item.metadata.clear()
+
 
     def load(self, content_id):
-        return self.cache.load(content_id)
+
+        item = self.items[content_id]
+
+        item.data = self.cache.load(item.source)
+        item.metadata = self.cache.load(item.source + '/metadata')
+
+        return item
 
     def clear(self):
         self.cache.clear()
@@ -85,7 +106,7 @@ class ItemManager:
 
 
 
-class SiteItem(dict):
+class SiteItem(dict, Events):
     """
     Represents thing used to create site. For example site source files.
     """
@@ -99,6 +120,7 @@ class SiteItem(dict):
             path: Optionally full path to file which was used to create item.
 
         """
+        Events.__init__(self)
 
         # Absolute path to file which was used to create item for example: "a/b.html"
         self.path = path
@@ -228,10 +250,14 @@ class SiteItem(dict):
         data is overwritten with new rendered one."""
 
         for renderer in self.renderers:
+            self.event('content.before_rendering', self, renderer)
+
             if callable(renderer):
                 self.data = renderer(self.data, self.metadata.dump())
             else:
                 self.data = renderer.render(self.data, self.metadata.dump())
+
+            self.event('content.after_rendering', self, renderer)
 
 
     def deploy(self, path):

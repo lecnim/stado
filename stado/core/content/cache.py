@@ -25,10 +25,11 @@ class ShelveCache(UserDict):
         self.data.clear()
 
 
-    def save(self, key, value):
+    def save(self, key, item):
         if not key in self.files:
             self.files.append(key)
-        self.data[key] = value
+
+        self.data[key] = item
 
     def load(self, key):
         print(key)

@@ -80,6 +80,7 @@ class Site(Events):
                 setattr(self, controller.name, controller)
 
             self.events.subscribe(controller)
+            self.template_engine.events.subscribe(controller)
 
 
         # Plugins
@@ -148,6 +149,10 @@ class Site(Events):
 
                 model = self.content.types(content.type)
                 content.set_type(model)
+
+                # Subscribe controller to content object events.
+                for i in self.controllers.values():
+                    content.events.subscribe(i)
 
                 # Loads content data and stores loaded content in cache.
 
