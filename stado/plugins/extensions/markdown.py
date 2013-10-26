@@ -15,7 +15,7 @@ class Markdown(Extension):
     loaders = []
     renderers = ['template_engine', render]
 
-    deployers = HTMLDeployer
+    deployer = HTMLDeployer
 
 
 
