@@ -1,5 +1,5 @@
 from .. import Extension
-from ...core import CopyDeployer
+from ..deployers import CopyDeployer
 
 
 class Default(Extension):
@@ -9,7 +9,8 @@ class Default(Extension):
 
     loaders = []
     renderers = []
-    deployers = [CopyDeployer]
+
+    deployer = CopyDeployer
 
 
 

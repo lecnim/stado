@@ -8,7 +8,8 @@ class Extension(Plugin):
 
     loaders = []
     renderers = []
-    deployers = []
+
+    deployer = None
 
 
     def __init__(self, site):
@@ -18,7 +19,7 @@ class Extension(Plugin):
 
         if self.extensions is None:
             self.site.content.types.set(None, self.loaders, self.renderers,
-                                        self.deployers)
+                                        self.deployer)
         else:
             for e in self.extensions:
 
@@ -26,7 +27,7 @@ class Extension(Plugin):
                     e,
                     loaders=self.loaders,
                     renderers=self.renderers,
-                    deployers=self.deployers
+                    deployers=self.deployer
                 )
 
 

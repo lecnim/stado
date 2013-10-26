@@ -20,4 +20,5 @@ class Yaml(Extension):
 
     loaders = [yaml_loader]
     renderers = [yaml_render]
-    deployers = [DataDeployer]
+
+    deployer = DataDeployer

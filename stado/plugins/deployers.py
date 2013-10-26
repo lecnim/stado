@@ -4,6 +4,8 @@ import shutil
 
 class CopyDeployer:
 
+    url = None
+
     @staticmethod
     def deploy(content, path):
         """Copy content source file to patch."""
@@ -20,6 +22,8 @@ class CopyDeployer:
 
 
 class DataDeployer:
+
+    url = None
 
 
     @staticmethod

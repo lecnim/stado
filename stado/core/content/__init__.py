@@ -133,12 +133,59 @@ class ContentData(dict):
         self.template = ''
 
 
+    @property
+    def url(self):
+        url_path = urllib.request.pathname2url(self.output)
+        # Url should starts with leading slash.
+        if not url_path.startswith('/'):
+            url_path = '/' + url_path
+
+        return url_path
+
+    @url.setter
+    def url(self, value):
+        """Permalink converted to file system path."""
+
+        keywords = re.findall("(:[a-zA-z]*)", value)
+        destination = os.path.normpath(value)
+
+        items = {
+            'path': os.path.split(self.id)[0],
+            'filename': self.filename,
+            'name': os.path.splitext(self.filename)[0],
+            'extension': os.path.splitext(self.filename)[1][1:],
+        }
+
+        for key in keywords:
+            # :filename => filename
+            if key[1:] in items:
+                destination = destination.replace(key, str(items[key[1:]]))
+
+        #//home/a.html => home/a.html
+        self.output = destination.lstrip(os.sep)
+
+
+    def is_page(self):
+        pass
+
+        #
+        #path = urllib.request.url2pathname(value)
+        #
+        ## Output directory should be relative.
+        #self.output = path.rstrip(os.sep)
+
+
+
     def set_type(self, type):
 
         self.type = type['extension']
         self.loaders = type['loaders']
         self.renderers = type['renderers']
-        self.deployers = type['deployers']
+        self.deployer = type['deployers']
+
+        if self.deployer.url:
+            self.url = self.deployer.url
+
 
     #
 
@@ -175,8 +222,7 @@ class ContentData(dict):
 
     def deploy(self, path):
 
-        for deployer in self.deployers:
-            deployer.deploy(self, os.path.join(path, self.output))
+        self.deployer.deploy(self, os.path.join(path, self.output))
 
 
 
@@ -193,21 +239,7 @@ class ContentData(dict):
         return self
 
 
-    @property
-    def url(self):
-        url_path = urllib.request.pathname2url(self.output)
-        # Url should starts with leading slash.
-        if not url_path.startswith('/'):
-            url_path = '/' + url_path
 
-        return url_path
-
-    @url.setter
-    def url(self, value):
-        path = urllib.request.url2pathname(value)
-
-        # Output directory should be relative.
-        self.output = path.rstrip(os.sep)
 
 
 
@@ -234,8 +266,8 @@ class ContentData(dict):
     #    return destination.lstrip(os.sep)
 
 
-    def __repr__(self):
-        return "<Content:  '{}'>".format(self.source)
+    #def __repr__(self):
+    #    return "<Content:  '{}'>".format(self.source)
 
 
 

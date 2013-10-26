@@ -1,4 +1,3 @@
-import os
 from .. import Extension
 from ..deployers import DataDeployer
 
@@ -8,11 +7,8 @@ class HTMLDeployer(DataDeployer):
     Writes content data as a "html" files.
     """
 
-    @staticmethod
-    def deploy(content, path):
-        # Modify path so its end with ".html"
-        path = os.path.splitext(path)[0] + '.html'
-        DataDeployer.deploy(content, path)
+    url = '/:path/:name.html'
+
 
 
 class HTML(Extension):
@@ -22,4 +18,4 @@ class HTML(Extension):
 
     loaders = []
     renderers = ['template_engine']
-    deployers = [HTMLDeployer]
+    deployer = HTMLDeployer

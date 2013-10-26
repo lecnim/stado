@@ -20,4 +20,5 @@ class Json(Extension):
 
     loaders = [json_loader]
     renderers = [json_render]
-    deployers = [DataDeployer]
+
+    deployer = DataDeployer
