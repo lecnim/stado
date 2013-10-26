@@ -71,10 +71,8 @@ class ItemCache:
 
 
 
-
-
-
 class ItemManager:
+    """Group objects used to manage items, for example items cache, loaders etc."""
 
     def __init__(self, loaders, types, cache):
 
@@ -87,13 +85,12 @@ class ItemManager:
 
 
 
-
-
-
-
-
 class SiteItem(dict):
-    def __init__(self, source, output=None, type=None, path=None):
+    """
+    Represents thing used to create site. For example site source files.
+    """
+
+    def __init__(self, source, output, path=None):
         """
         Args:
             source: Item is recognized by source property. For example controllers
@@ -103,38 +100,49 @@ class SiteItem(dict):
 
         """
 
+        # Absolute path to file which was used to create item for example: "a/b.html"
         self.path = path
 
-        self.data = None
-        self.content = None
-        self.metadata = {}
-
+        # Item is recognized by controllers using this property.
         self.source = source
+
+        # Item content.
+        self.data = None
 
         # Default output path set by item loader.
         self.default_output = output
         self.output = output
+        # Title of output file, for example: 'b.html'
+        self.filename = os.path.split(self.default_output)[1]
 
-
+        # Stores objects which are used to generate and save item content.
         self.loaders = []
         self.renderers = []
         self.deployers = []
 
 
-        # Path to source file relative to site source, for example: 'a/b.html'
-        self.source = source
-        # Title of source file, for example: 'b.html'
-        self.filename = os.path.split(self.source)[1]
+    # Properties.
 
-        # Content will be available under this URL.
-        self._permalink = '/:path/:filename'
+    @property
+    def content(self):
+        return self.data
+    @content.setter
+    def content(self, value):
+        self.data = value
 
-        # Template engine renders page using this variables.
-        self.template = ''
-
+    @property
+    def metadata(self):
+        """Metadata dict, for example used during content rendering."""
+        return self
+    @metadata.setter
+    def metadata(self, value):
+        self.clear()
+        self.update(value)
 
     @property
     def url(self):
+        """Item will be available using this url."""
+
         url_path = urllib.request.pathname2url(self.output)
         # Url should starts with leading slash.
         if not url_path.startswith('/'):
@@ -144,7 +152,7 @@ class SiteItem(dict):
 
     @url.setter
     def url(self, value):
-        """Permalink converted to file system path."""
+        """Set new item url."""
 
         keywords = re.findall("(:[a-zA-z]*)", value)
         destination = os.path.normpath(value)
@@ -165,31 +173,41 @@ class SiteItem(dict):
         self.output = destination.lstrip(os.sep)
 
 
+    # Methods.
+
     def is_page(self):
         """Returns True if item is a page."""
         if self.output.endswith('.html'):
             return True
 
-        #
-        #path = urllib.request.url2pathname(value)
-        #
-        ## Output directory should be relative.
-        #self.output = path.rstrip(os.sep)
-
-
 
     def set_type(self, type):
+        """Sets item loaders, renderers and deployer. Also sets item url using
+        deployer url pattern."""
 
+        # For example: "html"
         self.type = type['extension']
+
+        # Lists.
         self.loaders = type['loaders']
         self.renderers = type['renderers']
+        # Deployer object.
         self.deployer = type['deployers']
+        print(self.deployer)
 
         if self.deployer.url:
             self.url = self.deployer.url
 
 
-    #
+    def dump(self):
+        """Returns new dict with item metadata."""
+
+        i = {}
+        i.update(self)
+        return i
+
+
+    # Loading , rendering, deploying.
 
     def load(self):
         """Load content metadata and data using each loader."""
@@ -204,16 +222,10 @@ class SiteItem(dict):
             self.data = data
             self.metadata = metadata
 
-        #print('AFTER LOADING', self.id)
-        print(type(self.metadata), self.metadata)
 
     def render(self):
         """Renders content data using each renderer. After each rendering previous
         data is overwritten with new rendered one."""
-
-        #print('RENDERING CONTENT', self.id)
-
-        print(self.metadata)
 
         for renderer in self.renderers:
             if callable(renderer):
@@ -223,171 +235,6 @@ class SiteItem(dict):
 
 
     def deploy(self, path):
+        """Writes page to output directory in given path"""
 
         self.deployer.deploy(self, os.path.join(path, self.output))
-
-
-
-
-    def dump(self):
-        """Returns dict with context."""
-
-        i = {}
-        i.update(self)
-        return i
-
-    @property
-    def context(self):
-        return self
-
-
-
-
-
-
-    #@property
-    #def output(self):
-    #    """Permalink converted to file system path."""
-    #
-    #    keywords = re.findall("(:[a-zA-z]*)", self._permalink)
-    #    destination = os.path.normpath(self._permalink)
-    #
-    #    items = {
-    #        'path': os.path.split(self.source)[0],
-    #        'filename': self.filename,
-    #        'name': os.path.splitext(self.filename)[0],
-    #        'extension': os.path.splitext(self.filename)[1][1:],
-    #    }
-    #
-    #    for key in keywords:
-    #        # :filename => filename
-    #        if key[1:] in items:
-    #            destination = destination.replace(key, str(items[key[1:]]))
-    #
-    #    # //home/a.html => home/a.html
-    #    return destination.lstrip(os.sep)
-
-
-    #def __repr__(self):
-    #    return "<Content:  '{}'>".format(self.source)
-
-
-
-
-
-
-# TODO: removing
-
-#
-#class Content(dict):
-#    """
-#    Represents site source file.
-#
-#    """
-#
-#    def __init__(self, source):
-#        dict.__init__(self)
-#
-#
-#
-#
-#
-#
-#        # Path to source file relative to site source, for example: 'a/b.html'
-#        self.source = source
-#        # Title of source file, for example: 'b.html'
-#        self.filename = os.path.split(self.source)[1]
-#
-#        # Content will be available under this URL.
-#        self._permalink = '/:path/:filename'
-#
-#        # Template engine renders page using this variables.
-#        self.template = ''
-#
-#
-#
-#
-#    def dump(self):
-#        """Returns dict with context."""
-#
-#        i = {}
-#        i.update(self)
-#        return i
-#
-#    @property
-#    def context(self):
-#        return self
-#
-#
-#    @property
-#    def url(self):
-#        return '/' + self.output
-#
-#    @url.setter
-#    def url(self, value):
-#        self._permalink = value
-#
-#
-#
-#    @property
-#    def output(self):
-#        """Permalink converted to file system path."""
-#
-#        keywords = re.findall("(:[a-zA-z]*)", self._permalink)
-#        destination = os.path.normpath(self._permalink)
-#
-#        items = {
-#            'path': os.path.split(self.source)[0],
-#            'filename': self.filename,
-#            'name': os.path.splitext(self.filename)[0],
-#            'extension': os.path.splitext(self.filename)[1][1:],
-#        }
-#
-#        for key in keywords:
-#            # :filename => filename
-#            if key[1:] in items:
-#                destination = destination.replace(key, str(items[key[1:]]))
-#
-#        # //home/a.html => home/a.html
-#        return destination.lstrip(os.sep)
-#
-#
-#    def __repr__(self):
-#        return "<Content:  '{}'>".format(self.source)
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#class Asset(Content):
-#    """
-#    Represents asset file.
-#    """
-#
-#    model = 'asset'
-#
-#    def is_page(self):
-#        return False
-#    def is_asset(self):
-#        return True
-#    def __repr__(self):
-#        return "<Asset: '{}'>".format(self.source)
-#
-#class Page(Content):
-#    """
-#    Represents page file. (Usually *.html)
-#    """
-#
-#    model = 'page'
-#
-#    def is_page(self):
-#        return True
-#    def is_asset(self):
-#        return False
-#    def __repr__(self):
-#        return "<Page: '{}'>".format(self.source)
-#
