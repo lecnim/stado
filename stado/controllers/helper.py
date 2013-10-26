@@ -15,8 +15,8 @@ class Helper(Controller):
 
         # Bind events to plugin methods.
         self.events.bind({
-            'content.before_rendering': self.add_helpers_to_context,
-            'content.after_rendering': self.remove_helpers_from_context
+            'content.before_rendering': self.add_helpers,
+            'content.after_rendering': self.remove_helpers
         })
 
         # Available helper methods gather from site.py file.
@@ -31,22 +31,21 @@ class Helper(Controller):
         return function
 
 
-    def add_helpers_to_context(self, item, renderer):
-        """Updates content context with all available helper functions."""
+    def add_helpers(self, item, renderer):
+        """Updates item metadata with all available helper functions."""
+
+        # Add helper methods only when renderer is template engine, because
+        # other renderers do not accepts methods in metadata dict.
 
         if self.site.template_engine == renderer:
-
             for name, function in self.functions.items():
 
-                #if not self.site.template_engine in item.renderers:
-                #    continue
-
+                # Do not overwrite already existing metadata variables.
                 if not name in item:
                     item.metadata[name] = function
-                    print(item)
 
-    def remove_helpers_from_context(self, item, renderer):
-        """Removes all helpers methods from content context."""
+    def remove_helpers(self, item, renderer):
+        """Removes all helpers methods from item metadata."""
 
         if self.site.template_engine == renderer:
 
@@ -55,7 +54,6 @@ class Helper(Controller):
 
             for key, value in item.metadata.items():
                 for name, function in self.functions.items():
-
                     if key == name and value == function:
                         remove.append(key)
 
