@@ -4,6 +4,13 @@ from . import Controller
 
 
 class Before(Controller):
+    """Access to item before rendering. Usage:
+
+    @before('a.html', 'b.html')
+        def page(path):
+            ...
+
+    """
 
     name = 'before'
 
@@ -24,16 +31,7 @@ class Before(Controller):
 
 
     def __call__(self, *paths):
-        """Reads function and paths from decorator.
-        Example:
-
-        @before('a.html', 'b.html')
-        def page(path):
-            ...
-
-        Writes [page, ['a.html', 'b.html']] to self.functions.
-
-        """
+        """Calling decorator."""
 
         def wrap(function):
             self.functions.append((function, paths))
@@ -44,7 +42,7 @@ class Before(Controller):
 
         for function, paths in self.functions:
             for path in paths:
-                if fnmatch.fnmatch(content.id, path):
+                if fnmatch.fnmatch(content.source, path):
 
                     # Runs function with different arguments depending on their
                     # amount.
@@ -56,5 +54,4 @@ class Before(Controller):
                         context = function(content)
 
                     if context:
-                        print(content.id, content.metadata)
                         content.metadata.update(context)

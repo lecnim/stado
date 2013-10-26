@@ -229,9 +229,9 @@ class SiteItem(dict):
 
         for renderer in self.renderers:
             if callable(renderer):
-                self.data = renderer(self.data, self.metadata)
+                self.data = renderer(self.data, self.metadata.dump())
             else:
-                self.data = renderer.render(self.data, self.metadata)
+                self.data = renderer.render(self.data, self.metadata.dump())
 
 
     def deploy(self, path):

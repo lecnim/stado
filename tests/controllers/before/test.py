@@ -30,7 +30,7 @@ class TestBefore(TestPlugin):
         @self.app.before('page.html')
         def test(page):
             self.assertIsInstance(page, SiteItem)
-            return {'badger': page.id}
+            return {'badger': page.source}
         self.app.run()
 
         # tests
@@ -115,6 +115,8 @@ class TestBefore(TestPlugin):
 
         # site.py
 
+        self.maxDiff = None
+
         @self.app.before('yaml.yaml')
         def test():
             return {'badger': 'test'}
@@ -123,7 +125,7 @@ class TestBefore(TestPlugin):
         # tests
 
         with open('yaml.yaml') as page:
-            self.assertCountEqual('badger: test\none: 1\n', page.read())
+            self.assertEqual('badger: test\none: 1\n', page.read())
 
 
     def test_overwrite_json(self):
