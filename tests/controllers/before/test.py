@@ -1,4 +1,4 @@
-from stado.core.content import ContentData
+from stado.core.content import SiteItem
 from tests.controllers import TestPlugin
 
 
@@ -29,7 +29,7 @@ class TestBefore(TestPlugin):
 
         @self.app.before('page.html')
         def test(page):
-            self.assertIsInstance(page, ContentData)
+            self.assertIsInstance(page, SiteItem)
             return {'badger': page.id}
         self.app.run()
 

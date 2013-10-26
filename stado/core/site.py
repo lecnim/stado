@@ -1,8 +1,8 @@
 import os
 import inspect
 
-from .content.loaders import FileSystemContentLoader
-from .content import ContentManager
+from .content.loaders import FileSystemItemLoader
+from .content import ItemManager
 from ..templates.mustache import TemplateEngine
 
 from .events import Events
@@ -59,8 +59,8 @@ class Site(Events):
         self.template_engine = template_engine(self.path)
 
         # Content manager: finding content, loading, storing...
-        self.content = ContentManager(
-            loaders=[FileSystemContentLoader()],
+        self.content = ItemManager(
+            loaders=[FileSystemItemLoader()],
             types=[],
             cache=ShelveCache(self.output)
         )

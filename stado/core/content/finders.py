@@ -9,7 +9,7 @@ from ..events import Events
 
 
 
-class ContentFinder(Events):
+class ItemFinder(Events):
     """Base for classes which are used to find content."""
 
     def event_found_content(self, path):
@@ -30,7 +30,7 @@ class ContentFinder(Events):
 
 # Finders.
 
-class FileSystemContentFinder(ContentFinder):
+class FileSystemItemFinder(ItemFinder):
     """
     Searches for files which can be used to create Content objects.
     """

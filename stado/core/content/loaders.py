@@ -1,27 +1,27 @@
 import os
 
-from . import ContentData
-from .finders import FileSystemContentFinder
+from . import SiteItem
+from .finders import FileSystemItemFinder
 from ..events import Events
 
 
 
-class ContentLoader(Events):
+class ItemLoader(Events):
     pass
 
 
 
 # TODO: Ideas for other finder classes.
 
-class ZipContentLoader(ContentLoader):
+class ZipItemLoader(ItemLoader):
     """Only idea, can load content from zip files."""
     pass
 
-class SQLiteContentLoader(ContentLoader):
+class SQLiteItemLoader(ItemLoader):
     """Only idea, can load content from SQLite database."""
     pass
 
-class JsonContentLoader(ContentLoader):
+class JsonItemLoader(ItemLoader):
     """Only idea, can load content from JSON database."""
     pass
 
@@ -29,9 +29,9 @@ class JsonContentLoader(ContentLoader):
 
 # Filesystem content loader.
 
-class FileSystemContentLoader(ContentLoader):
+class FileSystemItemLoader(ItemLoader):
 
-    finder = FileSystemContentFinder()
+    finder = FileSystemItemFinder()
 
 
     def load(self, path, excluded_paths=None):
@@ -43,21 +43,28 @@ class FileSystemContentLoader(ContentLoader):
             # id: Content is recognized by controllers using it is. Id is same as
             #   source path.
             output = os.path.relpath(content_path, path)
-            yield FileContent(content_path, output, id=output)
+            yield FileItem(content_path, output)
 
 
-class FileContent(ContentData):
+class FileItem(SiteItem):
 
-    def __init__(self, path, output, id):
-        ContentData.__init__(self, path, output, id=id)
+    def __init__(self, path, output):
 
+        # File item source is same as item output. For example if source path is
+        # "b.html", it be that same as a item output path: "output/b.html".
+
+        SiteItem.__init__(self, source=output, output=output, path=path)
+
+        # Item type is recognized using file extension.
         self.type = os.path.splitext(path)[1][1:]
+
+        # If item content it not set - it will be read directly from file.
         self._data = None
 
     @property
     def data(self):
         if self._data is None:
-            with open(self.source) as file:
+            with open(self.path) as file:
                 return file.read()
         return self._data
 

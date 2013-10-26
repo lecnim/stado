@@ -17,7 +17,7 @@ class CopyDeployer:
         if not os.path.exists(directory_path):
             os.makedirs(directory_path)
 
-        shutil.copy(content.source, path)
+        shutil.copy(content.path, path)
 
 
 

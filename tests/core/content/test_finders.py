@@ -1,6 +1,6 @@
 import os
 
-from stado.core.content.finders import FileSystemContentFinder
+from stado.core.content.finders import FileSystemItemFinder
 from tests import TestInCurrentDirectory
 
 
@@ -11,7 +11,7 @@ class TestFileSystemContentFinder(TestInCurrentDirectory):
 
     def test_search(self):
 
-        finder = FileSystemContentFinder()
+        finder = FileSystemItemFinder()
         files = [i for i in finder.search('data')]
 
         self.assertEqual(3, len(files))
@@ -22,7 +22,7 @@ class TestFileSystemContentFinder(TestInCurrentDirectory):
 
     def test_search_excluded_dirs(self):
 
-        finder = FileSystemContentFinder()
+        finder = FileSystemItemFinder()
         files = [i for i in finder.search('data', excluded_paths=['b'])]
 
         self.assertEqual(2, len(files))
@@ -30,7 +30,7 @@ class TestFileSystemContentFinder(TestInCurrentDirectory):
 
     def test_search_excluded_files(self):
 
-        finder = FileSystemContentFinder()
+        finder = FileSystemItemFinder()
         files = [i for i in finder.search('data', excluded_paths=['a.html'])]
 
         self.assertEqual(2, len(files))

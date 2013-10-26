@@ -1,4 +1,4 @@
-from stado.core.content import ContentData
+from stado.core.content import SiteItem
 from tests.controllers import TestPlugin
 
 
@@ -28,7 +28,7 @@ class TestAfter(TestPlugin):
 
         @self.app.after('page.html')
         def test(page, data):
-            self.assertIsInstance(page, ContentData)
+            self.assertIsInstance(page, SiteItem)
             return page.id
         self.app.run()
 

@@ -5,7 +5,7 @@ from .cache import ShelveCache
 
 # TODO: comments
 
-class ContentTypes:
+class ItemTypes:
     """
     Storing content type models.
 
@@ -48,7 +48,7 @@ class ContentTypes:
 
 
 
-class ContentCache:
+class ItemCache:
 
     def __init__(self, cache):
         self.cache = cache
@@ -59,8 +59,8 @@ class ContentCache:
             yield self.cache.get(i)
 
     def save(self, content):
-        self.ids.append(content.id)
-        self.cache.save(content.id, content)
+        self.ids.append(content.source)
+        self.cache.save(content.source, content)
 
     def load(self, content_id):
         return self.cache.load(content_id)
@@ -74,15 +74,15 @@ class ContentCache:
 
 
 
-class ContentManager:
+class ItemManager:
 
     def __init__(self, loaders, types, cache):
 
         self.ids = []
 
         self.loaders = loaders
-        self.types = ContentTypes(types)
-        self.cache = ContentCache(cache)
+        self.types = ItemTypes(types)
+        self.cache = ItemCache(cache)
 
 
 
@@ -92,28 +92,27 @@ class ContentManager:
 
 
 
-class ContentData(dict):
-    def __init__(self, source, output=None, type=None, id=None):
+class SiteItem(dict):
+    def __init__(self, source, output=None, type=None, path=None):
         """
         Args:
-            source: Path in source directory pointing to item which was used to
-                create this data. For example it can be path to file.
-            output: Path in output directory, where data will be written. Default
-                output is same as source.
-            type:
-                Data type, default is filename extension like: html
-            id:
-                Controllers objects can get Content using its id.
+            source: Item is recognized by source property. For example controllers
+                use this.
+            output: Path in output directory, where item will be written.
+            path: Optionally full path to file which was used to create item.
 
         """
+
+        self.path = path
 
         self.data = None
         self.metadata = {}
 
         self.source = source
 
+        # Default output path set by item loader.
+        self.default_output = output
         self.output = output
-        self.id = id
 
 
         self.loaders = []
@@ -150,7 +149,7 @@ class ContentData(dict):
         destination = os.path.normpath(value)
 
         items = {
-            'path': os.path.split(self.id)[0],
+            'path': os.path.split(self.default_output)[0],
             'filename': self.filename,
             'name': os.path.splitext(self.filename)[0],
             'extension': os.path.splitext(self.filename)[1][1:],
@@ -202,14 +201,14 @@ class ContentData(dict):
             self.data = data
             self.metadata = metadata
 
-        print('AFTER LOADING', self.id)
+        #print('AFTER LOADING', self.id)
         print(type(self.metadata), self.metadata)
 
     def render(self):
         """Renders content data using each renderer. After each rendering previous
         data is overwritten with new rendered one."""
 
-        print('RENDERING CONTENT', self.id)
+        #print('RENDERING CONTENT', self.id)
 
         print(self.metadata)
 
