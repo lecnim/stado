@@ -106,6 +106,7 @@ class SiteItem(dict):
         self.path = path
 
         self.data = None
+        self.content = None
         self.metadata = {}
 
         self.source = source
@@ -165,7 +166,9 @@ class SiteItem(dict):
 
 
     def is_page(self):
-        pass
+        """Returns True if item is a page."""
+        if self.output.endswith('.html'):
+            return True
 
         #
         #path = urllib.request.url2pathname(value)
