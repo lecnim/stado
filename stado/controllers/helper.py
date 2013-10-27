@@ -5,9 +5,6 @@ class Helper(Controller):
 
     name = 'helper'
 
-    # Controller must be run before layout rendering.
-    order = 0
-
 
     def __init__(self, site):
         Controller.__init__(self, site)
