@@ -1,4 +1,3 @@
-import fnmatch
 from . import Controller
 
 
@@ -9,9 +8,9 @@ class Pages(Controller):
     def __call__(self, *paths):
         """Yields Pages object from given location."""
 
-        for path in paths:
-            for file in self.site.content.cache.sources:
-                if fnmatch.fnmatch(file, path):
-                    content = self.site.content.cache.load(file)
-                    if content.is_page():
-                        yield content
+        # Iterate all site items.
+        for item in self.site.content.cache.items.values():
+            # Item must be assets and source paths must match.
+            if item.is_page() and item.match(*paths):
+                # Loads item form cache.
+                yield self.site.content.cache.load(item.source)
