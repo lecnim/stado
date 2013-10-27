@@ -1,4 +1,7 @@
-import fnmatch
+"""
+@after controller
+"""
+
 import inspect
 from . import Controller
 
@@ -7,61 +10,50 @@ class After(Controller):
     """
     Access to item content after rendering. Use:
 
-        @after('a.html', 'b.html')
-        def method(content, item):
-            ...
+    @after('a.html', 'b.html')
+    def method(content, item):
+        ...
 
     """
 
     name = 'after'
 
-    #TODO: remove this?
-    # Controller must be run before yaml or json page dump plugin.
-    order = 0
-
 
     def __init__(self, site):
         Controller.__init__(self, site)
 
-        # Bind events to plugin methods.
+        # Bind events to controller methods.
         self.events.bind({
 
             # Event is run after item has finished rendering.
-            'item.after_rendering': self.add_context,
+            'item.after_rendering': self.update_content,
         })
 
         self.functions = []
 
 
     def __call__(self, *paths):
-        """Reads function and paths from decorator. Example:
-
-        @after('a.html', 'b.html')
-        def page(path):
-            ...
-
-        """
+        """Calling @after decorator."""
 
         def wrap(function):
             self.functions.append((function, paths))
         return wrap
 
-
-    def add_context(self, item):
+    def update_content(self, item):
+        """Updates item content."""
 
         for function, paths in self.functions:
-            for path in paths:
-                if fnmatch.fnmatch(item.source, path):
+            if item.match(*paths):
 
-                    # Runs function with different arguments depending on their
-                    # amount.
+                # Runs function with different arguments depending on their
+                # amount.
 
-                    args = len(inspect.getfullargspec(function)[0])
-                    if args == 0:
-                        template = function()
-                    elif args == 1:
-                        template = function(item.data)
-                    elif args == 2:
-                        template = function(item, item.data)
+                args = len(inspect.getfullargspec(function)[0])
+                if args == 0:
+                    template = function()
+                elif args == 1:
+                    template = function(item.data)
+                elif args == 2:
+                    template = function(item, item.data)
 
-                    item.content = template
+                item.content = template
