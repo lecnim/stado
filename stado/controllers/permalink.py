@@ -2,6 +2,7 @@ import fnmatch
 from . import Controller
 
 
+# TODO: cleaning
 class Permalink(Controller):
 
     name = 'permalink'
@@ -11,35 +12,30 @@ class Permalink(Controller):
 
         # Bind events to plugin methods.
         self.events.bind({
-            'loader.after_loading_content': self.update_permalink,
+            'content.after_loading': self.update_permalink,
         })
 
         self.paths = {}
 
+    # TODO: use url styles.
     def __call__(self, target, url):
 
-        # Target is Content id. Try to get Content object by id, or if it is not
-        # exists, save permalink and try to set it later.
-        if isinstance(target, str):
+
+        for item_source in self.site.content.cache.sources:
+            if fnmatch.fnmatch(item_source, target):
+                item = self.site.content.cache.load(item_source)
+                item.url = url
+                self.site.content.cache.save(item)
+
+        self.paths[target] = url
 
 
-            content = self.site.content.cache.load(target)
-            if content:
-                content.url = url
-                self.save_content(content)
-            else:
-                self.paths[target] = url
 
-        # Target is Content object. Change url directly.
-        else:
-            target.url = url
-
-
-    def update_permalink(self, content):
+    def update_permalink(self, item):
 
         for path in self.paths:
 
-            if fnmatch.fnmatch(content.source, path):
+            if fnmatch.fnmatch(item.source, path):
                 permalink = self.paths[path]
 
                 if permalink == 'pretty':
@@ -47,5 +43,5 @@ class Permalink(Controller):
                 elif permalink == 'default' or permalink == 'ugly':
                     permalink = '/:path/:filename'
 
-                content._permalink = permalink
+                item.url = permalink
 
