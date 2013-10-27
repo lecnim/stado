@@ -71,3 +71,6 @@ class FileItem(SiteItem):
     @data.setter
     def data(self, value):
         self._data = value
+
+    def has_data(self):
+        return False if self._data is None else True

@@ -25,7 +25,9 @@ class After(Controller):
 
         # Bind events to plugin methods.
         self.events.bind({
-            'renderer.after_rendering_content': self.add_context,
+
+            # Event is run after item has finished rendering.
+            'item.after_rendering': self.add_context,
         })
 
         self.functions = []

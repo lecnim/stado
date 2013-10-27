@@ -32,9 +32,7 @@ class ShelveCache(UserDict):
         self.data[key] = item
 
     def load(self, key):
-        print(key)
-        print(self.files)
-        return self.data[key]
+        return self.data.get(key)
 
     def clear(self):
         """Removes cache files."""

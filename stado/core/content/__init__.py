@@ -61,6 +61,10 @@ class ItemCache:
         for i in self.items.keys():
             yield self.load(i)
 
+    @property
+    def sources(self):
+        return self.items.keys()
+
 
     def save(self, item):
         self.ids.append(item.source)
@@ -69,7 +73,8 @@ class ItemCache:
         self.items[item.source] = item
 
         # Store item data and metadata in cache.
-        self.cache.save(item.source, item.data)
+        if item.has_data():
+            self.cache.save(item.source, item.data)
         self.cache.save(item.source + '/metadata', item.metadata.dump())
 
         # Clear data and metadata to free memory.
@@ -202,6 +207,9 @@ class SiteItem(dict, Events):
         if self.output.endswith('.html'):
             return True
 
+    def has_data(self):
+        return True if self.data else False
+
 
     def set_type(self, type):
         """Sets item loaders, renderers and deployer. Also sets item url using
@@ -215,7 +223,6 @@ class SiteItem(dict, Events):
         self.renderers = type['renderers']
         # Deployer object.
         self.deployer = type['deployers']
-        print(self.deployer)
 
         if self.deployer.url:
             self.url = self.deployer.url
@@ -234,9 +241,10 @@ class SiteItem(dict, Events):
     def load(self):
         """Load content metadata and data using each loader."""
 
+        self.event('item.before_loading', self)
+
         for loader in self.loaders:
             if callable(loader):
-                print(loader)
                 data, metadata = loader(self.data)
             else:
                 data, metadata = loader.load(self.data)
@@ -244,20 +252,26 @@ class SiteItem(dict, Events):
             self.data = data
             self.metadata = metadata
 
+        self.event('item.after_loading', self)
+
 
     def render(self):
         """Renders content data using each renderer. After each rendering previous
         data is overwritten with new rendered one."""
 
-        for renderer in self.renderers:
-            self.event('content.before_rendering', self, renderer)
+        # Event before rendering is started.
+        self.event('item.before_rendering', self)
 
+        for renderer in self.renderers:
+            self.event('renderer.before_rendering', self, renderer)
             if callable(renderer):
                 self.data = renderer(self.data, self.metadata.dump())
             else:
                 self.data = renderer.render(self.data, self.metadata.dump())
+            self.event('renderer.after_rendering', self, renderer)
 
-            self.event('content.after_rendering', self, renderer)
+        # Event rendering has ended.
+        self.event('item.after_rendering', self)
 
 
     def deploy(self, path):

@@ -24,7 +24,7 @@ class Before(Controller):
 
         # Bind events to plugin methods.
         self.events.bind({
-            'renderer.before_rendering_content': self.add_context,
+            'item.after_loading': self.add_context,
         })
 
         self.functions = []

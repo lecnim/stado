@@ -15,8 +15,8 @@ class Helper(Controller):
 
         # Bind events to plugin methods.
         self.events.bind({
-            'content.before_rendering': self.add_helpers,
-            'content.after_rendering': self.remove_helpers
+            'renderer.before_rendering': self.add_helpers,
+            'renderer.after_rendering': self.remove_helpers
         })
 
         # Available helper methods gather from site.py file.
