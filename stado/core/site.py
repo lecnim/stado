@@ -4,13 +4,10 @@ import inspect
 from .content.loaders import FileSystemItemLoader
 from .content import ItemManager
 from ..templates.mustache import TemplateEngine
-
 from .events import Events
 from .. import controllers
 from .. import plugins
 from .. import config as CONFIG
-
-
 from .content.cache import ShelveCache
 from .. import log
 
@@ -33,7 +30,6 @@ class Site(Events):
         Events.__init__(self)
 
 
-
         # Set path to file path from where Site is used.
         if source is None:
             source = os.path.split(inspect.stack()[1][1])[0]
@@ -50,7 +46,6 @@ class Site(Events):
             self._output = output
         else:
             self._output = os.path.join(self.path, CONFIG.build_dir)
-
 
         self.excluded_paths = []
 
@@ -80,8 +75,6 @@ class Site(Events):
                 setattr(self, controller.name, controller)
 
             self.events.subscribe(controller)
-            self.template_engine.events.subscribe(controller)
-
 
         # Plugins
 
@@ -99,10 +92,6 @@ class Site(Events):
         if CONFIG.output:
             return CONFIG.output
         return self._output
-
-    #@output.setter
-    #def output(self, value):
-    #    self._output = value
 
 
 
@@ -128,6 +117,8 @@ class Site(Events):
 
         return True
 
+
+    # Generating.
 
     def load(self):
         """Loads content from site source files to cache."""
@@ -166,53 +157,19 @@ class Site(Events):
 
 
     def render(self):
-        """Renders content in cache."""
+        """Renders item to cache."""
 
         log.debug('\tRendering content...')
 
         for content in self.content.cache:
-
-            if False in self.event('renderer.before_rendering_content', content):
-                continue
-
             content.render()
-
-            if False in self.event('renderer.after_rendering_content', content):
-                continue
-
             self.content.cache.save(content)
-
-
-            #if content.is_page():
-            #
-            #    template = content.template
-            #
-            #    # Render using template from event.
-            #    for result in self.event('renderer.before_rendering_content',
-            #                             content):
-            #
-            #        # Some plugin overwrite content.template.
-            #        if result is not None:
-            #            template = result
-            #        elif result is False:
-            #            continue
-            #
-            #    log.debug('\t\t[ {0.model} ]  {0.source}'.format(content))
-            #    data = self.renderer.render(template, content.context)
-            #
-            #    # Here loader.load()
-            #
-            #    # TODO: Something better storing content than this.
-            #    content._content = data
-            #
-            #    self.event('renderer.after_rendering_content', content)
-            #    self.cache[content.source] = content
 
         return self
 
 
     def deploy(self):
-        """Write content data to output directory."""
+        """Writes item data to output directory."""
 
         log.debug('\tDeploying content...')
 
@@ -221,6 +178,7 @@ class Site(Events):
             content.deploy(self.output)
 
 
+    # Cleaning.
 
     def clear(self):
         """Clearing site components."""
@@ -228,9 +186,3 @@ class Site(Events):
         for i in self.controllers.values():
             del i.site
         del self.controllers
-
-        del self.loader
-        del self.renderer
-        del self.deployer
-
-        del self.cache
