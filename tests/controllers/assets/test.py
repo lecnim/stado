@@ -10,10 +10,12 @@ class TestAssets(TestPlugin):
 
         @self.app.before('*.jpg')
         def set_title(page):
+            print(page.source)
             return {'title': 'badger'}
 
         @self.app.helper
         def assets():
+            print([i.metadata for i in self.app.assets('*')])
             return [i for i in self.app.assets('*')]
         self.app.run()
 

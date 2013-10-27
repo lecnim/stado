@@ -10,10 +10,10 @@ class Assets(Controller):
         """Yields Asset objects from given location."""
 
         for path in paths:
-            for id in self.site.content.cache.ids:
-                 if fnmatch.fnmatch(id, path):
-                    content = self.get_content(id)
-                    if content.is_asset():
+            for file in self.site.content.cache.sources:
+                if fnmatch.fnmatch(file, path):
+                    content = self.site.content.cache.load(file)
+                    if not content.is_page():
                         yield content
 
 
