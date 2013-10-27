@@ -1,4 +1,7 @@
-import fnmatch
+"""
+@before controller
+"""
+
 import inspect
 from . import Controller
 
@@ -7,51 +10,47 @@ class Before(Controller):
     """Access to item before rendering. Usage:
 
     @before('a.html', 'b.html')
-        def page(path):
-            ...
+    def page(path):
+        ...
 
     """
 
     name = 'before'
 
-    # Controller must run before yaml page dump plugin.
-    order = -1
-
 
     def __init__(self, site):
         Controller.__init__(self, site)
 
-
-        # Bind events to plugin methods.
+        # Bind events to controller methods.
         self.events.bind({
-            'item.after_loading': self.add_context,
+            'item.after_loading': self.update_metadata,
         })
 
         self.functions = []
 
 
     def __call__(self, *paths):
-        """Calling decorator."""
+        """Calling @before decorator."""
 
         def wrap(function):
             self.functions.append((function, paths))
         return wrap
 
 
-    def add_context(self, content):
+    def update_metadata(self, item):
+        """Updates item metadata."""
 
         for function, paths in self.functions:
-            for path in paths:
-                if fnmatch.fnmatch(content.source, path):
+            if item.match(*paths):
 
-                    # Runs function with different arguments depending on their
-                    # amount.
+                # Runs function with different arguments depending on their
+                # amount.
 
-                    args = inspect.getfullargspec(function)[0]
-                    if len(args) == 0:
-                        context = function()
-                    else:
-                        context = function(content)
+                args = inspect.getfullargspec(function)[0]
+                if len(args) == 0:
+                    metadata = function()
+                else:
+                    metadata = function(item)
 
-                    if context:
-                        content.metadata.update(context)
+                if metadata:
+                    item.metadata.update(metadata)
