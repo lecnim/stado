@@ -1,4 +1,5 @@
 import fnmatch
+import posixpath
 
 from . import Controller
 
@@ -14,22 +15,28 @@ class Ignore(Controller):
 
         # Bind events to plugin methods.
         self.events.bind({
-            'loader.before_loading_content': self.ignore_file,
-            'loader.before_loading_directory': self.ignore_file,
+            'finder.found_item': self.ignore_file,
+            #'finder.found_directory': self.ignore_file,
         })
 
         # List of ignored paths.
         self.ignored_paths = []
 
 
-    def __call__(self, *paths):
+    def __call__(self, *sources):
 
-        for path in paths:
-            if not path in self.ignored_paths:
-                self.ignored_paths.append(path)
+        for source in sources:
+
+            #source = posixpath.normpath(source)
+
+            if not source in self.ignored_paths:
+                self.ignored_paths.append(source)
+                self.site.excluded_paths.append(source)
 
 
     def ignore_file(self, path):
+
+        #print('.', path)
 
         for i in self.ignored_paths:
             if fnmatch.fnmatch(path, i):
