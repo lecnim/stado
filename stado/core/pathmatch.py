@@ -1,4 +1,5 @@
 import re
+import os
 
 def translate(pat):
     """Translate a shell PATTERN to a regular expression.
@@ -23,7 +24,7 @@ def translate(pat):
         i = i + 1
 
         if c == '*':
-            res = res + '[^\/]+'
+            res = res + '[^\/\\\\]+'
 
         elif c == '?':
             res = res + '.'
@@ -50,7 +51,15 @@ def translate(pat):
     return res + '\Z(?ms)'
 
 
-def pathmatch(path, pattern):
+def pathmatch(path, *patterns):
 
-    if re.match(translate(pattern), path):
-        return True
+    for i in patterns:
+
+        print('!!!', i, path)
+
+        i = os.path.normpath(i)
+        path = os.path.normpath(path)
+
+        if re.match(translate(i), path):
+            print('TRUE')
+            return True
