@@ -91,5 +91,5 @@ class Build(Command):
             log.info("Done! Site built in {}s".format(timer.get()))
 
         clear_default_site()
-        log.debug('\tRemoving unreachable objects: {}'.format(gc.collect()))
+        #log.debug('\tRemoving unreachable objects: {}'.format(gc.collect()))
 

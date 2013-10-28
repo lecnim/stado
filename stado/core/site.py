@@ -53,13 +53,13 @@ class Site(Events):
         # Template engine used as to render Content data.
         self.template_engine = template_engine(self.path)
 
+
         # Content manager: finding content, loading, storing...
         self.content = ItemManager(
             loaders=[FileSystemItemLoader()],
             types=[],
             cache=ShelveCache(self.output)
         )
-
 
         # Controllers
 
@@ -99,6 +99,7 @@ class Site(Events):
         """Creates site: loads, renders, deploys."""
 
         log.debug('Starting building site: {}'.format(self.path))
+        log.info(self.output)
 
         # Create output directory if not exists.
 

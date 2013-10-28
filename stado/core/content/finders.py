@@ -36,7 +36,7 @@ class FileSystemItemFinder(ItemFinder):
     Searches for files which can be used to create Content objects.
     """
 
-    excluded_names = ['__pychache__']
+    excluded_names = ['__pychache__', '*.py']
 
 
     def search(self, path, excluded_paths=None):
@@ -69,9 +69,12 @@ class FileSystemItemFinder(ItemFinder):
             for file in files:
                 file_path = os.path.join(dirpath, file)
 
+                print(file)
+
                 # Skip excluded files.
                 if self.is_excluded(file) \
                     or file_path in excluded_paths:
+                    print('SKPEED')
                     continue
 
                 if pathmatch(file_path, *excluded_paths):
@@ -87,4 +90,6 @@ class FileSystemItemFinder(ItemFinder):
         """Returns True if given name should be excluded."""
 
         for pattern in self.excluded_names:
-            return True if pathmatch(name, pattern) else False
+            print(pattern, name)
+            if pathmatch(name, pattern):
+                return True
