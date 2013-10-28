@@ -6,6 +6,7 @@ to create Content objects.
 import os
 from fnmatch import fnmatch
 from ..events import Events
+from ..pathmatch import pathmatch
 
 
 
@@ -15,7 +16,7 @@ class ItemFinder(Events):
     def event_found_content(self, path):
         """Finder found file."""
 
-        if False in self.event('finder.found_content', path):
+        if False in self.event('finder.found_item', path):
             return False
         return True
 
@@ -61,11 +62,19 @@ class FileSystemItemFinder(ItemFinder):
                     or os.path.join(dirpath, folder) in excluded_paths:
                     folders.remove(folder)
 
+                elif pathmatch(os.path.join(dirpath, folder), *excluded_paths):
+                    folders.remove(folder)
+
+
             for file in files:
                 file_path = os.path.join(dirpath, file)
 
                 # Skip excluded files.
-                if self.is_excluded(file) or file_path in excluded_paths:
+                if self.is_excluded(file) \
+                    or file_path in excluded_paths:
+                    continue
+
+                if pathmatch(file_path, *excluded_paths):
                     continue
 
                 # Notify other objects that finder found file.
@@ -76,5 +85,6 @@ class FileSystemItemFinder(ItemFinder):
 
     def is_excluded(self, name):
         """Returns True if given name should be excluded."""
+
         for pattern in self.excluded_names:
-            return True if fnmatch(name, pattern) else False
+            return True if pathmatch(name, pattern) else False
