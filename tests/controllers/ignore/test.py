@@ -58,7 +58,8 @@ class TestIgnore(TestPlugin):
         # tests
 
         self.assertNotIn('a.html', os.listdir())
-        self.assertFalse(os.path.exists(os.path.join('b', 'b.html')))
+        self.assertNotIn('b.html', os.listdir())
+        self.assertTrue(os.path.exists(os.path.join('b', 'b.html')))
 
 
     def test_pattern_matching_tree(self):

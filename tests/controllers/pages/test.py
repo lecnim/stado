@@ -8,13 +8,14 @@ class TestPages(TestPlugin):
 
         # site.py
 
-        @self.app.before('*')
+        @self.app.before('**')
         def set_title(page):
+            print('>>>', page.source)
             return {'title': 'badger'}
 
         @self.app.helper
         def pages():
-            return [i for i in self.app.pages('*')]
+            return [i for i in self.app.pages('**')]
         self.app.run()
 
         # tests
