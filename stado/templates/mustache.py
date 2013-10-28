@@ -43,8 +43,6 @@ class TemplateEngine(Events):
     def render(self, source, context):
         """Used by Renderer class."""
 
-        self.event('template_engine.before_rendering')
-
         # Creating new class which will be used as a template context.
         context_class = type('RenderContext', (Context,), {})
 
@@ -63,7 +61,5 @@ class TemplateEngine(Events):
         render_context = context_class(context)
 
         result = pystache.render(source, render_context)
-
-        self.event('template_engine.after_rendering')
 
         return result
