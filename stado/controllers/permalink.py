@@ -12,7 +12,7 @@ class Permalink(Controller):
 
         # Bind events to plugin methods.
         self.events.bind({
-            'content.after_loading': self.update_permalink,
+            'item.after_loading': self.update_permalink,
         })
 
         self.paths = {}
