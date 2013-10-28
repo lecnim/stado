@@ -1,5 +1,6 @@
 import re
 import os
+import urllib.request
 
 def translate(pat):
     """Translate a shell PATTERN to a regular expression.
@@ -57,8 +58,13 @@ def pathmatch(path, *patterns):
 
         print('!!!', i, path)
 
-        i = os.path.normpath(i)
-        path = os.path.normpath(path)
+        #i = urllib.request.pathname2url(i)
+        #path = urllib.request.pathname2url(path)
+
+        i = os.path.normpath(i).replace('\\', '/')
+        path = os.path.normpath(path).replace('\\', '/')
+
+        print(i, path)
 
         if re.match(translate(i), path):
             print('TRUE')
