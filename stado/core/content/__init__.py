@@ -3,6 +3,7 @@ import re
 import urllib.request
 from .cache import ShelveCache
 from ..events import Events
+from ..pathmatch import pathmatch
 
 # TODO: comments
 
@@ -101,8 +102,6 @@ class ItemManager:
     """Group objects used to manage items, for example items cache, loaders etc."""
 
     def __init__(self, loaders, types, cache):
-
-        self.ids = []
 
         self.loaders = loaders
         self.types = ItemTypes(types)
@@ -209,6 +208,13 @@ class SiteItem(dict, Events):
 
     def has_data(self):
         return True if self.data else False
+
+    def match(self, *sources):
+
+        for source in sources:
+            if pathmatch(self.source, source):
+                return True
+        return False
 
 
     def set_type(self, type):
