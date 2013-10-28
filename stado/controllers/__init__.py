@@ -15,11 +15,15 @@ class Controller(Events):
         self.setup()
 
 
-    def get_content(self, content_id):
-        return self.site.content.cache.load(content_id)
+    def get_item(self, source):
+        return self.site.content.cache.load(source)
 
-    def save_content(self, content):
-        self.site.content.cache.save(content)
+    def save_item(self, item):
+        self.site.content.cache.save(item)
+
+    def iter_items(self):
+        for i in self.site.content.cache:
+            yield i
 
 
     # TODO: remove
@@ -37,8 +41,6 @@ from . import helper
 from . import layout
 from . import pages
 from . import assets
-from . import yaml_page_dump
-from . import json_page_dump
 
 
 def load(select=None):
