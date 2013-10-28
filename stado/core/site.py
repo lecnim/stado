@@ -146,11 +146,7 @@ class Site(Events):
                     content.events.subscribe(i)
 
                 # Loads content data and stores loaded content in cache.
-
-                self.event('content.before_loading', content)
                 content.load()
-                self.event('content.after_loading', content)
-
                 self.content.cache.save(content)
 
         return self
