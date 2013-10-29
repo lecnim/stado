@@ -26,7 +26,7 @@ class After(Controller):
         self.events.bind({
 
             # Event is run after item has finished rendering.
-            'item.after_rendering': self.update_content,
+            'item.before_deploying': self.update_content,
         })
 
         self.functions = []
@@ -50,10 +50,10 @@ class After(Controller):
 
                 args = len(inspect.getfullargspec(function)[0])
                 if args == 0:
-                    template = function()
+                    content = function()
                 elif args == 1:
-                    template = function(item.data)
+                    content = function(item.data)
                 elif args == 2:
-                    template = function(item, item.data)
+                    content = function(item, item.data)
 
-                item.content = template
+                item.content = content

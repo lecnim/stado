@@ -283,4 +283,6 @@ class SiteItem(dict, Events):
     def deploy(self, path):
         """Writes page to output directory in given path"""
 
+        self.event('item.before_deploying', self)
         self.deployer.deploy(self, os.path.join(path, self.output))
+        self.event('item.after_deploying', self)
