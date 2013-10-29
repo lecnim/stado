@@ -2,15 +2,13 @@ from . import Controller
 
 
 class Pages(Controller):
+    """Iterate page items."""
 
     name = 'pages'
 
     def __call__(self, *paths):
-        """Yields Pages object from given location."""
+        """Yields page items from given location."""
 
-        # Iterate all site items.
-        for item in self.site.items.cache.items.values():
-            # Item must be assets and source paths must match.
+        for item in self.site.items:
             if item.is_page() and item.match(*paths):
-                # Loads item form cache.
-                yield self.site.items.cache.load(item.source)
+                yield item

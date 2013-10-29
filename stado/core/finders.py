@@ -4,14 +4,13 @@ to create Content objects.
 """
 
 import os
-from fnmatch import fnmatch
-from ..events import Events
-from ..pathmatch import pathmatch
+from .events import Events
+from .pathmatch import pathmatch
 
 
 
 class ItemFinder(Events):
-    """Base for classes which are used to find content."""
+    """Base for classes which are used to find items."""
 
     def event_found_content(self, path):
         """Finder found file."""
@@ -33,14 +32,14 @@ class ItemFinder(Events):
 
 class FileSystemItemFinder(ItemFinder):
     """
-    Searches for files which can be used to create Content objects.
+    Searches for files which can be used to create Item objects.
     """
 
     excluded_names = ['__pychache__', '*.py']
 
 
     def search(self, path, excluded_paths=None):
-        """Yields paths pointing to files, which can be used to create Content
+        """Yields paths pointing to files, which can be used to create Item
         objects. Argument 'excluded_paths' is list of skipped locations, relative to
         path directory.
         """
@@ -90,6 +89,5 @@ class FileSystemItemFinder(ItemFinder):
         """Returns True if given name should be excluded."""
 
         for pattern in self.excluded_names:
-            print(pattern, name)
             if pathmatch(name, pattern):
                 return True

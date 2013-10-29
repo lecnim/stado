@@ -1,7 +1,7 @@
 import os
 
-from stado.core.content.loaders import FileSystemItemLoader
-from stado.core.content.loaders import FileItem
+from stado.core.loaders import FileSystemItemLoader
+from stado.core.loaders import FileItem
 from tests import TestInCurrentDirectory
 
 
@@ -15,7 +15,7 @@ class TestFileSystemContentLoader(TestInCurrentDirectory):
         loader = FileSystemItemLoader()
         contents = [i for i in loader.load('data')]
 
-        self.assertEqual(3, len(contents))
+        self.assertEqual(4, len(contents))
         self.assertIsInstance(contents[0], FileItem)
 
 
@@ -25,7 +25,7 @@ class TestFileSystemContentLoader(TestInCurrentDirectory):
         contents = [i for i in loader.load('data')]
 
         sources = [i.source for i in contents]
-        self.assertCountEqual(['a.html', 'b.html',
+        self.assertCountEqual(['a.html', 'b.html', 'image.jpg',
                                os.path.join('b','b.md')], sources)
 
 
@@ -37,6 +37,7 @@ class TestFileSystemContentLoader(TestInCurrentDirectory):
         outputs = [i.output for i in contents]
         self.assertCountEqual([os.path.join('a.html'),
                                os.path.join('b.html'),
+                               os.path.join('image.jpg'),
                                os.path.join('b','b.md')], outputs)
 
 
@@ -48,6 +49,7 @@ class TestFileSystemContentLoader(TestInCurrentDirectory):
         paths = [i.path for i in contents]
         self.assertCountEqual([os.path.join('data', 'a.html'),
                                os.path.join('data', 'b.html'),
+                               os.path.join('data', 'image.jpg'),
                                os.path.join('data', 'b','b.md')], paths)
 
 
@@ -56,5 +58,5 @@ class TestFileSystemContentLoader(TestInCurrentDirectory):
         loader = FileSystemItemLoader()
         contents = [i for i in loader.load('data')]
 
-        data = [i.data for i in contents]
-        self.assertCountEqual(['a', 'b', 'bb'], data)
+        data = [i.data for i in contents if i.source.endswith('.html')]
+        self.assertCountEqual(['a', 'b'], data)

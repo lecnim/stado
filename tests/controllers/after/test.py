@@ -1,4 +1,4 @@
-from stado.core.content import SiteItem
+from stado.core.item import SiteItem
 from tests.controllers import TestPlugin
 
 

@@ -4,21 +4,21 @@ from tests.controllers import TestPlugin
 
 class TestPermalink(TestPlugin):
 
-    def test_page(self):
-        """Permalink controllers should correctly change Content object url."""
+    def test_item(self):
+        """Permalink controllers should correctly change Item object url."""
 
         # site.py
 
         @self.app.before('page.html')
         def url(page):
             self.app.permalink(page, '/b')
+            self.assertEqual('/b', page.url, "should modify item.url after calling")
         self.app.run()
 
         # tests
 
         with open('b') as page:
             self.assertEqual('badger', page.read())
-
 
 
     def test_page(self):
@@ -52,7 +52,7 @@ class TestPermalink(TestPlugin):
 
         # site.py
 
-        self.app.permalink('*.*', '/test/:path/:filename')
+        self.app.permalink('**', '/test/:path/:filename')
         self.app.run()
 
         # tests
@@ -61,6 +61,25 @@ class TestPermalink(TestPlugin):
         self.assertIn('image.jpg', os.listdir('test'))
         self.assertIn('page.html', os.listdir('test'))
         self.assertIn('a', os.listdir('test'))
+
+
+    def test_default_permalink(self):
+        """Calling permalink controller with only on argument should change url of
+        all page items."""
+
+        # site.py
+
+        self.app.permalink('/test/:path/:filename')
+        self.app.run()
+
+        # tests
+
+        self.assertTrue(os.path.exists('test'))
+        self.assertNotIn('image.jpg', os.listdir('test'))
+        self.assertIn('page.html', os.listdir('test'))
+        self.assertIn('a', os.listdir('test'))
+        self.assertTrue(os.path.exists(os.path.join('test', 'a', 'page.html')))
+
 
 
     # Styles.
@@ -91,6 +110,21 @@ class TestPermalink(TestPlugin):
 
         self.assertTrue(os.path.exists('page.html'))
         self.assertTrue(os.path.exists('image.jpg'))
+
+    def test_item_style_pretty(self):
+        """Permalink controllers should correctly change url using built-in styles."""
+
+        # site.py
+
+        @self.app.before('page.html')
+        def url(page):
+            self.app.permalink(page, 'pretty')
+        self.app.run()
+
+        # tests
+
+        self.assertTrue(os.path.exists('page'))
+        self.assertIn('index.html', os.listdir('page'))
 
 
     # Keywords.

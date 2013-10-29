@@ -1,8 +1,8 @@
 import os
 
-from . import SiteItem
+from .item import SiteItem
 from .finders import FileSystemItemFinder
-from ..events import Events
+from .events import Events
 
 
 
@@ -14,15 +14,15 @@ class ItemLoader(Events):
 # TODO: Ideas for other finder classes.
 
 class ZipItemLoader(ItemLoader):
-    """Only idea, can load content from zip files."""
+    """Only idea, can load items from zip files."""
     pass
 
 class SQLiteItemLoader(ItemLoader):
-    """Only idea, can load content from SQLite database."""
+    """Only idea, can load items from SQLite database."""
     pass
 
 class JsonItemLoader(ItemLoader):
-    """Only idea, can load content from JSON database."""
+    """Only idea, can load items from JSON database."""
     pass
 
 

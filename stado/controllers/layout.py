@@ -77,27 +77,3 @@ class Layout(Controller):
                     template = self.site.template_engine.render(layout.read(), context)
 
             item.content = template
-
-
-        #
-        #for path in self.paths:
-        #
-        #    #
-        #    if not fnmatch.fnmatch(item.source, path):
-        #        continue
-        #
-        #    layouts, layout_context = self.paths[path]
-        #    template = item.template
-        #
-        #    for layout_path in layouts:
-        #        with open(os.path.join(self.site.path, layout_path)) as layout:
-        #
-        #            context = {
-        #                'page': item.context,
-        #                'content': template
-        #            }
-        #            context.update(layout_context)
-        #
-        #            template = self.site.renderer.render(layout.read(), context)
-        #
-        #    return template

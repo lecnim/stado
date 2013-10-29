@@ -12,13 +12,6 @@ class Ignore(Controller):
     def __init__(self, site):
         Controller.__init__(self, site)
 
-
-        # Bind events to plugin methods.
-        self.events.bind({
-            'finder.found_item': self.ignore_file,
-            #'finder.found_directory': self.ignore_file,
-        })
-
         # List of ignored paths.
         self.ignored_paths = []
 
@@ -27,17 +20,13 @@ class Ignore(Controller):
 
         for source in sources:
 
-            #source = posixpath.normpath(source)
+            # There are to possibilities: given ignored element is item source or
+            # item object.
+            if isinstance(source, str):
+                if not source in self.ignored_paths:
+                    self.ignored_paths.append(source)
+                    self.site.excluded_paths.append(source)
 
-            if not source in self.ignored_paths:
-                self.ignored_paths.append(source)
-                self.site.excluded_paths.append(source)
-
-
-    def ignore_file(self, path):
-
-        #print('.', path)
-
-        for i in self.ignored_paths:
-            if fnmatch.fnmatch(path, i):
-                return False
+            # Source is item object.
+            else:
+                self.site.cache.remove_item(source.source)

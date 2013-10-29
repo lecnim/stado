@@ -1,23 +1,34 @@
+"""
+Paths comparing module.
+"""
+
 import re
 import os
-import urllib.request
+
+
+def pathmatch(path, *patterns):
+    """Returns True if path match one of given patterns."""
+
+    path = os.path.normpath(path).replace('\\', '/')
+
+    for i in patterns:
+        i = os.path.normpath(i).replace('\\', '/')
+        if re.match(translate(i), path):
+            return True
+    return False
+
 
 def translate(pat):
-    """Translate a shell PATTERN to a regular expression.
-
-    There is no way to quote meta-characters.
-    """
+    """From fnmatch.translate, translate a shell PATTERN to a regular expression."""
 
     i, n = 0, len(pat)
     res = ''
     while i < n:
 
-
+        # Double star as it git.ignore
         if pat[i:i+2] == '**':
             i = i + 2
-
             res = res + '.*'
-
             if len(pat) == i:
                 break
 
@@ -50,22 +61,3 @@ def translate(pat):
         else:
             res = res + re.escape(c)
     return res + '\Z(?ms)'
-
-
-def pathmatch(path, *patterns):
-
-    for i in patterns:
-
-        print('!!!', i, path)
-
-        #i = urllib.request.pathname2url(i)
-        #path = urllib.request.pathname2url(path)
-
-        i = os.path.normpath(i).replace('\\', '/')
-        path = os.path.normpath(path).replace('\\', '/')
-
-        print(i, path)
-
-        if re.match(translate(i), path):
-            print('TRUE')
-            return True

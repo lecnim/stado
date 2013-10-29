@@ -77,8 +77,19 @@ class TestIgnore(TestPlugin):
         self.assertFalse(os.path.exists(os.path.join('b', 'b.html')))
 
 
-    def test_ignore_underscore(self):
-        """Ignore plugin should correctly ignore files using pattern."""
+    def test_ignore_underscore_everywhere(self):
+
+        # site.py
+
+        self.app.ignore('**_*')
+        self.app.run()
+
+        # tests
+        self.assertNotIn('_a.css', os.listdir())
+        self.assertFalse(os.path.exists(os.path.join('_b', 'b.html')))
+        self.assertFalse(os.path.exists(os.path.join('b', '_c.html')))
+
+    def test_ignore_underscore_top(self):
 
         # site.py
 
@@ -88,3 +99,4 @@ class TestIgnore(TestPlugin):
         # tests
         self.assertNotIn('_a.css', os.listdir())
         self.assertFalse(os.path.exists(os.path.join('_b', 'b.html')))
+        self.assertTrue(os.path.exists(os.path.join('b', '_c.html')))

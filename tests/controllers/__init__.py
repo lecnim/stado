@@ -17,7 +17,7 @@ class TestPlugin(unittest.TestCase):
         self.cwd = os.getcwd()
         self.temp_path = tempfile.mkdtemp()
 
-        self.app = Stado(source=os.path.join(self.path, 'data'),
+        self.app = Stado(os.path.join(self.path, 'data'),
                          output=self.temp_path)
 
         os.chdir(self.temp_path)

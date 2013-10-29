@@ -18,12 +18,12 @@ class Extension(Plugin):
         self.renderers = self._update_template_engine(self.renderers)
 
         if self.extensions is None:
-            self.site.items.types.set(None, self.loaders, self.renderers,
+            self.site.item_types.set(None, self.loaders, self.renderers,
                                         self.deployer)
         else:
             for e in self.extensions:
 
-                self.site.items.types.set(
+                self.site.item_types.set(
                     e,
                     loaders=self.loaders,
                     renderers=self.renderers,

@@ -1,38 +1,53 @@
 import os
 import inspect
 
-from .content.loaders import FileSystemItemLoader
-from .content import ItemManager
+from .loaders import FileSystemItemLoader
+from .item import ItemTypes
 from ..templates.mustache import TemplateEngine
 from .events import Events
 from .. import controllers
 from .. import plugins
 from .. import config as CONFIG
-from .content.cache import ShelveCache
+from .cache import ItemCache, ShelveCache
 from .. import log
+from .pathmatch import pathmatch
 
 
 
 class Site(Events):
     """
-    This is site. It contains all sites objects like Page, Assets, Loader etc.
-    Use run() method to build site.
+    This is site. Use run() method to build it.
 
     Site building:
-    - Loads content using Loader object and saves this loaded content in Cache object.
-    - Renders content from cache using Renderer object.
-    - Write content to file system using Deployer object.
+    - Loads items using Loaders objects and saves this items in Cache object.
+    - Renders item from cache using item renderers objects.
+    - Write item to file system using item deployer object.
 
     """
 
-    def __init__(self, source=None, output=None, config=None,
-                 template_engine=TemplateEngine):
+    def __init__(self, path=None, output=None, config=None,
+                 template_engine=TemplateEngine,
+                 cache=ShelveCache,
+                 loaders=(FileSystemItemLoader(),)):
+        """
+        Arguments:
+            path: Items will be created using files in this path. Default path is
+                same as path to python module file using this class.
+            output:
+                Site will be build in this location.
+            template_engine:
+                Template engine class. Default is using mustache.
+            cache:
+                Cache class.
+            loaders: List of ItemLoader classes used to create Items objects.
+        """
+
         Events.__init__(self)
 
 
         # Set path to file path from where Site is used.
-        if source is None:
-            source = os.path.split(inspect.stack()[1][1])[0]
+        if path is None:
+            path = os.path.split(inspect.stack()[1][1])[0]
 
         # Configuration loading.
         self.config = CONFIG.get_default_site_config()
@@ -40,51 +55,31 @@ class Site(Events):
             self.config.update(config)
 
         # Absolute path to site source directory.
-        self.path = os.path.normpath(source)
+        self.path = os.path.normpath(path)
         # Absolute path to site output directory.
         if output:
             self._output = output
         else:
             self._output = os.path.join(self.path, CONFIG.build_dir)
 
+        # Paths pointing to files or directories which will be ignored.
         self.excluded_paths = []
-
-
-        # Template engine used as to render Content data.
         self.template_engine = template_engine(self.path)
 
+        self.item_types = ItemTypes()
+        self.cache = ItemCache(cache(self.output))
+        self.loaders = loaders
 
-        # Content manager: finding content, loading, storing...
-        self.items = ItemManager(
-            loaders=[FileSystemItemLoader()],
-            types=[],
-            cache=ShelveCache(self.output)
-        )
 
-        # Controllers
-
+        # Loads controllers from stado.controllers package.
         self.controllers = {}
+        for i in controllers.load(self.config['controllers']):
+            self.controllers[i.name] = self.bind_controller(i(self))
 
-        for c in controllers.load(self.config['controllers']):
-
-            controller = c(self)
-            self.controllers[controller.name] = controller
-
-            # Bind controller as a object method.
-            if controller.is_callable is True:
-                setattr(self, controller.name, controller)
-
-            self.events.subscribe(controller)
-
-        # Plugins
-
+        # Loads plugins from stado.plugins package.
         self.plugins = {}
-
-        for p in plugins.load(self.config['plugins']):
-
-            plugin = p(self)
-            self.plugins[plugin.name] = plugin
-
+        for i in plugins.load(self.config['plugins']):
+            self.plugins[i.name] = i(self)
 
 
     @property
@@ -94,19 +89,54 @@ class Site(Events):
         return self._output
 
 
+    # Shortcuts.
+
+    def get_item(self, item_source):
+        """Shortcut for self.cache.load_item()."""
+        return self.cache.load_item(item_source)
+
+    def save_item(self, item):
+        """Shortcut for self.cache.save_item()."""
+        self.cache.save_item(item)
+
+    @property
+    def items(self):
+        """Yields items from cache."""
+        for item in self.cache:
+            yield item
+
+    @property
+    def sources(self):
+        """Yield items sources available in cache."""
+        for source in self.cache.sources:
+            yield source
+
+
+    # Methods.
+
+    def bind_controller(self, controller):
+        """Binds events to given controller object. Installs controller as a site
+        method if controller is callable. Returns given controller object."""
+
+        # Bind controller as a object method.
+        if controller.is_callable is True:
+            setattr(self, controller.name, controller)
+
+        self.events.subscribe(controller)
+        return controller
+
 
     def run(self):
         """Creates site: loads, renders, deploys."""
 
         log.debug('Starting building site: {}'.format(self.path))
-        log.info(self.output)
 
         # Create output directory if not exists.
 
         if not os.path.exists(self.output):
             os.makedirs(self.output)
 
-        # Cache for storing content.
+        # Build site.
 
         self.load()
         self.render()
@@ -114,65 +144,67 @@ class Site(Events):
 
         # Remove cache.
 
-        self.items.cache.clear()
-
-        return True
+        self.cache.clear()
 
 
     # Generating.
 
     def load(self):
-        """Loads content from site source files to cache."""
+        """Loads items from site source files and stores this items in cache."""
 
-        log.debug('\tLoading site content...')
+        log.debug('\tLoading site items...')
 
         # Use each content loader.
-        for loader in self.items.loaders:
+        for loader in self.loaders:
 
             # Skip site output directory.
             excluded_paths = self.excluded_paths + [self.output]
-            # Content loader returns Content objects.
-            for content in loader.load(self.path, excluded_paths):
+            for item in loader.load(self.path, excluded_paths):
 
-                log.debug('\t\t[ {0.type} ]  {0.source}'.format(content))
+                log.debug('\t\t[ {0.type} ]  {0.source}'.format(item))
 
-                # Get content model with load(), render(), deploy() methods.
-                # Install this methods in Content.
+                # Get item model with load(), render(), deploy() methods.
+                # Install this methods in Item.
 
-                model = self.items.types(content.type)
-                content.set_type(model)
+                model = self.item_types(item.type)
+                item.set_type(model)
 
-                # Subscribe controller to content object events.
+                # Subscribe controller to item object events.
                 for i in self.controllers.values():
-                    content.events.subscribe(i)
+                    item.events.subscribe(i)
 
-                # Loads content data and stores loaded content in cache.
-                content.load()
-                self.items.cache.save(content)
+                # Loads item data and stores loaded item in cache.
+                self.cache.save_item(item)
+
+        # Load item if all other items are initialized!
+        for item in self.cache:
+            item.load()
+            self.cache.save_item(item)
 
         return self
 
 
     def render(self):
-        """Renders item to cache."""
+        """Renders items to cache."""
 
-        log.debug('\tRendering content...')
+        self.event('site.before_rendering')
+        log.debug('\tRendering items...')
 
-        for content in self.items.cache:
-            content.render()
-            self.items.cache.save(content)
-
+        for item in self.cache:
+            self.cache.save_item(item.render())
         return self
 
 
     def deploy(self):
-        """Writes item data to output directory."""
+        """Writes items to output directory."""
 
-        log.debug('\tDeploying content...')
+        self.event('site.before_deploying')
+        log.debug('\tDeploying items...')
 
-        for content in self.items.cache:
-            log.debug('\t\t{} => {}'.format(content.source, content.output))
-            content.deploy(self.output)
+        for item in self.cache:
+            log.debug('\t\t{} => {}'.format(item.source, item.output))
+            item.deploy(self.output)
+        return self
 
 
     # Cleaning.

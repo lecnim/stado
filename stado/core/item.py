@@ -1,22 +1,18 @@
 import os
 import re
 import urllib.request
-from .cache import ShelveCache
-from ..events import Events
-from ..pathmatch import pathmatch
 
-# TODO: comments
+from .events import Events
+from .pathmatch import pathmatch
+
 
 class ItemTypes:
     """
     Storing content type models.
-
     """
 
     def __init__(self, models=None):
-
         self.models = {}
-
         if models:
             for i in models: self.set(**i)
 
@@ -37,7 +33,6 @@ class ItemTypes:
 
         raise KeyError('Default content type model not found!')
 
-
     def set(self, extension, loaders, renderers, deployers):
 
         self.models[extension] = {
@@ -46,67 +41,6 @@ class ItemTypes:
             'renderers': renderers,
             'deployers': deployers,
         }
-
-
-
-
-class ItemCache:
-
-    def __init__(self, cache):
-
-        self.items = {}
-        self.cache = cache
-        self.ids = []
-
-    def __iter__(self):
-        for i in self.items.keys():
-            yield self.load(i)
-
-    @property
-    def sources(self):
-        return self.items.keys()
-
-
-    def save(self, item):
-        self.ids.append(item.source)
-
-        # Store item object.
-        self.items[item.source] = item
-
-        # Store item data and metadata in cache.
-        if item.has_data():
-            self.cache.save(item.source, item.data)
-        self.cache.save(item.source + '/metadata', item.metadata.dump())
-
-        # Clear data and metadata to free memory.
-        item.data = None
-        item.metadata.clear()
-
-
-    def load(self, content_id):
-
-        item = self.items[content_id]
-
-        item.data = self.cache.load(item.source)
-        item.metadata = self.cache.load(item.source + '/metadata')
-
-        return item
-
-    def clear(self):
-        self.cache.clear()
-
-
-
-
-class ItemManager:
-    """Group objects used to manage items, for example items cache, loaders etc."""
-
-    def __init__(self, loaders, types, cache):
-
-        self.loaders = loaders
-        self.types = ItemTypes(types)
-        self.cache = ItemCache(cache)
-
 
 
 
@@ -128,6 +62,7 @@ class SiteItem(dict, Events):
 
         # Absolute path to file which was used to create item for example: "a/b.html"
         self.path = path
+        self.type = None
 
         # Item is recognized by controllers using this property.
         self.source = source
@@ -144,7 +79,7 @@ class SiteItem(dict, Events):
         # Stores objects which are used to generate and save item content.
         self.loaders = []
         self.renderers = []
-        self.deployers = []
+        self.deployer = None
 
 
     # Properties.
@@ -183,11 +118,12 @@ class SiteItem(dict, Events):
         keywords = re.findall("(:[a-zA-z]*)", value)
         destination = os.path.normpath(value)
 
+        path, filename = os.path.split(self.default_output)
+
         items = {
-            'path': os.path.split(self.default_output)[0],
-            'filename': self.filename,
-            'name': os.path.splitext(self.filename)[0],
-            'extension': os.path.splitext(self.filename)[1][1:],
+            'path': path, 'filename': filename,
+            'name': os.path.splitext(filename)[0],
+            'extension': os.path.splitext(filename)[1][1:],
         }
 
         for key in keywords:
@@ -205,11 +141,14 @@ class SiteItem(dict, Events):
         """Returns True if item is a page."""
         if self.output.endswith('.html'):
             return True
+        return False
 
     def has_data(self):
+        """Returns True if item has data."""
         return True if self.data else False
 
     def match(self, *sources):
+        """Returns True if item source matches one of given."""
 
         for source in sources:
             if pathmatch(self.source, source):
@@ -237,9 +176,7 @@ class SiteItem(dict, Events):
     def dump(self):
         """Returns new dict with item metadata."""
 
-        i = {}
-        i.update(self)
-        return i
+        return dict(self)
 
 
     # Loading , rendering, deploying.
@@ -259,6 +196,7 @@ class SiteItem(dict, Events):
             self.metadata = metadata
 
         self.event('item.after_loading', self)
+        return self
 
 
     def render(self):
@@ -278,6 +216,7 @@ class SiteItem(dict, Events):
 
         # Event rendering has ended.
         self.event('item.after_rendering', self)
+        return self
 
 
     def deploy(self, path):
@@ -286,3 +225,4 @@ class SiteItem(dict, Events):
         self.event('item.before_deploying', self)
         self.deployer.deploy(self, os.path.join(path, self.output))
         self.event('item.after_deploying', self)
+        return self
