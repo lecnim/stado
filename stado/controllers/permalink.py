@@ -21,11 +21,11 @@ class Permalink(Controller):
     def __call__(self, target, url):
 
 
-        for item_source in self.site.content.cache.sources:
+        for item_source in self.site.items.cache.sources:
             if fnmatch.fnmatch(item_source, target):
-                item = self.site.content.cache.load(item_source)
+                item = self.site.items.cache.load(item_source)
                 item.url = url
-                self.site.content.cache.save(item)
+                self.site.items.cache.save(item)
 
         self.paths[target] = url
 

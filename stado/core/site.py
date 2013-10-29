@@ -55,7 +55,7 @@ class Site(Events):
 
 
         # Content manager: finding content, loading, storing...
-        self.content = ItemManager(
+        self.items = ItemManager(
             loaders=[FileSystemItemLoader()],
             types=[],
             cache=ShelveCache(self.output)
@@ -114,7 +114,7 @@ class Site(Events):
 
         # Remove cache.
 
-        self.content.cache.clear()
+        self.items.cache.clear()
 
         return True
 
@@ -127,7 +127,7 @@ class Site(Events):
         log.debug('\tLoading site content...')
 
         # Use each content loader.
-        for loader in self.content.loaders:
+        for loader in self.items.loaders:
 
             # Skip site output directory.
             excluded_paths = self.excluded_paths + [self.output]
@@ -139,7 +139,7 @@ class Site(Events):
                 # Get content model with load(), render(), deploy() methods.
                 # Install this methods in Content.
 
-                model = self.content.types(content.type)
+                model = self.items.types(content.type)
                 content.set_type(model)
 
                 # Subscribe controller to content object events.
@@ -148,7 +148,7 @@ class Site(Events):
 
                 # Loads content data and stores loaded content in cache.
                 content.load()
-                self.content.cache.save(content)
+                self.items.cache.save(content)
 
         return self
 
@@ -158,9 +158,9 @@ class Site(Events):
 
         log.debug('\tRendering content...')
 
-        for content in self.content.cache:
+        for content in self.items.cache:
             content.render()
-            self.content.cache.save(content)
+            self.items.cache.save(content)
 
         return self
 
@@ -170,7 +170,7 @@ class Site(Events):
 
         log.debug('\tDeploying content...')
 
-        for content in self.content.cache:
+        for content in self.items.cache:
             log.debug('\t\t{} => {}'.format(content.source, content.output))
             content.deploy(self.output)
 
