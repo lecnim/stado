@@ -2,7 +2,7 @@ from ..core.events import Events
 
 
 class Controller(Events):
-    """Base plugin class."""
+    """Base controller class."""
 
     is_callable = True
     order = 10
@@ -10,25 +10,6 @@ class Controller(Events):
     def __init__(self, site):
         Events.__init__(self)
         self.site = site
-
-        # TODO: remove
-        self.setup()
-
-
-    def get_item(self, source):
-        return self.site.content.cache.load(source)
-
-    def save_item(self, item):
-        self.site.content.cache.save(item)
-
-    def iter_items(self):
-        for i in self.site.content.cache:
-            yield i
-
-
-    # TODO: remove
-    def setup(self):
-        pass
 
 
 # Plugins.
