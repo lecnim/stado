@@ -63,6 +63,7 @@ class SiteItem(dict, Events):
         # Absolute path to file which was used to create item for example: "a/b.html"
         self.path = path
         self.type = None
+        self.enabled = True
 
         # Item is recognized by controllers using this property.
         self.source = source

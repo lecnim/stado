@@ -2,6 +2,44 @@ import os
 from tests.controllers import TestPlugin
 
 
+class TestIgnoreWithOtherControllers(TestPlugin):
+
+    def test_before_item(self):
+        """Ignore plugin should correctly ignore item objects in @before."""
+
+        # site.py
+
+        @self.app.before('a.html')
+        def test(page):
+            self.app.ignore(page)
+
+        self.app.load().render()
+        self.assertEqual([], [i for i in self.app.pages('a.html')])
+        self.app.deploy()
+
+        # tests
+
+        self.assertNotIn('a.html', os.listdir())
+
+    def test_after_item(self):
+        """Ignore plugin should correctly ignore item objects in @after."""
+
+        # site.py
+
+        @self.app.after('a.html')
+        def test(content, page):
+            self.app.ignore(page)
+
+        self.app.load().render()
+        self.assertEqual([], [i for i in self.app.pages('a.html')])
+        self.app.deploy()
+
+        # tests
+
+        self.assertNotIn('a.html', os.listdir())
+
+
+
 class TestIgnore(TestPlugin):
 
     def test_path_argument(self):

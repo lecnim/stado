@@ -10,7 +10,6 @@ class TestPages(TestPlugin):
 
         @self.app.before('**')
         def set_title(page):
-            print('>>>', page.source)
             return {'title': 'badger'}
 
         @self.app.helper

@@ -16,12 +16,14 @@ class ItemCache:
     @property
     def sources(self):
         """Sources of stored items."""
-        return self.items.keys()
-
+        for item in self.items.values():
+            if item.enabled:
+                yield item.source
 
     def __iter__(self):
-        for source in self.items:
-            yield self.load_item(source)
+        for item in self.items.values():
+            if item.enabled:
+                yield self.load_item(item.source)
 
     def save_item(self, item):
         """Saves given item in cache."""
@@ -42,13 +44,17 @@ class ItemCache:
         """Returns item from cache."""
 
         item = self.items[item_source]
-        item.data = self.cache.load(item.source)
-        item.metadata = self.cache.load(item.source + '/metadata')
-
-        return item
+        if item.enabled:
+            item.data = self.cache.load(item.source)
+            item.metadata = self.cache.load(item.source + '/metadata')
+            return item
+        raise KeyError('Item is disabled: ' + item_source)
 
     def remove_item(self, item_source):
-        self.cache.remove(item_source)
+
+        item = self.items[item_source]
+        self.cache.remove(item.source)
+        self.cache.remove(item.source + '/metadata')
 
     def clear(self):
         """Removes all elements from cache."""
@@ -98,7 +104,8 @@ class ShelveCache:
         """Remove given key."""
 
         self.data = shelve.open(self.path)
-        del self.data[key]
+        if key in self.data:
+            del self.data[key]
         self.data.close()
 
     def clear(self):

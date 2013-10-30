@@ -27,7 +27,7 @@ class TestAfter(TestPlugin):
         # site.py
 
         @self.app.after('page.html')
-        def test(page, data):
+        def test(data, page):
             self.assertIsInstance(page, SiteItem)
             return page.source
         self.app.run()

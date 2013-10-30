@@ -1,6 +1,3 @@
-import fnmatch
-import posixpath
-
 from . import Controller
 
 
@@ -18,15 +15,15 @@ class Ignore(Controller):
 
     def __call__(self, *sources):
 
-        for source in sources:
+        for i in sources:
 
             # There are to possibilities: given ignored element is item source or
             # item object.
-            if isinstance(source, str):
-                if not source in self.ignored_paths:
-                    self.ignored_paths.append(source)
-                    self.site.excluded_paths.append(source)
+            if isinstance(i, str):
+                if not i in self.ignored_paths:
+                    self.ignored_paths.append(i)
+                    self.site.excluded_paths.append(i)
 
-            # Source is item object.
+            ## Source is item object.
             else:
-                self.site.cache.remove_item(source.source)
+                i.enabled = False
