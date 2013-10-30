@@ -4,6 +4,7 @@ from . import Controller
 class Helper(Controller):
 
     name = 'helper'
+    order = 1
 
 
     def __init__(self, site):
