@@ -57,6 +57,5 @@ def load(select=None):
     """
 
     for class_obj in Extension.__subclasses__():
-        print(class_obj)
         if select is None or class_obj.name in select:
             yield class_obj
