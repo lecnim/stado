@@ -7,4 +7,4 @@ def load(engine_name):
 
     # Iterate all modules in templates directory.
 
-    return globals().get(engine_name, None)
+    return globals()[engine_name]
