@@ -11,21 +11,7 @@ from .pathmatch import pathmatch
 
 class ItemFinder(Events):
     """Base for classes which are used to find items."""
-
-    def event_found_content(self, path):
-        """Finder found file."""
-
-        if False in self.event('finder.found_item', path):
-            return False
-        return True
-
-    def event_found_directory(self, path):
-        """Finder found directory."""
-
-        if False in self.event('finder.found_directory', path):
-            return False
-        return True
-
+    pass
 
 
 # Finders.
@@ -50,39 +36,21 @@ class FileSystemItemFinder(ItemFinder):
 
         for dirpath, folders, files in os.walk(path):
 
-            # Notify other objects that finder found folder.
-            # Folder loading can be stopped by event result.
-            if not self.event_found_directory(dirpath):
-                continue
-
             # Skip excluded folders.
             for folder in folders:
-                if self.is_excluded(folder) \
-                    or os.path.join(dirpath, folder) in excluded_paths:
-                    folders.remove(folder)
-
-                elif pathmatch(os.path.join(dirpath, folder), *excluded_paths):
+                if self.is_excluded(folder) or pathmatch(os.path.join(dirpath,
+                                                         folder), *excluded_paths):
                     folders.remove(folder)
 
 
             for file in files:
                 file_path = os.path.join(dirpath, file)
 
-                print(file)
-
                 # Skip excluded files.
-                if self.is_excluded(file) \
-                    or file_path in excluded_paths:
-                    print('SKPEED')
+                if self.is_excluded(file) or pathmatch(file_path, *excluded_paths):
                     continue
 
-                if pathmatch(file_path, *excluded_paths):
-                    continue
-
-                # Notify other objects that finder found file.
-                # File yielding can be stopped by event result.
-                if self.event_found_content(file_path):
-                    yield file_path
+                yield file_path
 
 
     def is_excluded(self, name):
