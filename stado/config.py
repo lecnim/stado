@@ -1,5 +1,5 @@
 # Building.
-build_dir = '_build'
+build_dir = 'output'
 output = None
 
 # Development server.
