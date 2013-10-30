@@ -1,37 +1,54 @@
-from ..core.events import Events
+class Plugin:
+    pass
 
 
-class Plugin(Events):
-    """Base plugin class."""
+class Extension(Plugin):
+    name = None
+    extensions = []
 
-    is_callable = True
-    order = 10
+    loaders = []
+    renderers = []
+
+    deployer = None
+
 
     def __init__(self, site):
-        Events.__init__(self)
+
+        # Reference to parent Site object.
         self.site = site
-        self.setup()
 
-    def setup(self):
-        pass
+        self.renderers = self._update_template_engine(self.renderers)
+
+        # Model with supporting any extension.
+        if self.extensions is None:
+            self.site.item_types.set(None, self.loaders, self.renderers,
+                                     self.deployer)
+        else:
+            for e in self.extensions:
+                self.site.item_types.set(e, loaders=self.loaders,
+                                         renderers=self.renderers,
+                                         deployers=self.deployer)
 
 
-# Plugins.
+    def _update_template_engine(self, renderers):
+        """Replaces "template_engine" with TemplateEngine object, in renderers
+        list."""
 
-from . import ignore
-from . import before
-from . import after
-from . import permalink
-from . import helper
-from . import layout
-from . import pages
-from . import assets
-from . import yaml_page_dump
-from . import json_page_dump
+        return [self.site.template_engine if x == 'template_engine'
+                else x for x in renderers]
+
+
+# Supported files types.
+
+from .extensions.default import Default
+from .extensions.markdown import Markdown
+from .extensions.html import HTML
+from .extensions.json import Json
+from .extensions.yaml import Yaml
 
 
 def load(select=None):
-    """Yields plugins modules.
+    """Yields controllers modules.
 
     Args:
         select (None or list): Loads only given modules, or if None loads all modules.
@@ -39,6 +56,6 @@ def load(select=None):
         module object
     """
 
-    for class_obj in Plugin.__subclasses__():
+    for class_obj in Extension.__subclasses__():
         if select is None or class_obj.name in select:
             yield class_obj

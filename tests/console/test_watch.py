@@ -30,7 +30,7 @@ def modify_script(path):
              '\napp = Stado()'
              '\n@app.before("a.html")'
              '\ndef update(page):'
-             '\n    page.template = "updated"'
+             '\n    page.content = "updated"'
              '\napp.run()'
         )
         file.write(script)

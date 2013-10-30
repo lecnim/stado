@@ -1,5 +1,5 @@
 from ..libs import pystache
-
+from ..core.events import Events
 
 # Template engine info.
 
@@ -32,14 +32,15 @@ class Helper:
         return self.f()
 
 
-class TemplateEngine:
+class TemplateEngine(Events):
     """This class is used to render templates."""
 
     def __init__(self, path):
+        Events.__init__(self)
         self.path = path
 
-    @staticmethod
-    def render(source, context):
+
+    def render(self, source, context):
         """Used by Renderer class."""
 
         # Creating new class which will be used as a template context.
@@ -59,4 +60,6 @@ class TemplateEngine:
         # Use template context class to create dict.
         render_context = context_class(context)
 
-        return pystache.render(source, render_context)
+        result = pystache.render(source, render_context)
+
+        return result
