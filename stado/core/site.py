@@ -10,8 +10,6 @@ from .. import plugins
 from .. import config as CONFIG
 from .cache import ItemCache, ShelveCache
 from .. import log
-from .pathmatch import pathmatch
-
 
 
 class Site(Events):
@@ -131,11 +129,6 @@ class Site(Events):
 
         log.debug('Starting building site: {}'.format(self.path))
 
-        # Create output directory if not exists.
-
-        if not os.path.exists(self.output):
-            os.makedirs(self.output)
-
         # Build site.
 
         self.load()
@@ -153,6 +146,13 @@ class Site(Events):
         """Loads items from site source files and stores this items in cache."""
 
         log.debug('\tLoading site items...')
+
+        # Controllers order.
+        # Before loading:
+        #   1) layout
+        # After loading:
+        #   1) permalink
+        #   2) before
 
         # Use each content loader.
         for loader in self.loaders:
@@ -174,12 +174,7 @@ class Site(Events):
                     item.events.subscribe(i)
 
                 # Loads item data and stores loaded item in cache.
-                self.cache.save_item(item)
-
-        # Load item if all other items are initialized!
-        for item in self.cache:
-            item.load()
-            self.cache.save_item(item)
+                self.cache.save_item(item.load())
 
         return self
 
@@ -187,8 +182,15 @@ class Site(Events):
     def render(self):
         """Renders items to cache."""
 
-        self.event('site.before_rendering')
         log.debug('\tRendering items...')
+
+        # Controllers order.
+        # Before rendering:
+        #   1) helper
+        # After rendering:
+        #   1) layout
+        #   2) helper
+        #   3) after
 
         for item in self.cache:
             self.cache.save_item(item.render())
@@ -198,7 +200,6 @@ class Site(Events):
     def deploy(self):
         """Writes items to output directory."""
 
-        self.event('site.before_deploying')
         log.debug('\tDeploying items...')
 
         for item in self.cache:
