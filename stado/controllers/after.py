@@ -17,6 +17,7 @@ class After(Controller):
     """
 
     name = 'after'
+    order = 2
 
 
     def __init__(self, site):
@@ -26,7 +27,7 @@ class After(Controller):
         self.events.bind({
 
             # Event is run after item has finished rendering.
-            'item.before_deploying': self.update_content,
+            'item.after_rendering': self.update_content,
         })
 
         self.functions = []
@@ -54,6 +55,6 @@ class After(Controller):
                 elif args == 1:
                     content = function(item.data)
                 elif args == 2:
-                    content = function(item, item.data)
+                    content = function(item.data, item)
 
                 item.content = content
