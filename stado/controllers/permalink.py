@@ -45,7 +45,7 @@ class Permalink(Controller):
                 if pathmatch(source, target):
                     item = self.site.load_item(source)
                     item.url = url
-                    self.save_item(item)
+                    self.site.save_item(item)
 
         # Third is calling with two arguments but first argument is item object.
         # Change permalink directly.
