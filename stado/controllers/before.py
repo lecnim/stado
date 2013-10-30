@@ -16,6 +16,8 @@ class Before(Controller):
     """
 
     name = 'before'
+    # Should run after permalink controller.
+    order = 1
 
 
     def __init__(self, site):
@@ -23,6 +25,9 @@ class Before(Controller):
 
         # Bind events to controller methods.
         self.events.bind({
+
+            # This event is use instead of item.before_rendering, because during
+            # rendering all items must have updated metadata already.
             'item.after_loading': self.update_metadata,
         })
 
