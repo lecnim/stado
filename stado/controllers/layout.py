@@ -1,5 +1,3 @@
-import fnmatch
-import glob
 import os
 from . import Controller
 
@@ -7,6 +5,7 @@ from . import Controller
 class Layout(Controller):
 
     name = 'layout'
+    order = 0
 
 
     def __init__(self, site):
