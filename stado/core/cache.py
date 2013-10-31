@@ -111,4 +111,36 @@ class ShelveCache:
     def clear(self):
         """Removes cache files."""
 
-        shutil.rmtree(os.path.split(self.path)[0])
+        cache_path = os.path.split(self.path)[0]
+        if os.path.exists(cache_path):
+            shutil.rmtree(cache_path)
+
+
+class DictCache:
+    """
+    Cache data in filesystem using shelve module.
+    """
+
+    def __init__(self, path):
+
+        path = os.path.join(path, '__cache__')
+        self.data = {}
+
+    def save(self, key, value):
+        """Saves value in given key."""
+        self.data[key] = value
+
+
+    def load(self, key):
+        """Loads value from given key."""
+        data = self.data.get(key)
+        return data
+
+    def remove(self, key):
+        """Remove given key."""
+        if key in self.data:
+            del self.data[key]
+
+    def clear(self):
+        """Removes cache files."""
+        self.data.clear()
