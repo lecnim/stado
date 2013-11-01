@@ -31,6 +31,7 @@ Details
 
 `@after` as like `@before` can take any number of paths and also supports file matching.
 
+* * *
 
 `@after` can pass page object to function using it **second** argument.
 

@@ -2,10 +2,10 @@ Quick start
 ===========
 
 
-Install
--------
+Installation
+------------
 
-Just download `stado.py` file and place it in empty directory.
+Just download the `stado.py` file and place it in a empty directory.
 
 
 
@@ -21,13 +21,14 @@ Example directory structure
 
 
 
-Use `stado.py` to execute commands. For example `stado.py build` or `stado.py edit`.
+Use the `stado.py` file to execute commands. For example `stado.py build` or `stado
+.py edit`.
 
-`project` is site directory. It contains all site source files,
-which are used during building.
+`project` is the site directory. It contains all the site source files,
+which are used during building process.
 
 
-### File `project/site.py` ###
+### File project/site.py ###
 
     #!python
     from stado import run, before
@@ -39,39 +40,43 @@ which are used during building.
     run()                   # start building site.
 
 
-`project/site.py` is controlling site building. Controllers objects like `@before`
-are available to control this process.
+`project/site.py` file is controlling the process of building site using controllers
+objects like `@before`.
 
 In details:
 
-All used stado objects are imported.
+Here all stado objects used by the site are imported.
 
+    #!python
     from stado import run, before
 
-Decorator `@before('index.html')` will execute `hello()` method before
-rendering `index.html` page. Variables from returned dictionary are available in
+A decorator `@before('index.html')` will execute `hello()` method before
+rendering `index.html` page. Variables from a returned dictionary are available in
 `index.html`.
 
+    #!python
     @before('index.html')
     def hello():
         return {'title': 'Hello World!'}
 
-Site building is started using this method.
+Site building process is started using this method.
 
+    #!python
     run()
 
-### File `index.html` ###
+### File index.html ###
 
+    #!HTML+jinja
     {{ title }}
 
-`index.html` is a page file. Pages files are rendered with template engine
-during site building. Default template engine is Mustache. All `html`, `md`,
-`yaml`, `json` files are recognized as a pages.
+`index.html` is a page file. Page files are rendered with the template engine
+during site building. Default template engine is Mustache. All `html` and `md`
+files are recognized as pages.
 
-### File `image.jpg` ###
+### File image.jpg ###
 
-`image.jpg` is asset file. Assets are **not** rendered by template engine,
-they are only copied to output directory.
+`image.jpg` is a asset file. Assets are **not** rendered by the template engine,
+they are only copied to an output directory.
 
 
 
@@ -83,16 +88,16 @@ Running stado
 If stado is run without commands, it will try to build all sites.
 You can choose which site to build using `stado.py build [site]` command.
 
-Also there is development server available. It has auto-rebuild on save feature.
+Also there is a development server available. It has auto-rebuild on save feature.
 Use `stado.py edit [site]` to start it.
 
-List of all available commands is here!
 
 
 
 Output
 ------
 
+    #!python
     project/
         site.py
         index.html
@@ -101,5 +106,5 @@ Output
             index.html
             image.jpg
 
-Stado builds site to `output` directory.
+Stado builds the site into an `output` directory.
 

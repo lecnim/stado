@@ -37,6 +37,7 @@ Details
     def add_title():
       return {'title': 'Hello'}
 
+* * *
 
 `@before` can pass page object to function using function first argument.
 
