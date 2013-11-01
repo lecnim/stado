@@ -1,4 +1,4 @@
-Stado documentation
+Stadø documentation
 ===================
 
 [Quick start](quick-start.html)

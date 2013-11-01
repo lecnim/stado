@@ -70,7 +70,7 @@ def add_sidebar(content, item):
                        'powered by python scripts.'
         page.header.append(about)
 
-        link = page.new_tag('a', href='stadoproject.org')
+        link = page.new_tag('a', href='http://stadoproject.org')
         link.string = 'stadoproject.org'
         page.header.append(link)
         return str(page)

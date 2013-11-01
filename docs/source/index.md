@@ -62,9 +62,9 @@ What about features?
 --------------------
 
 - No dependencies, batteries included:
-    - Markdown support using Python-Markdown.
-    - Mustache templates using pystache.
-    - YAML parsing using pyyaml.
+    - Markdown support using [`Python-Markdown`](https://github.com/waylan/Python-Markdown).
+    - Mustache templates using [`pystache`](https://github.com/defunkt/pystache).
+    - YAML parsing using [`pyyaml`](https://github.com/yaml/pyyaml).
 - Only one file (actually less than **100kb**).
 - Page building powered by python scripts.
 - Site content from yaml or json files.
