@@ -6,7 +6,9 @@
 **What is stadø?**
 
 Stado is a one-file, simple static site generator, powered by python scripts.
-You just download `stado.py` and it is ready to work.
+You just download
+[`stado.py`](https://github.com/lecnim/stado/releases/download/v0.5.1/stado.py)
+and it is ready to work.
 
 
 [![Build Status](https://travis-ci.org/lecnim/stado.png?branch=master)](https://travis-ci.org/dendek/stado)
@@ -37,6 +39,6 @@ is the limit, probably.
 > Only python3, currently supported versions: `3.2`, `3.3`
 
 
-For documentation and more info visit [stadoproject.org](https://stadoproject.org).
+For documentation and more info visit [stadoproject.org](http://stadoproject.org).
 
 ![gg](logo.jpg)
