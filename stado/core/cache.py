@@ -128,7 +128,7 @@ class ShelveCache:
 
         while os.listdir(cache_path):
             time.sleep(1)
-            log.info('Retrying to delete cache files...')
+            log.info('Retrying to delete cache directory...')
         os.rmdir(cache_path)
 
 
