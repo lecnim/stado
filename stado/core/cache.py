@@ -1,6 +1,8 @@
 import os
 import shutil
 import shelve
+import time
+from .. import log
 
 
 class ItemCache:
@@ -88,6 +90,11 @@ class ShelveCache:
     def save(self, key, value):
         """Saves value in given key."""
 
+        # If cache was cleared all cache files are removed, so recreate them.
+        cache_path = os.path.split(self.path)[0]
+        if not os.path.exists(cache_path):
+            os.makedirs(cache_path)
+
         self.data = shelve.open(self.path)
         self.data[key] = value
         self.data.close()
@@ -111,4 +118,45 @@ class ShelveCache:
     def clear(self):
         """Removes cache files."""
 
-        shutil.rmtree(os.path.split(self.path)[0])
+        cache_path = os.path.split(self.path)[0]
+
+        for file in os.listdir(cache_path):
+            os.remove(os.path.join(cache_path, file))
+
+        # Removing on windows sometimes fails, maybe search indexing or other
+        # services are messing. Retrying will fix it. Should?
+
+        while os.listdir(cache_path):
+            time.sleep(1)
+            log.info('Retrying to delete cache directory...')
+        os.rmdir(cache_path)
+
+
+class DictCache:
+    """
+    Cache data in filesystem using shelve module.
+    """
+
+    def __init__(self, path):
+
+        path = os.path.join(path, '__cache__')
+        self.data = {}
+
+    def save(self, key, value):
+        """Saves value in given key."""
+        self.data[key] = value
+
+
+    def load(self, key):
+        """Loads value from given key."""
+        data = self.data.get(key)
+        return data
+
+    def remove(self, key):
+        """Remove given key."""
+        if key in self.data:
+            del self.data[key]
+
+    def clear(self):
+        """Removes cache files."""
+        self.data.clear()

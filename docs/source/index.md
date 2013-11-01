@@ -1,7 +1,7 @@
-![img](public/logo.jpg)
+![img](docs/public/logo.jpg)
 
-*Stado is one-file, simple static site generator, powered by python scripts.*
-=============================================================================
+*Stado is a one-file, simple static site generator, powered by python scripts.*
+===============================================================================
 
 
 
@@ -17,10 +17,10 @@ Directory structure:
         site.py
         index.md
 
-File `project/site.py`:
+File *project/site.py*:
 
     #!python
-    from stado import run
+    from stado import run, before
 
     @before('index.md')
     def hello():
@@ -28,17 +28,17 @@ File `project/site.py`:
 
     run()
 
-File `project/index.md`:
+File *project/index.md*:
 
     #!HTML+jinja
     {{ title }}
 
 ### Output ###
-Run stado to build site:
+Run stado to build the site:
 
     stado.py
 
-Stado builds site in `output` directory:
+Stado builds the site in `output` directory:
 
     project/
         site.py
@@ -46,7 +46,7 @@ Stado builds site in `output` directory:
         output/
             index.html
 
-File `project/output/index.html`:
+File *project/output/index.html*:
 
     #!text
     Hello World!
@@ -54,7 +54,7 @@ File `project/output/index.html`:
 
 
 Great, what do I need?
----------------
+----------------------
 
 Only python3, supported versions: `3.2`, `3.3`
 
@@ -62,11 +62,11 @@ What about features?
 --------------------
 
 - No dependencies, batteries included:
-    - markdown support using great Python-Markdown
-    - mustache templates using great pystache
-    - yaml parsing using great pyyaml
+    - Markdown support using Python-Markdown.
+    - Mustache templates using pystache.
+    - YAML parsing using pyyaml.
 - Only one file (actually less than **100kb**).
-- Pages creation powered by python scripts.
+- Page building powered by python scripts.
 - Site content from yaml or json files.
 - Development server.
 - File watcher for site auto-rebuilding.
@@ -76,8 +76,8 @@ What about features?
 Interested?
 -----------
 
-- [Download latest release (0.4.1)](https://github.com/dendek/stado/releases/download/v0.4.1/stado.py)
+- [Download latest release (0.5.1)](https://github.com/lecnim/stado/releases/download/v0.5.1/stado.py)
 - [Read the documentation](docs)
-- [See source at GitHub](https://github.com/dendek/stado)
+- [See source at GitHub](https://github.com/lecnim/stado)
 
 

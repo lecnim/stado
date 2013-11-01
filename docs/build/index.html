@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <link href="docs/public/code.css" rel="stylesheet" type="text/css"/>
+    <link href="docs/public/main.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+
+        <header>
+        <nav>
+            <a href="index.html">overview</a>
+            //
+            <a href="docs/quick-start.html">quick-start</a>
+            //
+            <a href="docs">docs</a>
+        </nav>
+    </header>
+<section id="content">
+    <p><img alt="img" src="docs/public/logo.jpg" /></p>
+<h1><em>Stado is a one-file, simple static site generator, powered by python scripts.</em></h1>
+<h2>Example please!</h2>
+<h3>Source</h3>
+<p>Directory structure:</p>
+<div class="codehilite"><pre><span class="n">stado</span><span class="p">.</span><span class="n">py</span>
+<span class="n">project</span><span class="o">/</span>
+    <span class="n">site</span><span class="p">.</span><span class="n">py</span>
+    <span class="n">index</span><span class="p">.</span><span class="n">md</span>
+</pre></div>
+
+
+<p>File <em>project/site.py</em>:</p>
+<div class="codehilite"><pre><span class="kn">from</span> <span class="nn">stado</span> <span class="kn">import</span> <span class="n">run</span><span class="p">,</span> <span class="n">before</span>
+
+<span class="nd">@before</span><span class="p">(</span><span class="s">&#39;index.md&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">hello</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="s">&#39;Hello World!&#39;</span><span class="p">}</span>
+
+<span class="n">run</span><span class="p">()</span>
+</pre></div>
+
+
+<p>File <em>project/index.md</em>:</p>
+<div class="codehilite"><pre><span class="cp">{{</span> <span class="nv">title</span> <span class="cp">}}</span>
+</pre></div>
+
+
+<h3>Output</h3>
+<p>Run stado to build the site:</p>
+<div class="codehilite"><pre><span class="n">stado</span><span class="p">.</span><span class="n">py</span>
+</pre></div>
+
+
+<p>Stado builds the site in <code>output</code> directory:</p>
+<div class="codehilite"><pre><span class="n">project</span><span class="o">/</span>
+    <span class="n">site</span><span class="p">.</span><span class="n">py</span>
+    <span class="n">index</span><span class="p">.</span><span class="n">md</span>
+    <span class="n">output</span><span class="o">/</span>
+        <span class="n">index</span><span class="p">.</span><span class="n">html</span>
+</pre></div>
+
+
+<p>File <em>project/output/index.html</em>:</p>
+<div class="codehilite"><pre>Hello World!
+</pre></div>
+
+
+<h2>Great, what do I need?</h2>
+<p>Only python3, supported versions: <code>3.2</code>, <code>3.3</code></p>
+<h2>What about features?</h2>
+<ul>
+<li>No dependencies, batteries included:<ul>
+<li>Markdown support using Python-Markdown.</li>
+<li>Mustache templates using pystache.</li>
+<li>YAML parsing using pyyaml.</li>
+</ul>
+</li>
+<li>Only one file (actually less than <strong>100kb</strong>).</li>
+<li>Page building powered by python scripts.</li>
+<li>Site content from yaml or json files.</li>
+<li>Development server.</li>
+<li>File watcher for site auto-rebuilding.</li>
+<li>Manages group of sites (can build or watch more than one site).</li>
+<li>Easy and minimalistic.</li>
+</ul>
+<h2>Interested?</h2>
+<ul>
+<li><a href="https://github.com/lecnim/stado/releases/download/v0.5.1/stado.py">Download latest release (0.5.1)</a></li>
+<li><a href="docs">Read the documentation</a></li>
+<li><a href="https://github.com/lecnim/stado">See source at GitHub</a></li>
+</ul>
+</section>
+
+<footer>
+    <p>© Copyright 2013 by Kasper Minciel</p>
+</footer>
+
+
+</body>
+</html>

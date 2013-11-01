@@ -8,7 +8,7 @@ from tests.console import TestCommand
 
 
 
-class TestBuildSite(TestCommand):
+class TestNewSite(TestCommand):
     """Tests command:
 
         new [site]
@@ -44,5 +44,5 @@ class TestBuildSite(TestCommand):
     def test_site_exists(self):
         """new [site]: Should raise error when creating site which already exits."""
 
-        self.assertRaises(CommandError, Console().__call__, 'new a')
-        #self.assertFalse(Console().__call__('new a'))
+        self.assertFalse(Console().__call__('new a'))
+        self.assertRaises(CommandError,Console().commands['new'].run, 'a')

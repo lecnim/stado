@@ -39,6 +39,8 @@ Details
     def set_layout(page):
       layout(page, 'layout.html')
 
+* * *
+
 `layout` can render page using multiple layout files.
 
     #!python

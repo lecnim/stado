@@ -38,7 +38,7 @@ Helper function can return `list`, `dict` or other objects:
 
     1234
 
-
+* * *
 
 Function decorated by `@helper` can use `pages` and `assets`. This controllers
 returns list of Pages object or Assets objects. For example:

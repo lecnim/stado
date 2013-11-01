@@ -21,7 +21,7 @@ class FileSystemItemFinder(ItemFinder):
     Searches for files which can be used to create Item objects.
     """
 
-    excluded_names = ['__pychache__', '*.py']
+    excluded_names = ['__pycache__', '*.py']
 
 
     def search(self, path, excluded_paths=None):
