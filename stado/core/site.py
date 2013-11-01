@@ -8,7 +8,7 @@ from .events import Events
 from .. import controllers
 from .. import plugins
 from .. import config as CONFIG
-from .cache import ItemCache, ShelveCache
+from .cache import ItemCache, DictCache
 from .. import log
 
 
@@ -25,7 +25,7 @@ class Site(Events):
 
     def __init__(self, path=None, output=None, config=None,
                  template_engine=TemplateEngine,
-                 cache=ShelveCache,
+                 cache=DictCache,
                  loaders=(FileSystemItemLoader(),)):
         """
         Arguments:
@@ -137,7 +137,7 @@ class Site(Events):
 
         # Remove cache.
 
-        self.cache.clear()
+        self.clear()
 
 
     # Generating.
@@ -213,6 +213,7 @@ class Site(Events):
     def clear(self):
         """Clearing site components."""
 
-        for i in self.controllers.values():
-            del i.site
-        del self.controllers
+        #for i in self.controllers.values():
+        #    del i.site
+        #del self.controllers
+        self.cache.clear()
