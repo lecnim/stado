@@ -76,8 +76,7 @@ What about features?
 Interested?
 -----------
 
-- [Download latest release (0.4.1)](https://github.com/lecnim/stado/releases/download/v0
-.4.1/stado.py)
+- [Download latest release (0.5.1)](https://github.com/lecnim/stado/releases/download/v0.5.1/stado.py)
 - [Read the documentation](docs)
 - [See source at GitHub](https://github.com/lecnim/stado)
 
