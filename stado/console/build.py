@@ -90,6 +90,8 @@ class Build(Command):
 
             log.info("Done! Site built in {}s".format(timer.get()))
 
-        clear_default_site()
-        #log.debug('\tRemoving unreachable objects: {}'.format(gc.collect()))
+        else:
+            log.info('Failed to build, file site.py not found in '
+                     'directory: {}'.format(site))
 
+        clear_default_site()

@@ -137,13 +137,15 @@ class Console:
         result = None
         if 'function' in args:
 
+            cmd = args.pop('function')
+
             try:
-                cmd = args.pop('function')
                 result = cmd(**args)
             except KeyboardInterrupt:
                 return True
             except StadoError as error:
-                log.error(error)
+                msg = 'Oops! Error! Something went wrong:\n{}'
+                log.error(msg.format(error))
                 return False
 
         log.setLevel(config.log_level)
