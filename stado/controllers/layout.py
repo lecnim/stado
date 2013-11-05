@@ -21,6 +21,8 @@ class Layout(Controller):
         # Key is path to file, value is path to layout.
         self.paths = {}
 
+        self.default = None
+
 
 
     def __call__(self, target, *layouts, **kwargs):
@@ -28,18 +30,26 @@ class Layout(Controller):
 
         layout_data = (layouts, kwargs.get('context', {}))
 
-        # Add layout data to item.
-        if not isinstance(target, str):
-            target.layouts = layout_data
+        # Default layout.
+        if not layouts:
+            self.default = [(target, ), layout_data[1]]
+            self.site.ignore(target)
 
-        path = target if isinstance(target, str) else target.source
+        else:
 
-        # 'a.html': ['layout.html'], {'context': 'variables'}
-        self.paths[path] = layout_data
 
-        # Prevents layouts files in output.
-        for i in layouts:
-            self.site.ignore(i)
+            # Add layout data to item.
+            if not isinstance(target, str):
+                target.layouts = layout_data
+
+            path = target if isinstance(target, str) else target.source
+
+            # 'a.html': ['layout.html'], {'context': 'variables'}
+            self.paths[path] = layout_data
+
+            # Prevents layouts files in output.
+            for i in layouts:
+                self.site.ignore(i)
 
 
     def add_layouts_property(self, item):
@@ -51,6 +61,9 @@ class Layout(Controller):
             if item.match(path):
                 item.layouts = layout
                 break
+
+        if not item.layouts and self.default:
+            item.layouts = self.default
 
 
     def render(self, item):

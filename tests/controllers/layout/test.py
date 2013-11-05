@@ -50,6 +50,25 @@ class TestLayout(TestPlugin):
             self.assertEqual('layout sub-layout badger', page.read())
 
 
+    def test_default_layout(self):
+        """Layout plugin should render all pages without layouts using
+        default layout. Heh it sounds weird."""
+
+        # site.py
+
+        self.app.layout('layout.html')
+        self.app.run()
+
+        # tests
+
+        with open('page.html') as page:
+            self.assertEqual('layout badger', page.read())
+        with open('markdown.html') as page:
+            self.assertEqual('layout <p>badger</p>', page.read())
+
+        self.assertFalse(os.path.exists('layout.html'))
+
+
     def test_context(self):
         """Layout plugin should correctly use own context."""
 
@@ -87,7 +106,7 @@ class TestLayout(TestPlugin):
 
         # site.py
 
-        self.app.layout('*.*', 'layout.html')
+        self.app.layout('*', 'layout.html')
         self.app.run()
 
         # tests
