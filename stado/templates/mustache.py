@@ -1,14 +1,12 @@
+"""
+Support for Mustache templates using pystache module.
+"""
+
 from ..libs import pystache
-from ..core.events import Events
-
-# Template engine info.
-
-enabled = True
-requirements = 'Require mustache module! http://github.com/defunkt/pystache'
-
-name = 'mustache'
+from . import TemplateEngine
 
 
+# Hacking pystache context.
 
 class Context(dict):
     """Template context."""
@@ -22,7 +20,6 @@ class Context(dict):
         # Standard item.
         return dict.__getitem__(self, item)
 
-
 class Helper:
     """Helper function as a property."""
 
@@ -32,16 +29,17 @@ class Helper:
         return self.f()
 
 
-class TemplateEngine(Events):
-    """This class is used to render templates."""
+# Template engine class.
 
-    def __init__(self, path):
-        Events.__init__(self)
-        self.path = path
+class Mustache(TemplateEngine):
+    """Wrapper for pystache module."""
+
+    name = 'mustache'
+    requirements = 'Require pystache module! http://github.com/defunkt/pystache'
 
 
-    def render(self, source, context):
-        """Used by Renderer class."""
+    def render(self, source: str, context: dict):
+        """Renders source with given context."""
 
         # Creating new class which will be used as a template context.
         context_class = type('RenderContext', (Context,), {})

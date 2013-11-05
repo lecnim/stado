@@ -1,10 +1,36 @@
-from . import mustache
+from ..errors import StadoError
 
+
+class TemplateEngine:
+    """Base class for template engines."""
+
+    # Disabled engine are not used.
+    enabled = True
+    # Message printed if required packages are not available.
+    requirements = 'Requirements not specified.'
+
+    @classmethod
+    def check_requirements(cls):
+        """Checks requirements and returns True if engine is available. Should
+        raises StadoError if some required packages are missing."""
+        return True
+
+    def __init__(self, path=None):
+        self.path = path
+
+
+# All available template engines must be imported.
+
+from .mustache import Mustache
+from .jinja2 import Jinja2
 
 
 def load(engine_name):
-    """Returns template engine module."""
+    """Returns template engine class. Raises StadoError if engine not found."""
 
-    # Iterate all modules in templates directory.
+    for i in TemplateEngine.__subclasses__():
+        if i.name == engine_name and i.enabled:
+            if i.check_requirements():
+                return i
 
-    return globals()[engine_name]
+    raise StadoError('Template engine not found: {}'.format(engine_name))

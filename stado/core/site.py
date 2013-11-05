@@ -3,7 +3,7 @@ import inspect
 
 from .loaders import FileSystemItemLoader
 from .item import ItemTypes
-from ..templates.mustache import TemplateEngine
+from .. import templates
 from .events import Events
 from .. import controllers
 from .. import plugins
@@ -24,7 +24,7 @@ class Site(Events):
     """
 
     def __init__(self, path=None, output=None, config=None,
-                 template_engine=TemplateEngine,
+                 template_engine='mustache',
                  cache=DictCache,
                  loaders=(FileSystemItemLoader(),)):
         """
@@ -62,7 +62,14 @@ class Site(Events):
 
         # Paths pointing to files or directories which will be ignored.
         self.excluded_paths = []
-        self.template_engine = template_engine(self.path)
+
+        # Initializing template engine.
+        if isinstance(template_engine, str):
+            engine = templates.load(template_engine)
+            self.template_engine = engine(self.path)
+        else:
+            self.template_engine = template_engine(self.path)
+
 
         self.item_types = ItemTypes()
         self.cache = ItemCache(cache(self.output))
