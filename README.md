@@ -11,7 +11,7 @@ You just download
 and it is ready to work.
 
 
-[![Build Status](https://travis-ci.org/lecnim/stado.png?branch=master)](https://travis-ci.org/dendek/stado)
+[![Build Status](https://travis-ci.org/lecnim/stado.png?branch=master)](https://travis-ci.org/lecnim/stado)
 
 
 **What? Why another static site generator?**
