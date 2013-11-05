@@ -58,6 +58,8 @@ class Help(Command):
 
             return msg
 
+        # Help for given command not found.
+        return "Help for the given command not found: {}".format(command_name)
 
     def global_help(self):
 

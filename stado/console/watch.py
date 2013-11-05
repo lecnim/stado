@@ -16,8 +16,8 @@ class Watch(Command):
 
     name = 'watch'
 
-    usage = 'watch [site] [options]'
-    summary = 'Build the site and watch for changes.'
+    usage = 'watch [site] [options]\n    watch [options]'
+    summary = 'Build the site or group of sites and watch for changes.'
     description = ''
     options = Build.options
 

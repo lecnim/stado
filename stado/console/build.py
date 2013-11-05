@@ -16,9 +16,9 @@ class Build(Command):
 
     name = 'build'
 
-    usage = "build [site] [options]"
-    summary = "Build the site in output directory."
-    description = ''
+    usage = "build [site] [options]\n    build [options]"
+    summary = "Build the site or group of sites in output directory."
+    description = ""
     options = [["-o, --output", "Specify the location to deploy to. (default: '{"
                                  "}')".format(CONFIG.build_dir)]]
 
