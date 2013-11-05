@@ -1,4 +1,5 @@
 import os
+import sys
 import argparse
 
 from ..errors import StadoError
@@ -101,6 +102,9 @@ class Console:
     def view(self, *args, **kwargs):
         self.commands['view'].run(*args, **kwargs)
 
+    def help(self, *args, **kwargs):
+        self.commands['help'].run(*args, **kwargs)
+
 
     # Execute command.
 
@@ -110,6 +114,11 @@ class Console:
         # Show help message if no arguments.
 
         print('')
+
+        # No arguments!
+        if not len(sys.argv) > 1 and not arguments:
+            self.help()
+            return True
 
         # Arguments from sys.args or from method arguments.
         if not arguments:
@@ -121,8 +130,7 @@ class Console:
         args = vars(args)
 
         # Enable debug mode.
-        debug_mode = args.pop('debug')
-        if debug_mode:
+        if 'debug' in args and args.pop('debug'):
             log.setLevel('DEBUG')
 
 
