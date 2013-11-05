@@ -22,6 +22,7 @@ from . import helper
 from . import layout
 from . import pages
 from . import assets
+from . import render
 
 
 def load(select=None):
