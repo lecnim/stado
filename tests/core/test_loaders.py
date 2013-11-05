@@ -25,8 +25,7 @@ class TestFileSystemContentLoader(TestInCurrentDirectory):
         contents = [i for i in loader.load('data')]
 
         sources = [i.source for i in contents]
-        self.assertCountEqual(['a.html', 'b.html', 'image.jpg',
-                               os.path.join('b','b.md')], sources)
+        self.assertCountEqual(['a.html', 'b.html', 'image.jpg', 'b/b.md'], sources)
 
 
     def test_content_output(self):

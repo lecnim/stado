@@ -66,7 +66,7 @@ class SiteItem(dict, Events):
         self.enabled = True
 
         # Item is recognized by controllers using this property.
-        self.source = source
+        self.source = os.path.normpath(source).replace('\\', '/')
 
         # Item content.
         self.data = None
