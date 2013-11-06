@@ -4,13 +4,13 @@ import logging
 from . import libs
 from . import config
 
-__version__ = '0.5.1'
+__version__ = '0.6.0'
 version = __version__
 
 
-# Custom logger from python logging module.
+# Custom logger using python logging module.
 def get_logger():
-    """Returns miniherd logger."""
+    """Returns stado logger."""
 
     logger = logging.getLogger('stado')
     logger.setLevel(config.log_level)
