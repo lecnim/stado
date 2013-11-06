@@ -7,9 +7,13 @@ Example
 -------
 
     #!python
+    from stado import helper, run
+
     @helper
     def hello():
         return 'Hello badger!'
+
+    run()
 
 Template:
 
@@ -28,7 +32,7 @@ Helper function can return `list`, `dict` or other objects:
     #!python
     @helper
     def numbers():
-      return [1, 2, 3, 4]
+        return [1, 2, 3, 4]
 
 *Template:*
 
@@ -40,8 +44,8 @@ Helper function can return `list`, `dict` or other objects:
 
 * * *
 
-Function decorated by `@helper` can use `pages` and `assets`. This controllers
-returns list of Pages object or Assets objects. For example:
+Function decorated by `@helper` can use `pages` and `assets` controllers. This
+controllers returns list of item objects like pages or assets. For example:
 
 Example project structure:
 
@@ -58,7 +62,7 @@ Example project structure:
 
     @helper
     def menu():
-      return [i for i in pages('*.html')]
+        return [i for i in pages('*.html')]
 
     run()
 

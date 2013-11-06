@@ -1,7 +1,8 @@
 layout
 ======
 
-Use `layout` to render page content using layouts files.
+Use `layout` controller to render a page content using layouts files. A page content
+is available in layout using a `content` keyword.
 
 Example
 -------
@@ -32,16 +33,16 @@ Example
 Details
 -------
 
-`layout` can be used inside function decorated by `@before`.
+`layout` controller can be used inside a function decorated by `@before`.
 
     #!python
     @before('index.html')
     def set_layout(page):
-      layout(page, 'layout.html')
+        layout(page, 'layout.html')
 
 * * *
 
-`layout` can render page using multiple layout files.
+`layout` controller can render a page using multiple layout files.
 
     #!python
     layout('index.html', 'sub-layout.html', 'layout.html')
@@ -69,7 +70,7 @@ Rendered file `output/index.html`:*
 
 * * *
 
-`layout` has access to page context using `{{ page }}` variable.
+`layout` controller has access to a page context using `{{ page }}` variable.
 
     {{ page.title }}
     {{{ content }}}
@@ -77,7 +78,16 @@ Rendered file `output/index.html`:*
 
 * * *
 
-You can pass custom context to layout using `context` argument.
+You can set a default layout for all pages by calling controller with only one
+argument.
+
+    #!python
+    layout('layout.html')
+
+
+* * *
+
+You can pass custom context to a layout controller using an `context` argument.
 
     #!python
     layout('index.html', 'layout.html', context={'title': 'Badger'})

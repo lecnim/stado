@@ -2,13 +2,14 @@
 
 <html>
 <head>
+<title>Stadø documentation</title>
 <meta charset="utf-8"/>
 <link href="public/code.css" rel="stylesheet" type="text/css"/>
 <link href="public/doc.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
 <header>
-<img src="public/logo.jpg"/>
+<img alt="logo" src="public/logo.jpg"/>
 <h1>Related topics</h1><ul><li><a href="index.html">Documentation_overview</a></li></ul><h1>Table of contents</h1><ul><li><a href="#installation">Installation</a></li><li><a href="#example-directory-structure">Example directory structure</a></li><li><a href="#running-stado">Running stado</a></li><li><a href="#output">Output</a></li></ul></header>
 <section id="content">
 <h1>Quick start</h1>
@@ -60,9 +61,9 @@ files are recognized as pages.</p>
 <p><code>image.jpg</code> is a asset file. Assets are <strong>not</strong> rendered by the template engine,
 they are only copied to an output directory.</p>
 <h2 id="running-stado">Running stado</h2>
-<div class="codehilite"><pre><span class="n">stado</span><span class="p">.</span><span class="n">py</span>
+<div class="codehilite"><pre><span class="n">stado</span><span class="p">.</span><span class="n">py</span> <span class="n">build</span>
 </pre></div>
-<p>If stado is run without commands, it will try to build all sites.
+<p>If stado is run with build command it will try to build all sites.
 You can choose which site to build using <code>stado.py build [site]</code> command.</p>
 <p>Also there is a development server available. It has auto-rebuild on save feature.
 Use <code>stado.py edit [site]</code> to start it.</p>

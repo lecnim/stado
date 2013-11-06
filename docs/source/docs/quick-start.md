@@ -83,9 +83,9 @@ they are only copied to an output directory.
 Running stado
 -------------
 
-    stado.py
+    stado.py build
 
-If stado is run without commands, it will try to build all sites.
+If stado is run with build command it will try to build all sites.
 You can choose which site to build using `stado.py build [site]` command.
 
 Also there is a development server available. It has auto-rebuild on save feature.

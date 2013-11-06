@@ -1,8 +1,8 @@
 @after
 ======
 
-Use `@after` decorator to execute function **after** pages rendering. It is used to
-modify page content before writing it in output.
+Use the `@after` decorator to execute function **after** pages rendering. It is used
+to modify a item content before writing it in the output.
 
 Example
 -------
@@ -29,11 +29,18 @@ Example
 Details
 -------
 
-`@after` as like `@before` can take any number of paths and also supports file matching.
+`@after` decorator as like `@before` can take any number of paths and also
+supports file matching.
+
+    #!python
+    @after('index.html', 'welcome.html', '**.md')
+    def capitalize(content):
+      return content.capitalize()
+
 
 * * *
 
-`@after` can pass page object to function using it **second** argument.
+`@after` decorator can pass item object to function using it **second** argument.
 
     #!python
     @after('*.html')

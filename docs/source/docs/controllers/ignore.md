@@ -1,7 +1,7 @@
 ignore
 ======
 
-Use `ignore` to ignore certain paths.
+Use `ignore` controller to ignore certain paths.
 
 Example
 -------

@@ -36,7 +36,7 @@ File *project/index.md*:
 ### Output ###
 Run stado to build the site:
 
-    stado.py
+    $ stado.py build
 
 Stado builds the site in `output` directory:
 
