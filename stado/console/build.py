@@ -39,6 +39,8 @@ class Build(Command):
         # Build all projects.
         if site is None:
 
+            log.info('Searching sites...')
+
             # List of directories in current working directory.
             cwd = os.getcwd()
             dirs = [i for i in os.listdir(cwd) if os.path.isdir(os.path.join(cwd, i))]
