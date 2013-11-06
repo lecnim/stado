@@ -99,7 +99,10 @@ class SiteItem(dict, Events):
     @metadata.setter
     def metadata(self, value):
         self.clear()
-        self.update(value)
+
+        if value is not None:
+            self.update(value)
+
 
     @property
     def url(self):
