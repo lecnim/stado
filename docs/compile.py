@@ -7,7 +7,8 @@ except ImportError:
     print('Require bs4! http://www.crummy.com/software/BeautifulSoup/')
     sys.exit(1)
 
-from stado import Stado
+
+from stado import Stado, __version__
 from stado.libs import markdown
 from stado.libs.markdown.extensions.codehilite import CodeHiliteExtension
 
@@ -22,7 +23,7 @@ def render(content, metadata):
 app = Stado('source', output='./build')
 
 @app.before('**.md')
-def remove_source(page):
+def global_variables(page):
 
     # Skip documentation main page.
     if page.url != '/docs/index.html':
@@ -30,7 +31,8 @@ def remove_source(page):
 
     return {
         'url': page.url,
-        'name': os.path.splitext(page.filename)[0]
+        'name': os.path.splitext(page.filename)[0],
+        'version': __version__
     }
 
 

@@ -1,6 +1,8 @@
 render_file
 ===========
 
+`(since version 0.6.0)`
+
 Use this controller to render given file using site template engine.
 
 

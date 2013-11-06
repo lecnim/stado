@@ -1,6 +1,8 @@
 Stadø documentation
 ===================
 
+version {{ version }}
+
 [Quick start](quick-start.html)
 -------------------------------
 
