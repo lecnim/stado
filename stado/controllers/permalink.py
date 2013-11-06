@@ -16,7 +16,9 @@ class Permalink(Controller):
             'item.after_loading': self.update_permalink,
         })
 
-        self.sources = {}
+        self.urls = {}
+        self.sources = []
+
         self.targets = []
 
 
@@ -29,7 +31,8 @@ class Permalink(Controller):
         # used this argument as a permalink.
         if url is None:
             url = self.convert_style(target)
-            self.sources['**.html'] = url
+            self.sources.append('**.html')
+            self.urls['**.html'] = url
 
             for item in self.site.items:
                 if item.is_page():
@@ -39,7 +42,8 @@ class Permalink(Controller):
         # Second is calling with two argument and first is item source. Find this
         # item and modify it permalink.
         if isinstance(target, str):
-            self.sources[target] = url
+            self.sources.append(target)
+            self.urls[target] = url
 
             for source in self.site.sources:
                 if pathmatch(source, target):
@@ -64,6 +68,6 @@ class Permalink(Controller):
 
 
     def update_permalink(self, item):
-        for source, permalink in self.sources.items():
+        for source in self.sources:
             if item.match(source):
-                item.url = self.convert_style(permalink)
+                item.url = self.convert_style(self.urls[source])
