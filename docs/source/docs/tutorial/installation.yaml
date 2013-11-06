@@ -1,5 +1,28 @@
+title: "Stadø tutorial: installation"
+related_topics:
+
+  - title: 'Documentation overview'
+    url: '../..'
+
 content: |
 
   Installation
   ============
 
+  Getting and installing stado should not take much time.
+
+  Requirements
+  ------------
+
+  Stado require only:
+
+  - Python, supported versions: `3.2`, `3.3`
+
+  You can use stado on **Unix** or **Windows** systems.
+
+
+  Getting stado
+  -------------
+
+  The best way to get stado is downloading the latest release version.
+  Then you place *stado.py* file in empty directory. That's all!

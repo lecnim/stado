@@ -117,6 +117,7 @@ def quickstart():
     for i in app.pages('docs/quick-start.yaml'):
         return i['headers']
 
+
 @app.helper
 def stado_version():
     return __version__
