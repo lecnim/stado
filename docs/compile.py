@@ -25,7 +25,8 @@ app = Stado('source', output='./build')
 
 @app.before('index.md')
 def index(page):
-    page.renderers = [render]
+    page.renderers = [app.template_engine.render, render]
+    page['stado_version'] = __version__
 
 
 @app.before('**.yaml')

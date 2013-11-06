@@ -6,15 +6,20 @@
     <meta charset="utf-8"/>
     <link href="docs/public/code.css" rel="stylesheet" type="text/css"/>
     <link href="docs/public/main.css" rel="stylesheet" type="text/css"/>
+    <link rel="shortcut icon" href="docs/public/favicon.png" type="image/png"/>
 </head>
 
 <body>
 
     <header>
+        <img src="docs/public/logo.jpg" alt="logo" />
         <nav>
             <a href="docs/quick-start">quick-start</a>
             //
             <a href="docs">documentation</a>
+            <a
+                    href="https://github.com/lecnim/stado/releases/download/v{{ page.stado_version }}/stado.py"
+               class="version">Download latest release: {{ page.stado_version }}</a>
         </nav>
     </header>
 

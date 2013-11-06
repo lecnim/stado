@@ -45,14 +45,7 @@ p {
     line-height: 140%;
 }
 
-nav {
-    float: right;
-    margin-top: 100px;
-    font-size: 1.3em;
-    font-style: italic;
-    letter-spacing: 0.05em;
-    padding-right: 10px;
-}
+
 
 footer {
     margin-top: 3em;
@@ -93,9 +86,12 @@ li {
     padding-top: 0.2em;
 }
 li:before {
-    content: '>';
-    color: rgb(160, 160, 160);
+    content: '~';
+    color: rgb(150, 150, 150);
     padding-right: 0.8em;
+}
+section#content li:before {
+    content: '○';
 }
 
 section#content li{
@@ -106,7 +102,7 @@ pre {
     padding-left: 1.5em;
     padding-top: 1em;
     padding-bottom: 1em;
-    background: rgb(218, 228, 218);
+    background: rgb(235, 230, 215);
 }
 
 h1 {

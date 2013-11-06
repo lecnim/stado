@@ -1,8 +1,9 @@
-![img](docs/public/logo.jpg)
+{{=<% %>=}}
+
+
 
 Stado is a simple, single-file, static site generator, powered by python scripts.
 =================================================================================
-
 
 
 Example please!
@@ -74,11 +75,12 @@ What about features?
 - Manages group of sites (can build or watch more than one site).
 - Easy and minimalistic.
 
-Interested?
+I am interested!
 -----------
 
-- [Download latest release (0.6.0)](https://github.com/lecnim/stado/releases/download/v0.6.0/stado.py)
+- [Download latest release (<% stado_version %>)](https://github.com/lecnim/stado/releases/download/v<% stado_version %>/stado.py)
 - [Read the documentation](docs)
 - [See source at GitHub](https://github.com/lecnim/stado)
+- [Submit bug or request feature](https://github.com/lecnim/stado/issues)
 
 
