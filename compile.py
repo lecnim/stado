@@ -67,6 +67,7 @@ class Minify:
 
         source = self.remove_comments_and_docstrings(source)
         source = self.remove_blank_lines(source)
+        source = self.dedent(source)
         return source
 
     @staticmethod
@@ -118,6 +119,7 @@ class Minify:
 
         return output
 
+
     @staticmethod
     def remove_blank_lines(source):
         """
@@ -128,6 +130,44 @@ class Minify:
         source = [a for a in io_obj.readlines() if a.strip()]
         return "".join(source)
 
+
+    @staticmethod
+    def dedent(source):
+        """
+        Minimizes indentation.
+        """
+
+        io_obj = StringIO(source)
+        out = ""
+        last_lineno = -1
+        last_col = 0
+        prev_start_line = 0
+        indentation = ""
+        indentation_level = 0
+        for i,tok in enumerate(tokenize.generate_tokens(io_obj.readline)):
+            token_type = tok[0]
+            token_string = tok[1]
+            start_line, start_col = tok[2]
+            end_line, end_col = tok[3]
+            if start_line > last_lineno:
+                last_col = 0
+            if token_type == tokenize.INDENT:
+                indentation_level += 1
+                continue
+            if token_type == tokenize.DEDENT:
+                indentation_level -= 1
+                continue
+            indentation = " " * indentation_level
+            if start_line > prev_start_line:
+                out += indentation + token_string
+            elif start_col > last_col:
+                out += " " + token_string
+            else:
+                out += token_string
+            prev_start_line = start_line
+            last_col = end_col
+            last_lineno = end_line
+        return out
 
 
 if __name__ == "__main__":
