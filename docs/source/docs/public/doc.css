@@ -69,6 +69,7 @@ h2 {
     font-size: 1.5em;
     font-style: italic;
     color: rgb(0, 0, 0);
+    padding-top: 1em;
 }
 h3 { 
     font-style: italic; 
@@ -98,14 +99,14 @@ li:before {
 }
 
 section#content li{
-    padding-top: 0.4em;
+    padding-bottom: 0.4em;
 }
 
 pre {
     padding-left: 1.5em;
     padding-top: 1em;
     padding-bottom: 1em;
-    background: rgb(234, 224, 208);
+    background: rgb(218, 228, 218);
 }
 
 h1 {

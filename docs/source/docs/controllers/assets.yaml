@@ -1,0 +1,46 @@
+title: "Stadø controller: assets"
+related_topics:
+
+  - title: 'Documentation overview'
+    url: '../..'
+  - title: 'Controllers overview'
+    url: '..'
+  - title: 'Controller pages'
+    url: '../pages'
+
+content: |
+
+  assets
+  ======
+
+  This controller can be used inside @helper function. It iterates all assets
+  items which match given source.
+
+  Usage
+  -----
+
+      #!python
+      assets(*sources: str)
+
+  ### Controller arguments ###
+
+  - `*sources` – asset items are match by sources, file matching supported.
+
+  ### Controller returns ###
+
+  SiteItem objects which are assets and match given sources.
+
+
+  Examples
+  --------
+
+  Helper which returns urls to all jpg and png files.
+
+      #!python
+      from stado import assets, helper, run
+
+      @helper
+      def images():
+          return [i.url for i in assets(**.jpg, **.png)]
+
+      run()

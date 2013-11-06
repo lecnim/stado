@@ -1,7 +1,7 @@
 ![img](docs/public/logo.jpg)
 
-*Stado is a one-file, simple static site generator, powered by python scripts.*
-===============================================================================
+Stado is a simple, single-file, static site generator, powered by python scripts.
+=================================================================================
 
 
 
@@ -36,6 +36,7 @@ File *project/index.md*:
 ### Output ###
 Run stado to build the site:
 
+    #!console
     $ stado.py build
 
 Stado builds the site in `output` directory:

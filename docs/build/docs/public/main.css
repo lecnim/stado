@@ -67,11 +67,12 @@ pre {
     padding-left: 1.5em;
     padding-top: 1em;
     padding-bottom: 1em;
-    background: rgb(234, 224, 208);
+    background: rgb(218, 228, 218);
 }
 
 h1 {
     margin-bottom: 2em;
     font-weight: bold;
     font-size: 2.25em;
+    font-style: italic;
 }

@@ -1,0 +1,110 @@
+title: "Stadø controller: helper"
+related_topics:
+
+  - title: 'Documentation overview'
+    url: '../..'
+  - title: 'Controllers overview'
+    url: '..'
+
+content: |
+
+  @helper
+  =======
+
+  Use `@helper` decorator to call a function during template rendering.
+
+
+  Usage
+  -----
+
+      #!python
+      @helper
+      def function():
+          return x
+
+  ### Decorated function returns ###
+
+  Variable which will be available during rendering using function name as a keyword.
+  Supported are python built-in variables like `str`, `list`, `dict`, `int`, etc.
+
+
+  Example
+  -------
+
+      #!python
+      from stado import helper, run
+
+      @helper
+      def hello():
+          return 'Hello badger!'
+
+      run()
+
+  Template:
+
+      #!HTML+jinja
+      {{ hello }}
+
+  Rendered template:
+
+      #!text
+      Hello badger!
+
+
+  Details
+  -------
+
+  Helper function can return `list`, `dict` or other python built-in objects:
+
+      #!python
+      @helper
+      def numbers():
+          return [1, 2, 3, 4]
+
+  *Template:*
+
+      #!text
+      {{# numbers }}{{ . }}{{/ numbers }}
+
+  *Rendered template:*
+
+      #!text
+      1234
+
+  * * *
+
+  Function decorated by `@helper` can use `pages` and `assets` controllers. This
+  controllers returns list of item objects like pages or assets. For example:
+
+  Example project structure:
+
+      project/
+        site.py
+        index.html
+        welcome.html
+        contact.html
+
+  *File `site.py`:*
+
+      #!python
+      from stado import helper, run
+
+      @helper
+      def menu():
+          return [i.url for i in pages('*.html')]
+
+      run()
+
+  *File `index.html`:*
+
+      #!jinja
+      {{# menu }}
+      <a href='{{ url }}'>Page</a>
+      {{/ menu }}
+
+  *Rendered file `output/index.html`:*
+
+      #!HTML
+      <a href='index.html'>Page</a>
+      <a href='welcome.html'>Page</a>
+      <a href='contact.html'>Page</a>

@@ -5,19 +5,19 @@
 <head>
     <title>Stadø documentation</title>
     <meta charset="utf-8"/>
-    <link href="public/code.css" rel="stylesheet" type="text/css"/>
-    <link href="public/doc.css" rel="stylesheet" type="text/css"/>
+    <link href="{{ public }}/code.css" rel="stylesheet" type="text/css"/>
+    <link href="{{ public }}/doc.css" rel="stylesheet" type="text/css"/>
 </head>
 
 <body>
 
     <header>
-        <img src="public/logo.jpg" alt="logo"/>
+        <img src="{{ public }}/logo.jpg" alt="logo"/>
         <h1>About</h1>
         <p>Stado is a single-file, simple static site generator, powered by
            python scripts.</p>
         <h1>Version</h1>
-        <p>0.6.0</p>
+        <p>{{ stado_version }}</p>
         <h1>Links</h1>
         <ul>
             <li><a href="http://stadoproject.org">Official site</a></li>
@@ -33,24 +33,17 @@
         <h2><a href="quick-start">Quick-start</a></h2>
         <p><em>Four steps to learn the Stado's basics. It's simple!</em></p>
         <ul>
-            <li><a href="quick-start#installation">Installation</a></li>
-            <li><a href="quick-start#example-directory-structure">Example directory structure</a></li>
-            <li><a href="quick-start#running-stado">Running stado</a></li>
-            <li><a href="quick-start#output">Output</a></li>
+            {{# quickstart }}
+            <li><a href="{{ url }}">{{ title }}</a></li>
+            {{/ quickstart }}
         </ul>
 
         <h2><a href="controllers">Controllers</a></h2>
         <p><em>Control the site building process using controllers.</em></p>
         <ul>
-            <li><a href="controllers/after">after</a></li>
-            <li><a href="controllers/assets">assets</a></li>
-            <li><a href="controllers/before">before</a></li>
-            <li><a href="controllers/helper">helper</a></li>
-            <li><a href="controllers/ignore">ignore</a></li>
-            <li><a href="controllers/layout">layout</a></li>
-            <li><a href="controllers/pages">pages</a></li>
-            <li><a href="controllers/permalink">permalink</a></li>
-            <li><a href="controllers/render_file">render_file</a></li>
+            {{# controllers }}
+            <li><a href="{{ url }}">{{ title }}</a></li>
+            {{/ controllers }}
         </ul>
     </section>
 

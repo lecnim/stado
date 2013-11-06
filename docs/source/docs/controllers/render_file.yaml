@@ -1,0 +1,52 @@
+title: "Stadø controller: render_file"
+related_topics:
+
+  - title: 'Documentation overview'
+    url: '../..'
+  - title: 'Controllers overview'
+    url: '..'
+
+content: |
+
+  render_file
+  ===========
+
+  `(since version 0.6.0)`
+
+  Use this controller to render given file using site template engine.
+
+
+  Usage
+  -----
+
+      #!python
+      render_file(path: str, context: dict)
+
+  ### Controller arguments ###
+
+  - `path` – path to file which will be rendered.
+  - `context` – custom context variables used during rendering.
+
+  ### Controller returns ###
+
+  String with rendered content of file.
+
+
+  Example
+  -------
+
+      #!python
+      from stado import render_file
+
+      x = render_file('welcome.html')
+
+  Variable `x` will be content of rendered `welcome.html` file.
+
+
+  Details
+  -------
+
+  You can pass custom context variables which will be used during rendering.
+
+      #!python
+      x = render_file('welcome.html', {'title': 'hello world'})

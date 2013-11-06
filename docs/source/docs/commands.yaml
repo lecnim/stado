@@ -1,0 +1,70 @@
+content:
+  Commands
+  ========
+
+  help
+  ----
+
+  `help`
+
+  Shows general help.
+
+
+  `help [command]`
+
+  Shows help about commands.
+
+
+
+
+
+  edit
+  ----
+
+  `edit [site]`
+
+  Auto rebuild on save, and start development server.
+
+  `edit [site] --output /www/project`
+
+  Use custom output directory.
+
+
+
+
+
+  build
+  -----
+
+  `build [site]`
+
+  Build site.
+
+  `build`
+
+  Build all sites in stado directory.
+
+  `build [site] --output /www/project`
+
+  Use custom output directory.
+
+
+
+
+
+  watch
+  -----
+
+  `watch [site]`
+
+  Rebuild site on save.
+
+  `watch`
+
+  Watch all sites in stado directory and rebuild on save.
+
+  `watch --output /www`
+
+  Use custom output directory.
+
+

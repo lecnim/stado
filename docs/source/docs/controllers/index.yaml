@@ -1,0 +1,56 @@
+title: "Stadø controllers"
+related_topics:
+
+  - title: 'Documentation overview'
+    url: '..'
+  - title: 'Controllers overview'
+    url: '..'
+
+content: |
+
+  Controllers
+  ===========
+
+  Controllers are objects which are used to controll the site building process.
+  For example you can change item url using `permalink` controller or modify item
+  metadata using `@before`.
+
+  List of available controllers
+  -----------------------------
+
+
+  - [after](after)
+
+    Modyfing item content before writing it to the output.
+
+  - [assets](assets)
+
+    Yields asset items.
+
+  - [before](before)
+
+    Modyfing item metadata before it rendering.
+
+  - [helper](helper)
+
+    Calling functions during template rendering.
+
+  - [ignore](ignore)
+
+    Ignoring files and directories.
+
+  - [layout](layout)
+
+    Rendering a item content using layout files.
+
+  - [pages](pages)
+
+    Yields page items.
+
+  - [permalink](permalink)
+
+    Modyfing items urls.
+
+  - [render_file](render-file)
+
+    Rendering files using template engine.

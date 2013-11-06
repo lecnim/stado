@@ -1,0 +1,32 @@
+title: "Stadø controller: ignore"
+related_topics:
+
+  - title: 'Documentation overview'
+    url: '../..'
+  - title: 'Controllers overview'
+    url: '..'
+
+content: |
+
+  ignore
+  ======
+
+  Use `ignore` controller to ignore certain paths.
+
+  Usage
+  -----
+
+      #!python
+      ignore(*sources: str or SiteItem)
+
+  ### Controller arguments ###
+
+  - `*sources` – ignored items are match by sources, file matching supported.
+
+  Examples
+  --------
+
+  Ignore file names in top directory with an underscore at the beginning:
+
+      #!python
+      ignore('_*')

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<title>Stadø quick-start</title>
+<meta charset="utf-8"/>
+<link href="../public/code.css" rel="stylesheet" type="text/css"/>
+<link href="../public/doc.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<header>
+<img alt="logo" src="../public/logo.jpg"/>
+<h1>Related topics</h1>
+<ul>
+<li><a href="..">Documentation overview</a></li>
+<li><a href="../controllers/before">Controller @before</a></li>
+</ul>
+<h1>Table of contents</h1><ul><li><a href="#installation">Installation</a></li><li><a href="#example-directory-structure">Example directory structure</a></li><li><a href="#running-stado">Running stado</a></li><li><a href="#output">Output</a></li></ul></header>
+<section id="content">
+<h1>Quick start</h1>
+<h2 id="installation">Installation</h2>
+<p>Just download the <code>stado.py</code> file and place it in a empty directory.
+Stado require python, you can get it from <a href="http://www
+.python.org">www.python.org</a>. Supported python versions are <code>3.3</code> and <code>3.2</code>.</p>
+<h2 id="example-directory-structure">Example directory structure</h2>
+<div class="codehilite"><pre><span class="n">stado</span><span class="o">.</span><span class="n">py</span>                <span class="c"># Stado main file for executing commands.</span>
+<span class="n">project</span><span class="o">/</span>                <span class="c"># Site directory.</span>
+    <span class="n">site</span><span class="o">.</span><span class="n">py</span>             <span class="c"># Python script which builds site.</span>
+    <span class="n">index</span><span class="o">.</span><span class="n">html</span>          <span class="c"># page</span>
+    <span class="n">image</span><span class="o">.</span><span class="n">jpg</span>           <span class="c"># asset</span>
+</pre></div>
+<p>Use the <code>stado.py</code> file to execute commands. For example <code>stado.py build</code> or
+<code>stado.py edit project</code>.</p>
+<p><code>project</code> is the site directory. It contains all the site source files,
+which are used during building process. There can be multiple site directories.</p>
+<h3>File project/site.py</h3>
+<div class="codehilite"><pre><span class="kn">from</span> <span class="nn">stado</span> <span class="kn">import</span> <span class="n">run</span><span class="p">,</span> <span class="n">before</span>
+
+<span class="nd">@before</span><span class="p">(</span><span class="s">'index.html'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">hello</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s">'title'</span><span class="p">:</span> <span class="s">'Hello World!'</span><span class="p">}</span>
+
+<span class="n">run</span><span class="p">()</span>                   <span class="c"># start building site.</span>
+</pre></div>
+<p><code>project/site.py</code> file is controlling the process of building the site using
+controllers objects like <code>@before</code>.</p>
+<p>In details:</p>
+<p>Here used stado objects are imported:</p>
+<div class="codehilite"><pre><span class="kn">from</span> <span class="nn">stado</span> <span class="kn">import</span> <span class="n">run</span><span class="p">,</span> <span class="n">before</span>
+</pre></div>
+<p>A decorator <code>@before('index.html')</code> will execute a <code>hello()</code> method before
+rendering the <code>index.html</code> page. Variables from a returned dictionary are
+available during rendering by template engine.</p>
+<div class="codehilite"><pre><span class="nd">@before</span><span class="p">(</span><span class="s">'index.html'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">hello</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s">'title'</span><span class="p">:</span> <span class="s">'Hello World!'</span><span class="p">}</span>
+</pre></div>
+<p>The site building process is started using this method.</p>
+<div class="codehilite"><pre><span class="n">run</span><span class="p">()</span>
+</pre></div>
+<h3>File index.html</h3>
+<div class="codehilite"><pre><span class="cp">{{</span> <span class="nv">title</span> <span class="cp">}}</span>
+</pre></div>
+<p><code>index.html</code> is a page file. Page files are rendered with the template engine
+during site building. Default template engine is Mustache. All <code>html</code> and <code>md</code>
+files are recognized as pages.</p>
+<h3>File image.jpg</h3>
+<p><code>image.jpg</code> is a asset file. Assets are <strong>not</strong> rendered by the template engine,
+they are only copied to an output directory.</p>
+<h2 id="running-stado">Running stado</h2>
+<div class="codehilite"><pre><span class="gp">$</span> stado.py build
+<span class="go">Searching sites...</span>
+<span class="go">Building site project...</span>
+<span class="go">Done! Site built in 0.01s</span>
+</pre></div>
+<p>If stado is run with build command it will try to build all available sites.
+You can choose which site to build by adding a site directory name to build
+command,
+for example:</p>
+<div class="codehilite"><pre><span class="gp">$</span> stado.py build project
+<span class="go">Building site project...</span>
+<span class="go">Done! Site built in 0.01s</span>
+</pre></div>
+<p>Also there is a development server available. It has a auto-rebuild on save
+feature. You can use it using <code>edit [site]</code> command. Take notice that you cannot
+edit group of sites, this command works only with single site.</p>
+<div class="codehilite"><pre><span class="gp">$</span> stado.py edit project
+<span class="go">Building site project...</span>
+<span class="go">Done! Site built in 0.01s</span>
+<span class="go">Watching for changes...</span>
+<span class="go">You can view site at: http://localhost:4000</span>
+</pre></div>
+<p>Now you can open web browser and visit <code>http://localhost:4000</code> to look at site.
+If you modify site source files, stado will auto-rebuild it and you will see
+changes immediately.</p>
+<h2 id="output">Output</h2>
+<div class="codehilite"><pre><span class="n">project</span><span class="o">/</span>
+    <span class="n">site</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">index</span><span class="o">.</span><span class="n">html</span>
+    <span class="n">image</span><span class="o">.</span><span class="n">jpg</span>
+    <span class="n">output</span><span class="o">/</span>             <span class="c"># rendered site is here</span>
+        <span class="n">index</span><span class="o">.</span><span class="n">html</span>
+        <span class="n">image</span><span class="o">.</span><span class="n">jpg</span>
+</pre></div>
+<p>Stado builds the site into an <code>output</code> directory.</p>
+<p>The content of <code>output/index.html</code> is:</p>
+<div class="codehilite"><pre>Hello World!
+</pre></div>
+</section>
+<footer>
+<p>© Copyright 2013 by Kasper Minciel</p>
+</footer>
+</body>
+</html>

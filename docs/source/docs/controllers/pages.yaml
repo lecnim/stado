@@ -1,0 +1,48 @@
+title: "Stadø controller: pages"
+related_topics:
+
+  - title: 'Documentation overview'
+    url: '../..'
+  - title: 'Controllers overview'
+    url: '..'
+  - title: 'Controller assets'
+    url: '../assets'
+
+
+content: |
+
+  pages
+  =====
+
+  This controller can be used inside @helper function. It iterates all page
+  items which match given source.
+
+  Usage
+  -----
+
+      #!python
+      pages(*sources: str)
+
+  ### Controller arguments ###
+
+  - `*sources` – page items are match by sources, file matching supported.
+
+  ### Controller returns ###
+
+  SiteItem objects which are pages and match given sources.
+
+
+  Examples
+  --------
+
+  Helper which returns urls to all pages available in site.
+
+      #!python
+      from stado import pages, helper, run
+
+      @helper
+      def navigation():
+          return [i.url for i in pages(**)]
+
+      run()
+

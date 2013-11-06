@@ -1,0 +1,126 @@
+title: "Stadø controller: layout"
+related_topics:
+
+  - title: 'Documentation overview'
+    url: '../..'
+  - title: 'Controllers overview'
+    url: '..'
+
+content: |
+
+  layout
+  ======
+
+  Use `layout` controller to render a page content using layouts files. A page content
+  is available in layout using a `content` keyword.
+
+
+  Usage
+  -----
+
+      #!python
+      layout(target: str or SiteItem, *layouts: str)
+
+  ### Controller arguments ###
+
+  - `target` – source (file matching supported) or SiteItem object. If no layouts
+  specified, argument is path to default layout file.
+  - `*layouts` – paths to layout files.
+
+
+  Example
+  -------
+
+      #!python
+      from stado import run, layout
+      layout('index.html', 'layout.html')
+      run()
+
+  *File `index.html`:
+
+      #!HTML
+      <p>Hello badger!</p>
+
+  *File `layout.html`:
+
+      #!HTML
+      <h1>Layout</h1>
+      {{{ content }}}
+
+  *Rendered file `output/index.html`:
+
+      #!HTML
+      <h1>Layout</h1>
+      <p>Hello badger!</p>
+
+
+  Details
+  -------
+
+  `layout` controller can be used inside a function decorated by `@before`.
+
+      #!python
+      @before('index.html')
+      def set_layout(page):
+          layout(page, 'layout.html')
+
+  * * *
+
+  `layout` controller can render a page using multiple layout files.
+
+      #!python
+      layout('index.html', 'sub-layout.html', 'layout.html')
+
+  File `index.html`:
+
+      #!text
+      Hello badger!
+
+  File `sub-layout.html`:
+
+      #!text
+      Hello sub-layout!
+      {{{ content }}}
+
+  File `layout.html`:
+
+      #!text
+      Hello layout!
+      {{{ content }}}
+
+  Rendered file `output/index.html`:
+
+      #!text
+      Hello layout!
+      Hello sub-layout!
+      Hello badger!
+
+  * * *
+
+  `layout` controller has access to a page context using `{{ page }}` variable.
+
+      #!text
+      {{ page.title }}
+      {{{ content }}}
+      {{ page.footer }}
+
+  * * *
+
+  You can set a default layout for all pages by calling controller with only one
+  argument.
+
+      #!python
+      layout('layout.html')
+
+
+  * * *
+
+  You can pass custom context to a layout controller using an `context` argument.
+
+      #!python
+      layout('index.html', 'layout.html', context={'title': 'Badger'})
+
+  Then you can use this context in `layout.html`:
+
+      #!text
+      {{ title }}
