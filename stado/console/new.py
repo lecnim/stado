@@ -6,12 +6,11 @@ from .. import log
 
 
 script = """\
-from stado import Stado
-app = Stado()
+from stado import run
 
 #  Start coding here!
 
-app.run()
+run()
 """
 
 index = """\
