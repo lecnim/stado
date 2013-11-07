@@ -5,9 +5,9 @@
 
 **What is stadø?**
 
-Stado is a one-file, simple static site generator, powered by python scripts.
+Stado is a simple, single-file static site generator, powered by python scripts.
 You just download
-[`stado.py`](https://github.com/lecnim/stado/releases/download/v0.5.1/stado.py)
+[`stado.py`](http://github.com/lecnim/stado/releases)
 and it is ready to work.
 
 
