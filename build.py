@@ -34,6 +34,11 @@ def build_stado():
 
     minify = Minify()
 
+    # Fix if build directory is missing.
+    output_dir = os.path.split(output)[0]
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
     module = zipfile.PyZipFile(output, mode='w', compression=compression)
     module.writestr('__main__.py', main_py)
 
