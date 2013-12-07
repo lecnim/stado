@@ -27,6 +27,12 @@ class TestLayout(TestPlugin):
         def set_layout(page):
             self.app.layout(page, 'layout.html')
 
+            # tests
+
+            self.assertIn('layout.html', page.layouts[0],
+                          'Layout controller should change item layout directly after '
+                          'calling in other controllers.')
+
         self.app.run()
 
         # tests
