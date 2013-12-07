@@ -1,5 +1,5 @@
 """
-Compile stado source to python zip package.
+Builds stado source into python zip package.
 Source reducing is inspired by "Python code minifier" created by Dan McDougall.
 You can get it from here: http://code.activestate.com/recipes/576704/
 """
@@ -14,13 +14,11 @@ from io import StringIO
 # Configuration.
 
 source = 'stado'                                # Path to stado source.
-output = os.path.join('build', 'stado.py')        # Path to output file.
+output = os.path.join('build', 'stado.py')      # Path to output file.
 compression = zipfile.ZIP_DEFLATED              # Compression type.
 
 
-
 # Content of __main__.py files in zip.
-
 main_py = """\
 import sys
 from stado.console import Console
@@ -29,15 +27,17 @@ sys.exit(0) if console() else sys.exit(1)
 """
 
 
-def compile_stado():
-    """Creates stado.py file with complied source."""
+def build_stado():
+    """Creates stado.py zip package using files from source."""
 
-    print('Compiling stado to: ' + output)
+    print('Building stado package: ' + output)
 
     minify = Minify()
 
     module = zipfile.PyZipFile(output, mode='w', compression=compression)
     module.writestr('__main__.py', main_py)
+
+    number_of_files = 0
 
     for dir_path, dirs, files in os.walk(source):
 
@@ -48,19 +48,38 @@ def compile_stado():
         # Append each file.
         for i in files:
 
+            # Skip python2 compiled files.
+            if i.endswith('.pyc'):
+                continue
+
             file_path = os.path.join(dir_path, i)
+
             with open(file_path) as file:
+                print('  {}'.format(file_path))
+                number_of_files += 1
 
                 # Minify python code.
                 data = minify(file.read())
                 module.writestr(os.path.join(dir_path, i), data)
 
     module.close()
-    print('Done!')
 
+    print('Done! ({} files, {})'.format(number_of_files,
+                                        size_of(os.path.getsize(output))))
+    print('Built package is here: ' + output)
+
+
+def size_of(num):
+    """Returns bytes converted to more user-friendly types (like KB, MB)."""
+
+    for x in ['bytes', 'KB', 'MB', 'GB', 'TB']:
+        if num < 1024.0:
+            return "%3.1f %s" % (num, x)
+        num /= 1024.0
 
 
 class Minify:
+
     """Returns python code without comments and blank lines."""
 
     def __call__(self, source):
@@ -89,7 +108,6 @@ class Minify:
             token_string = tok[1]
             start_line, start_col = tok[2]
             end_line, end_col = tok[3]
-            #ltext = tok[4]
 
             # The following two conditionals preserve indentation.
             # This is necessary because we're not using tokenize.untokenize()
@@ -106,8 +124,8 @@ class Minify:
 
             # This series of conditionals removes docstrings:
             elif token_type == tokenize.STRING:
-                if (prev_toktype != tokenize.INDENT) \
-                    and (prev_toktype != tokenize.NEWLINE):
+                if (prev_toktype != tokenize.INDENT) and (prev_toktype !=
+                                                          tokenize.NEWLINE):
                     output += token_string
 
             else:
@@ -119,7 +137,6 @@ class Minify:
 
         return output
 
-
     @staticmethod
     def remove_blank_lines(source):
         """
@@ -129,7 +146,6 @@ class Minify:
         io_obj = StringIO(source)
         source = [a for a in io_obj.readlines() if a.strip()]
         return "".join(source)
-
 
     @staticmethod
     def dedent(source):
@@ -144,7 +160,7 @@ class Minify:
         prev_start_line = 0
         indentation = ""
         indentation_level = 0
-        for i,tok in enumerate(tokenize.generate_tokens(io_obj.readline)):
+        for i, tok in enumerate(tokenize.generate_tokens(io_obj.readline)):
             token_type = tok[0]
             token_string = tok[1]
             start_line, start_col = tok[2]
@@ -173,7 +189,6 @@ class Minify:
 if __name__ == "__main__":
 
     if sys.version_info[:2] < (3, 2):
-        print('Failed to compile: require python >= 3.2')
+        print('Failed to build: require python >= 3.2')
     else:
-        compile_stado()
-
+        build_stado()
