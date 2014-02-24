@@ -16,10 +16,12 @@ class TestExample(unittest.TestCase):
     def setUp(self):
 
         self.cwd = os.getcwd()
-        os.chdir(os.path.dirname(__file__))
+        os.chdir(self.path)
+
+        self.temp_path = tempfile.mkdtemp()
 
         self.console = Console()
-        self.temp_path = tempfile.mkdtemp()
+        self.console('build data --output ' + self.temp_path)
 
     def tearDown(self):
         os.chdir(self.cwd)

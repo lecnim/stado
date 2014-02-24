@@ -1,3 +1,5 @@
+"""Tests basic site using before and ignore controllers."""
+
 import os
 from tests.examples import TestExample
 
@@ -5,10 +7,7 @@ from tests.examples import TestExample
 class TestBasicSite(TestExample):
 
     def test(self):
-
-        self.console('build basic --output ' + self.temp_path)
-
-        # Check pages.
+        """Checks pages sources."""
 
         with open(os.path.join(self.temp_path, 'index.html')) as page:
             self.assertEqual('Basic site\nHello on index!', page.read())
