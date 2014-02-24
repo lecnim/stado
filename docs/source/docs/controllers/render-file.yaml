@@ -8,7 +8,7 @@ related_topics:
 
 content: |
 
-  render_file
+  controller / render_file
   ===========
 
   Use this controller to render given file using site template engine.

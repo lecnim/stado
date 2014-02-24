@@ -10,7 +10,7 @@ related_topics:
 
 content: |
 
-  @before
+  controller / @before
   =======
 
   Use `@before` decorator to execute function before page rendering. It is used

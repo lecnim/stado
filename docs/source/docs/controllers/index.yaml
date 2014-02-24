@@ -8,7 +8,7 @@ related_topics:
 
 content: |
 
-  Controllers
+  controller / Controllers
   ===========
 
   Controllers are objects which are used to controll the site building process.

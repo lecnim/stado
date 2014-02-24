@@ -8,7 +8,7 @@ related_topics:
 
 content: |
 
-  @helper
+  controller / @helper
   =======
 
   Use `@helper` decorator to call a function during template rendering.

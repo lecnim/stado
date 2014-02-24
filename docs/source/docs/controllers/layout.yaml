@@ -8,7 +8,7 @@ related_topics:
 
 content: |
 
-  layout
+  controller / layout
   ======
 
   Use `layout` controller to render a page content using layouts files. A page content
