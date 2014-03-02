@@ -37,9 +37,7 @@ def modify_script(path):
 
 
 class TestWatchSite(TestCommand):
-    """Tests command:
-
-        watch [site] --output
+    """Command watch:
 
     Important!
     This test is done in temporary directory. Use self.temp_path to get path to it.
@@ -61,7 +59,7 @@ class TestWatchSite(TestCommand):
 
 
     def test_return_true(self):
-        """watch [site]: Should return True if watching ended successful."""
+        """should return True if watching ended successful."""
 
         self.shell.before_waiting = (modify_file,
                                      [os.path.join(self.temp_path, 'a', 'a.html')])
@@ -70,7 +68,7 @@ class TestWatchSite(TestCommand):
 
 
     def test_modify_file(self):
-        """watch [site]: Watcher should react on file modifying."""
+        """watcher should react on file modifying."""
 
         self.shell.before_waiting = (modify_file,
                                      [os.path.join(self.temp_path, 'a', 'a.html')])
@@ -82,7 +80,7 @@ class TestWatchSite(TestCommand):
 
 
     def test_create_file(self):
-        """watch [site]: Watcher should react on file creating."""
+        """watcher should react on file creating."""
 
         self.shell.before_waiting = (create_file,
                                      [os.path.join(self.temp_path, 'a', 'new.html')])
@@ -94,7 +92,7 @@ class TestWatchSite(TestCommand):
 
 
     def test_modify_script(self):
-        """watch [site]: Watcher should correctly re-import site.py"""
+        """watcher should correctly re-import site.py"""
 
         self.shell.before_waiting = (modify_script,
                                      [os.path.join(self.temp_path, 'a', 'site.py')])
@@ -106,7 +104,7 @@ class TestWatchSite(TestCommand):
 
 
     def test_output_option(self):
-        """watch [site] --output: Watcher should use custom output directory."""
+        """--output: watcher should use custom output directory."""
 
         output_path = tempfile.mkdtemp()
 
@@ -121,9 +119,7 @@ class TestWatchSite(TestCommand):
 
 
 class TestWatchGroupOfSites(TestCommand):
-    """Tests command:
-
-        watch --output
+    """Command watch group:
 
     Important!
     This test is done in temporary directory. Use self.temp_path to get path to it.
@@ -143,7 +139,7 @@ class TestWatchGroupOfSites(TestCommand):
 
 
     def test_return_true(self):
-        """watch : Should return True if watching ended successful."""
+        """should return True if watching ended successful."""
 
         self.shell.before_waiting = (modify_file,
                                      [os.path.join(self.temp_path, 'a', 'a.html')])
@@ -153,7 +149,7 @@ class TestWatchGroupOfSites(TestCommand):
 
 
     def test_modify_site(self):
-        """watch: Watcher should rebuild only modified site."""
+        """watcher should rebuild only modified site."""
 
         self.shell.before_waiting = (modify_file,
                                      [os.path.join(self.temp_path, 'a', 'a.html')])
@@ -169,7 +165,7 @@ class TestWatchGroupOfSites(TestCommand):
 
 
     def test_output_option(self):
-        """watch --output: Watcher should use custom output directory."""
+        """--output: watcher should use custom output directory."""
 
         output_path = tempfile.mkdtemp()
 

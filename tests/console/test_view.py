@@ -9,11 +9,8 @@ from stado.console import Console
 from tests.console import TestCommand
 
 
-
 class TestViewSite(TestCommand):
-    """Tests command:
-
-        view [site] --host --port --output
+    """Command view
 
     Important!
     This test is done in temporary directory. Use self.temp_path to get path to it.
@@ -30,10 +27,8 @@ class TestViewSite(TestCommand):
         self.shell = Console()
 
 
-
-
     def test_server(self):
-        """view [site]: Should run server and return True."""
+        """should run server and return True."""
 
         self.shell.before_waiting = self._test_server
         returned = self.shell(self.command + ' a')
@@ -51,7 +46,7 @@ class TestViewSite(TestCommand):
 
 
     def test_host_and_port(self):
-        """view [site] --host --port: Should run server on custom host and port."""
+        """--host --port: should run server on custom host and port."""
 
         self.shell.before_waiting = self._test_host_and_port
         self.shell(self.command + ' a --host 127.0.0.2 --port 3000')
@@ -66,7 +61,7 @@ class TestViewSite(TestCommand):
 
 
     def test_output_option(self):
-        """view [site] --output: Should run server in custom output directory."""
+        """--output: should run server in custom output directory."""
 
         output_path = tempfile.mkdtemp()
 

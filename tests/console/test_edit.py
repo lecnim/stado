@@ -8,12 +8,12 @@ from tests.console.test_watch import TestWatchSite, create_file
 
 
 class TestEditView(TestViewSite):
-    """Use 'view' command tests."""
+    """Command edit:"""
 
     command = 'edit'
 
 class TestEditWatch(TestWatchSite):
-    """Use 'watch' command tests."""
+    """Command edit + watch:"""
 
     command = 'edit'
 

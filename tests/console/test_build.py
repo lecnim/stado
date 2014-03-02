@@ -9,11 +9,8 @@ from stado.console import Console
 from tests.console import TestCommand
 
 
-
 class TestBuildSite(TestCommand):
-    """Tests command:
-
-        build [site] --output
+    """Command build <site>:
 
     Important!
     This test is done in temporary directory. Use self.temp_path to get path to it.
@@ -23,14 +20,13 @@ class TestBuildSite(TestCommand):
     """
 
     def test_returned_value(self):
-        """build [site]: Should return True if building successful."""
+        """should return True if building successful."""
 
         self.assertTrue(Console().__call__('build a'))
 
 
-
     def test_build_directory(self):
-        """build [site]: Should create output directory in site directory."""
+        """should create output directory in site directory."""
 
         Console().__call__('build a')
 
@@ -39,9 +35,8 @@ class TestBuildSite(TestCommand):
         self.assertTrue(os.path.exists(build_directory))
 
 
-
     def test_page(self):
-        """build [site]: Should correctly build page from site content."""
+        """should correctly build page from site content."""
 
         Console().__call__('build a')
 
@@ -53,10 +48,8 @@ class TestBuildSite(TestCommand):
             self.assertEqual('hello world', page.read())
 
 
-
-
     def test_skip_python_script(self):
-        """build [site]: Should skip python files."""
+        """should skip python files."""
 
         Console().__call__('build a')
 
@@ -67,7 +60,7 @@ class TestBuildSite(TestCommand):
 
 
     def test_output_option(self):
-        """build [site] --output: Should build site in custom output directory."""
+        """--output: should build site in custom output directory."""
 
         output_path = tempfile.mkdtemp()
         Console().__call__('build a --output ' + output_path)
@@ -82,11 +75,8 @@ class TestBuildSite(TestCommand):
 
 
 
-
 class TestBuildWithoutArguments(TestCommand):
-    """Tests command:
-
-        build --output
+    """Command build:
 
     Important!
     This test is done in temporary directory. Use self.temp_path to get path to it.
@@ -96,13 +86,13 @@ class TestBuildWithoutArguments(TestCommand):
     """
 
     def test_returned_value(self):
-        """build: Should return True if building each site in group => successful."""
+        """should return True if building each site in group => successful."""
 
         self.assertTrue(Console().__call__('build'))
 
 
     def test_build_directory(self):
-        """build: Should create output directory in each site directory."""
+        """should create output directory in each site directory."""
 
         Console().__call__('build')
 
@@ -114,7 +104,7 @@ class TestBuildWithoutArguments(TestCommand):
 
 
     def test_page(self):
-        """build: Should correctly build pages in each site content."""
+        """should correctly build pages in each site content."""
 
         Console().__call__('build')
 
@@ -131,7 +121,7 @@ class TestBuildWithoutArguments(TestCommand):
 
 
     def test_skip_python_script(self):
-        """build: Should skip python files."""
+        """should skip python files."""
 
         Console().__call__('build')
 
@@ -143,7 +133,7 @@ class TestBuildWithoutArguments(TestCommand):
 
 
     def test_output_option(self):
-        """build --output: Should build each site in custom output directory."""
+        """--output: should build each site in custom output directory."""
 
         output_path = tempfile.mkdtemp()
         Console().__call__('build --output ' + output_path)

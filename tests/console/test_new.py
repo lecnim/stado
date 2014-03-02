@@ -7,11 +7,8 @@ from stado.console import Console, CommandError
 from tests.console import TestCommand
 
 
-
 class TestNewSite(TestCommand):
-    """Tests command:
-
-        new [site]
+    """Command new <site>:
 
     Important!
     This test is done in temporary directory. Use self.temp_path to get path to it.
@@ -21,13 +18,13 @@ class TestNewSite(TestCommand):
     """
 
     def test_returned_value(self):
-        """new [site]: Should return True if building successful."""
+        """should return True if building successful."""
 
         self.assertTrue(Console().__call__('new test'))
 
 
     def test(self):
-        """new [site]: Should correctly creates new site files."""
+        """should correctly creates new site files."""
 
         Console().__call__('new test')
 
@@ -42,7 +39,7 @@ class TestNewSite(TestCommand):
 
 
     def test_site_exists(self):
-        """new [site]: Should raise error when creating site which already exits."""
+        """should raise error when creating site which already exits."""
 
         self.assertFalse(Console().__call__('new a'))
-        self.assertRaises(CommandError,Console().commands['new'].run, 'a')
+        self.assertRaises(CommandError, Console().commands['new'].run, 'a')
