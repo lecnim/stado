@@ -1,5 +1,7 @@
 <h1>{{ page.title }}</h1>
 
 <ul>
-    {{# page.list_of_fruits }}<li>{{.}}</li>{{/ page.list_of_fruits }}
+    {{# page.basket }}
+    <li>{{.}}</li>
+    {{/ page.basket }}
 </ul>

@@ -1,4 +1,4 @@
 {
-    "title": "Best of fruits",
-    "list_of_fruits": ["Apple", "Banana", "Orange", "Cherry"]
+    "title": "Basket of best fruits",
+    "basket": ["Apple", "Banana", "Orange", "Cherry"]
 }
