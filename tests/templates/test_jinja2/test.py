@@ -1,15 +1,28 @@
+"""Testing support for jinja2."""
+
 import os
+import unittest
 from stado import templates
 from tests import TestInCurrentDirectory
 
 
+def requirements():
+    """Skip test if jinja2 not available."""
+    try:
+        import jinja2
+        return True
+    except ImportError:
+        return False
+
+
+@unittest.skipIf(not requirements(), 'require jinja2')
 class TestJinja2Template(TestInCurrentDirectory):
     """
-    Tests Jinja2 template engine.
+    Template engine: Jinja2
     """
 
     def test_render(self):
-        """Stado should correctly renders template using Jinja2."""
+        """should correctly renders templates"""
 
         engine_class = templates.load('jinja2')
         engine = engine_class(os.path.join(self.path, 'data'))
@@ -20,7 +33,7 @@ class TestJinja2Template(TestInCurrentDirectory):
 
 
     def test_inheritance(self):
-        """Stado should correctly renders inherited templates using Jinja2."""
+        """should correctly renders inherited templates"""
 
         engine_class = templates.load('jinja2')
         engine = engine_class(os.path.join(self.path, 'data'))
@@ -28,12 +41,3 @@ class TestJinja2Template(TestInCurrentDirectory):
         result = engine.render('{% extends "a.html" %}{% block b %}'
                                'hello world{% endblock %}', {})
         self.assertEqual(result, 'hello world')
-
-
-# Skip test if jinja2 not available.
-
-try:
-    import jinja2
-except ImportError:
-    print('Skipping TestJinja2Template, jinja2 not available.')
-    del TestJinja2Template

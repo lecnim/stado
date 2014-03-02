@@ -1,14 +1,16 @@
+"""Testing support for Mustache."""
+
 import unittest
 from stado import templates
 
 
 class TestMustacheTemplate(unittest.TestCase):
     """
-    Tests Mustache template engine.
+    Template engine: Mustache
     """
 
     def test_render(self):
-        """Stado should correctly render template using Mustache."""
+        """should correctly renders templates"""
 
         engine_class = templates.load('mustache')
         engine = engine_class()
