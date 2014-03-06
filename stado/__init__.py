@@ -33,6 +33,17 @@ log = get_logger()
 app = None
 run = None
 
+
+class WrapController:
+
+    def __init__(self, controller):
+        self.controller = controller
+    def __call__(self, *args, **kwargs):
+        # if not app.is_loaded:
+        #     app.load()
+        return self.controller(*args, **kwargs)
+
+
 def default_site(path):
     global app
     global run
@@ -43,8 +54,9 @@ def default_site(path):
     module = sys.modules[__name__]
 
     for name, plugin in app.controllers.items():
-        setattr(module, name, plugin)
+        # setattr(module, name, plugin)
 
+        setattr(module, name, WrapController(plugin))
 
 def clear_default_site():
     global app

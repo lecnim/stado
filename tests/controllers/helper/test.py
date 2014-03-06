@@ -2,10 +2,13 @@ from tests.controllers import TestPlugin
 
 
 class TestHelper(TestPlugin):
+    """
+    Controller @helper
+    """
 
 
     def test_executing(self):
-        """Helper plugin should run function only when template is calling."""
+        """should run function only when template is calling"""
 
         # site.py
 
@@ -20,11 +23,27 @@ class TestHelper(TestPlugin):
 
         self.assertFalse(self.was_executed)
 
+    def test_layout(self):
+        """should be available during rendering layout"""
+
+        # site.py
+
+        @self.app.helper
+        def hello():
+            return 'hello world'
+        self.app.layout('str.html', 'layout.html')
+        self.app.run()
+
+        # tests
+
+        with open('str.html') as page:
+            self.assertEqual('hello world not', page.read())
+
 
     # Test types.
 
     def test_str(self):
-        """Helper plugin should works correctly if string returned."""
+        """should works correctly if string returned"""
 
         # site.py
 
@@ -40,7 +59,7 @@ class TestHelper(TestPlugin):
 
 
     def test_list(self):
-        """Helper plugin should works correctly if list returned."""
+        """should works correctly if list returned"""
 
         # site.py
 
@@ -56,7 +75,7 @@ class TestHelper(TestPlugin):
 
 
     def test_list_of_dict(self):
-        """Helper plugin should works correctly if list of dict returned."""
+        """should works correctly if list of dict returned"""
 
         # site.py
 
@@ -72,7 +91,7 @@ class TestHelper(TestPlugin):
 
 
     def test_dict(self):
-        """Helper plugin should works correctly if dict returned."""
+        """should works correctly if dict returned"""
 
         # site.py
 
@@ -90,7 +109,7 @@ class TestHelper(TestPlugin):
     # Other tests.
 
     def test_do_not_overwrite_context(self):
-        """Helper plugin should not overwrite already existing context key."""
+        """should not overwrite already existing context key"""
 
         # site.py
 

@@ -14,7 +14,8 @@ class ItemTypes:
     def __init__(self, models=None):
         self.models = {}
         if models:
-            for i in models: self.set(**i)
+            for i in models:
+                self.set(**i)
 
     def __call__(self, extension):
         return self.get(extension)
@@ -33,15 +34,8 @@ class ItemTypes:
 
         raise KeyError('Default content type model not found!')
 
-    def set(self, extension, loaders, renderers, deployers):
-
-        self.models[extension] = {
-            'extension': extension,
-            'loaders': loaders,
-            'renderers': renderers,
-            'deployers': deployers,
-        }
-
+    def set(self, extension, model):
+        self.models[extension] = model
 
 
 class SiteItem(dict, Events):
@@ -160,21 +154,21 @@ class SiteItem(dict, Events):
         return False
 
 
-    def set_type(self, type):
+    def set_type(self, model):
         """Sets item loaders, renderers and deployer. Also sets item url using
         deployer url pattern."""
 
         # For example: "html"
-        self.type = type['extension']
+        # self.type = type['extension']
 
         # Lists.
-        self.loaders = type['loaders']
-        self.renderers = type['renderers']
+        self.loaders = model.loaders
+        self.renderers = model.renderers
         # Deployer object.
-        self.deployer = type['deployers']
+        self.deployer = model.deployer
 
-        if self.deployer.url:
-            self.url = self.deployer.url
+        if model.url:
+            self.url = model.url
 
 
     def dump(self):
@@ -211,12 +205,12 @@ class SiteItem(dict, Events):
         self.event('item.before_rendering', self)
 
         for renderer in self.renderers:
-            self.event('renderer.before_rendering', self, renderer)
+            # self.event('renderer.before_rendering', self, renderer)
             if callable(renderer):
                 self.data = renderer(self.data, self.metadata.dump())
             else:
                 self.data = renderer.render(self.data, self.metadata.dump())
-            self.event('renderer.after_rendering', self, renderer)
+            # self.event('renderer.after_rendering', self, renderer)
 
         # Event rendering has ended.
         self.event('item.after_rendering', self)
@@ -227,6 +221,9 @@ class SiteItem(dict, Events):
         """Writes page to output directory in given path"""
 
         self.event('item.before_deploying', self)
+        # if callable(self.deployer):
+        #     self.deployer(self, os.path.join(path, self.output))
+        # else:
         self.deployer.deploy(self, os.path.join(path, self.output))
         self.event('item.after_deploying', self)
         return self

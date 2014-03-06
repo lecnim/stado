@@ -65,6 +65,7 @@ class FileItem(SiteItem):
     def data(self):
         if self._data is None:
             with open(self.path) as file:
+                print(self.path)
                 return file.read()
         return self._data
 

@@ -26,7 +26,8 @@ class Site(Events):
     def __init__(self, path=None, output=None, config=None,
                  template_engine='mustache',
                  cache=DictCache,
-                 loaders=(FileSystemItemLoader(),)):
+                 loaders=(FileSystemItemLoader(),),
+                 load=True):
         """
         Arguments:
             path: Items will be created using files in this path. Default path is
@@ -76,15 +77,21 @@ class Site(Events):
         self.loaders = loaders
 
 
+        # Loads plugins from stado.plugins package.
+        self.plugins = {}
+        for i in plugins.load(self.config['plugins']):
+            self.plugins[i.name] = i(self)
+
         # Loads controllers from stado.controllers package.
         self.controllers = {}
         for i in controllers.load(self.config['controllers']):
             self.controllers[i.name] = self.bind_controller(i(self))
 
-        # Loads plugins from stado.plugins package.
-        self.plugins = {}
-        for i in plugins.load(self.config['plugins']):
-            self.plugins[i.name] = i(self)
+        self.is_loaded = False
+        # if load:
+            # self.load()
+
+
 
 
     @property
@@ -127,7 +134,8 @@ class Site(Events):
         if controller.is_callable is True:
             setattr(self, controller.name, controller)
 
-        self.events.subscribe(controller)
+        # self.events.subscribe(controller)
+        self.template_engine.events.subscribe(controller)
         return controller
 
 
@@ -183,6 +191,7 @@ class Site(Events):
                 # Loads item data and stores loaded item in cache.
                 self.cache.save_item(item.load())
 
+        self.is_loaded = True
         return self
 
 

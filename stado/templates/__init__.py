@@ -1,7 +1,8 @@
 from ..errors import StadoError
+from ..core.events import Events
 
 
-class TemplateEngine:
+class TemplateEngine(Events):
     """Base class for template engines."""
 
     # Disabled engine are not used.
@@ -16,6 +17,7 @@ class TemplateEngine:
         return True
 
     def __init__(self, path=None):
+        Events.__init__(self)
         self.path = path
 
 

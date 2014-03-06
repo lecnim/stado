@@ -41,6 +41,8 @@ class Mustache(TemplateEngine):
     def render(self, source: str, context: dict):
         """Renders source with given context."""
 
+        self.event('template.before_rendering', self, context)
+
         # Creating new class which will be used as a template context.
         context_class = type('RenderContext', (Context,), {})
 
@@ -59,5 +61,7 @@ class Mustache(TemplateEngine):
         render_context = context_class(context)
 
         result = pystache.render(source, render_context)
+
+        self.event('template.after_rendering', self, context)
 
         return result

@@ -113,7 +113,7 @@ class Console:
 
         # Show help message if no arguments.
 
-        print('')
+        # print('')
 
         # No arguments!
         if not len(sys.argv) > 1 and not arguments:
