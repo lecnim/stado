@@ -11,11 +11,18 @@ class Controller(Events):
         Events.__init__(self)
         self.site = site
 
+    def get_item(self):
+        pass
+
+    def modify_item(self):
+        pass
+
 
 # Plugins.
 
 from . import ignore
 from . import before
+from . import context
 from . import after
 from . import permalink
 from . import helper
