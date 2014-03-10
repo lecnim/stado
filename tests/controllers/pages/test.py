@@ -8,9 +8,7 @@ class TestPages(TestPlugin):
 
         # site.py
 
-        @self.app.before('**')
-        def set_title(page):
-            return {'title': 'badger'}
+        self.app.context('**', {'title': 'badger'})
 
         @self.app.helper
         def pages():

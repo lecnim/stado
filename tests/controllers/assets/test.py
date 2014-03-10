@@ -8,9 +8,11 @@ class TestAssets(TestPlugin):
 
         # site.py
 
-        @self.app.before('**.jpg')
-        def set_title(page):
-            return {'title': 'badger'}
+        self.app.context('**.jpg', {'title': 'badger'})
+
+        # @self.app.before('**.jpg')
+        # def set_title(page):
+        #     return {'title': 'badger'}
 
         @self.app.helper
         def assets():
