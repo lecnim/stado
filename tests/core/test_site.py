@@ -13,6 +13,36 @@ class TestSite(TestTemporaryDirectory):
         path = os.path.dirname(__file__)
         self.site = Site(os.path.join(path, 'data'), self.temp_path)
 
+    # route
+
+    def check_route(self, path, source):
+
+        path = os.path.join(self.site.output, path)
+        self.assertTrue(os.path.exists(path))
+        with open(path) as page:
+            self.assertEqual(source, page.read())
+
+    def test_route(self):
+
+        self.site.route('/example.html', 'hello')
+        self.check_route('example.html', 'hello')
+
+    def test_route_function(self):
+        """route() should support function as a argument"""
+
+        def hello():
+            return 'hello'
+
+        self.site.route('/example.html', hello)
+        self.check_route('example.html', 'hello')
+
+    def test_route_dir(self):
+
+        self.site.route('/', 'hello')
+        self.check_route('index.html', 'hello')
+        self.site.route('/another', 'wow')
+        self.check_route('another/index.html', 'wow')
+
     # load
 
     def test_load_file(self):
@@ -39,3 +69,6 @@ class TestSite(TestTemporaryDirectory):
         """find() method should yield items"""
 
         self.assertIsInstance(self.site.find('*'), types.GeneratorType)
+
+        sources = [i.source for i in self.site.find('*.html')]
+        self.assertCountEqual(['index', 'about'], sources)

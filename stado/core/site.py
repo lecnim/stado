@@ -104,16 +104,35 @@ class Site(Events):
     # Controllers
 
     def route(self, url, source):
-        pass
+
+        path = os.path.join(self.output, url.lstrip('/'))
+
+        # Url is directory.
+        # /about => /about/index.html
+        extension = os.path.splitext(path)[1]
+        if not extension:
+            path = path + '/' + 'index.html'
+
+        # Create missing directories.
+        base_path = os.path.split(path)[0]
+        if not os.path.exists(base_path):
+            os.makedirs(base_path)
+
+        if callable(source):
+            source = source()
+
+        with open(path, 'w') as page:
+            page.write(source)
+
 
     def load(self, path):
         """Returns list of items created using files in path."""
 
-        path = os.path.join(self.path, path)
         items = [i for i in self.find(path)]
 
         # Return list if wildcards used or path is pointing to directory.
-        if glob.has_magic(path) or os.path.isdir(path):
+        if (glob.has_magic(path) or
+            os.path.isdir(os.path.join(self.path, path))):
             return items
 
         return items[0]
@@ -121,12 +140,16 @@ class Site(Events):
     def find(self, path):
         """Yields items created using files in path."""
 
+        # Create absolute path.
+        path = os.path.join(self.path, path)
+
         for item in self.loader.load(path, excluded=self.excluded_paths):
             yield item
 
 
     def register(self, path, *plugins):
         pass
+
 
     def build(self, path, *plugins, context=None, overwrite=True):
         pass
