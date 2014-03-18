@@ -1,7 +1,7 @@
 import os
 import inspect
 
-from .loaders import FileSystemItemLoader
+from .loaders import FileSystemItemLoader, FileLoader
 from .item import ItemTypes
 from .. import templates
 from .events import Events
@@ -10,6 +10,7 @@ from .. import plugins
 from .. import config as CONFIG
 from .cache import ItemCache, DictCache
 from .. import log
+from ..libs import glob2 as glob
 
 
 class Site(Events):
@@ -75,6 +76,8 @@ class Site(Events):
         self.cache = ItemCache(cache(self.output))
         self.loaders = loaders
 
+        self.loader = FileLoader()
+
 
         # Loads plugins from stado.plugins package.
         self.plugins = {}
@@ -82,9 +85,9 @@ class Site(Events):
             self.plugins[i.name] = i(self)
 
         # Loads controllers from stado.controllers package.
-        self.controllers = {}
-        for i in controllers.load(self.config['controllers']):
-            self.controllers[i.name] = self.bind_controller(i(self))
+        # self.controllers = {}
+        # for i in controllers.load(self.config['controllers']):
+        #     self.controllers[i.name] = self.bind_controller(i(self))
 
 
         self._find()
@@ -98,18 +101,29 @@ class Site(Events):
         return self._output
 
 
-
-
     # Controllers
 
     def route(self, url, source):
         pass
 
     def load(self, path):
-        pass
+        """Returns list of items created using files in path."""
+
+        path = os.path.join(self.path, path)
+        items = [i for i in self.find(path)]
+
+        # Return list if wildcards used or path is pointing to directory.
+        if glob.has_magic(path) or os.path.isdir(path):
+            return items
+
+        return items[0]
 
     def find(self, path):
-        pass
+        """Yields items created using files in path."""
+
+        for item in self.loader.load(path, excluded=self.excluded_paths):
+            yield item
+
 
     def register(self, path, *plugins):
         pass
@@ -216,8 +230,8 @@ class Site(Events):
                 item.set_extension(model)
 
                 # Subscribe controller to item object events.
-                for i in self.controllers.values():
-                    item.events.subscribe(i)
+                # for i in self.controllers.values():
+                #     item.events.subscribe(i)
 
                 # Loads item data and stores loaded item in cache.
                 self.cache.save_item(item)
