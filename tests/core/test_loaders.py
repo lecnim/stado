@@ -24,7 +24,7 @@ class TestFileSystemContentLoader(TestInCurrentDirectory):
         loader = FileSystemItemLoader()
         contents = [i for i in loader.load('data')]
 
-        sources = [i.source for i in contents]
+        sources = [i.id for i in contents]
         self.assertCountEqual(['a.html', 'b.html', 'image.jpg', 'b/b.md'], sources)
 
 
@@ -33,7 +33,7 @@ class TestFileSystemContentLoader(TestInCurrentDirectory):
         loader = FileSystemItemLoader()
         contents = [i for i in loader.load('data')]
 
-        outputs = [i.output for i in contents]
+        outputs = [i.output_path for i in contents]
         self.assertCountEqual([os.path.join('a.html'),
                                os.path.join('b.html'),
                                os.path.join('image.jpg'),
@@ -45,7 +45,7 @@ class TestFileSystemContentLoader(TestInCurrentDirectory):
         loader = FileSystemItemLoader()
         contents = [i for i in loader.load('data')]
 
-        paths = [i.path for i in contents]
+        paths = [i.source_path for i in contents]
         self.assertCountEqual([os.path.join('data', 'a.html'),
                                os.path.join('data', 'b.html'),
                                os.path.join('data', 'image.jpg'),
@@ -57,5 +57,5 @@ class TestFileSystemContentLoader(TestInCurrentDirectory):
         loader = FileSystemItemLoader()
         contents = [i for i in loader.load('data')]
 
-        data = [i.data for i in contents if i.source.endswith('.html')]
+        data = [i.source for i in contents if i.id.endswith('.html')]
         self.assertCountEqual(['a', 'b'], data)

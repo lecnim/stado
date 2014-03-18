@@ -23,15 +23,14 @@ class TestLayout(TestPlugin):
 
         # site.py
 
-        @self.app.before('page.html')
-        def set_layout(page):
-            self.app.layout(page, 'layout.html')
+        page = self.app.get('page.html')
+        self.app.layout(page, 'layout.html')
 
-            # tests
+        # tests
 
-            self.assertIn('layout.html', page.layouts[0],
-                          'Layout controller should change item layout directly after '
-                          'calling in other controllers.')
+        self.assertIn('layout.html', page.layouts[0],
+                      'Layout controller should change item layout directly after '
+                      'calling in other controllers.')
 
         self.app.run()
 
@@ -80,10 +79,7 @@ class TestLayout(TestPlugin):
 
         # site.py
 
-        @self.app.before('page.html')
-        def a():
-            return {'title': 'page'}
-
+        self.app.context('page.html', {'title': 'page'})
         self.app.layout('page.html', 'context-layout.html', 'layout.html',
                         context={'title': 'title'})
         self.app.run()

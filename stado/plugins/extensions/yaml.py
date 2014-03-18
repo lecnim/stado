@@ -29,7 +29,7 @@ class Yaml(Extension):
 
         self.renderers = [yaml_render]
         self.loaders = [yaml_loader]
-        self.deployer = DataDeployer
+        self.deployer = DataDeployer()
 
     # def load(self, data):
     #     return data, pyyaml.load(data)

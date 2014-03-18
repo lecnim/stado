@@ -48,5 +48,5 @@ class Json(Extension):
 
         self.renderers = [json_render]
         self.loaders = [json_loader]
-        self.deployer = DataDeployer
+        self.deployer = DataDeployer()
 

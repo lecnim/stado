@@ -1,5 +1,5 @@
 from . import Controller
-
+import os
 
 class Ignore(Controller):
 
@@ -15,15 +15,32 @@ class Ignore(Controller):
 
     def __call__(self, *sources):
 
+        ignored_paths = []
+        ignored_items = []
+
         for i in sources:
 
-            # There are to possibilities: given ignored element is item source or
-            # item object.
-            if isinstance(i, str):
-                if not i in self.ignored_paths:
-                    self.ignored_paths.append(i)
-                    self.site.excluded_paths.append(i)
+            if not isinstance(i, str):
+                ignored_items.append(i)
 
-            ## Source is item object.
             else:
-                i.enabled = False
+                if os.path.isdir(os.path.join(self.site.path, i)):
+                    ignored_paths.append(i + '/**')
+                else:
+                    ignored_paths.append(i)
+
+        for i in ignored_paths:
+
+            # There are to possibilities: given ignored element is item source
+            # or item object.
+
+            for item in self.site.items:
+                if item.match(*ignored_paths):
+                    item.published = False
+            #
+            # if not i in self.ignored_paths:
+            #     self.ignored_paths.append(i)
+            #     self.site.excluded_paths.append(i)
+
+        for i in ignored_items:
+            i.published = False

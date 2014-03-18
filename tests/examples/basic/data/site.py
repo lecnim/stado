@@ -1,24 +1,11 @@
-from stado import run, before, ignore
+from stado import run, ignore, context
 
-
-@before('*.html', '*.md')
-def title(page):
-    page['title'] = 'Basic site'
-
-
-@before('index.html')
-def index():
-    return {'content': 'Hello on index!'}
-
-
-@before('contact.html')
-def contact():
-    return {'email': 'example@site.com'}
-
-
-@before('about.md')
-def about():
-    return {'about': '...'}
+var = {'title': 'Basic site'}
+context('*.html', var)
+context('*.md', var)
+context('index.html', {'content': 'Hello on index!'})
+context('contact.html', {'email': 'example@site.com'})
+context('about.md', {'about': '...'})
 
 
 ignore('ignored*')

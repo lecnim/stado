@@ -26,8 +26,7 @@ class Site(Events):
     def __init__(self, path=None, output=None, config=None,
                  template_engine='mustache',
                  cache=DictCache,
-                 loaders=(FileSystemItemLoader(),),
-                 load=True):
+                 loaders=(FileSystemItemLoader(),)):
         """
         Arguments:
             path: Items will be created using files in this path. Default path is
@@ -87,10 +86,8 @@ class Site(Events):
         for i in controllers.load(self.config['controllers']):
             self.controllers[i.name] = self.bind_controller(i(self))
 
-        self.is_loaded = False
-        # if load:
-            # self.load()
 
+        self._find()
 
 
 
@@ -99,6 +96,34 @@ class Site(Events):
         if CONFIG.output:
             return CONFIG.output
         return self._output
+
+
+
+
+    # Controllers
+
+    def route(self, url, source):
+        pass
+
+    def load(self, path):
+        pass
+
+    def find(self, path):
+        pass
+
+    def register(self, path, *plugins):
+        pass
+
+    def build(self, path, *plugins, context=None, overwrite=True):
+        pass
+
+
+
+
+
+
+
+
 
 
     # Shortcuts.
@@ -126,6 +151,14 @@ class Site(Events):
 
     # Methods.
 
+    def _get(self, *source):
+
+        for item in self.cache:
+            if item.match(*source):
+                if not item.is_loaded():
+                    item.load()
+                yield item
+
     def bind_controller(self, controller):
         """Binds events to given controller object. Installs controller as a site
         method if controller is callable. Returns given controller object."""
@@ -139,35 +172,33 @@ class Site(Events):
         return controller
 
 
+    # Generating.
+
     def run(self):
         """Creates site: loads, renders, deploys."""
 
         log.debug('Starting building site: {}'.format(self.path))
+        log.debug('\tRendering and deploying items...')
 
-        # Build site.
+        for item in self.cache:
+            if not item.is_loaded():
+                item.load()
 
-        self.load()
-        self.render()
-        self.deploy()
+            log.debug('\t\t{} => {}'.format(item.id, item.output_path))
+            item.generate(self.output)
 
         # Remove cache.
 
-        self.clear()
+        # TODO: clearing cache
+        # self.clear()
 
+    def generate(self):
+        self.run()
 
-    # Generating.
+    def _find(self):
+        """Find site items and stores them unloaded in cache."""
 
-    def load(self):
-        """Loads items from site source files and stores this items in cache."""
-
-        log.debug('\tLoading site items...')
-
-        # Controllers order.
-        # Before loading:
-        #   1) layout
-        # After loading:
-        #   1) permalink
-        #   2) before
+        log.debug('\tFinding site items...')
 
         # Use each content loader.
         for loader in self.loaders:
@@ -176,52 +207,20 @@ class Site(Events):
             excluded_paths = self.excluded_paths + [self.output]
             for item in loader.load(self.path, excluded_paths):
 
-                log.debug('\t\t[ {0.type} ]  {0.source}'.format(item))
+                log.debug('\t\t[ {0.type} ]  {0.id}'.format(item))
 
                 # Get item model with load(), render(), deploy() methods.
                 # Install this methods in Item.
 
                 model = self.item_types(item.type)
-                item.set_type(model)
+                item.set_extension(model)
 
                 # Subscribe controller to item object events.
                 for i in self.controllers.values():
                     item.events.subscribe(i)
 
                 # Loads item data and stores loaded item in cache.
-                self.cache.save_item(item.load())
-
-        self.is_loaded = True
-        return self
-
-
-    def render(self):
-        """Renders items to cache."""
-
-        log.debug('\tRendering items...')
-
-        # Controllers order.
-        # Before rendering:
-        #   1) helper
-        # After rendering:
-        #   1) layout
-        #   2) helper
-        #   3) after
-
-        for item in self.cache:
-            self.cache.save_item(item.render())
-        return self
-
-
-    def deploy(self):
-        """Writes items to output directory."""
-
-        log.debug('\tDeploying items...')
-
-        for item in self.cache:
-            log.debug('\t\t{} => {}'.format(item.source, item.output))
-            item.deploy(self.output)
-        return self
+                self.cache.save_item(item)
 
 
     # Cleaning.

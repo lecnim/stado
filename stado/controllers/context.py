@@ -31,5 +31,5 @@ class Context(Controller):
                     else:
                         context = dict(*args, **context)
 
-                item.metadata.update(context)
+                item.context.update(context)
                 self.site.save_item(item)

@@ -40,7 +40,7 @@ class After(Controller):
             self.functions.append((function, paths))
         return wrap
 
-    def update_content(self, item):
+    def update_content(self, item, data):
         """Updates item content."""
 
         for function, paths in self.functions:
@@ -53,8 +53,9 @@ class After(Controller):
                 if args == 0:
                     content = function()
                 elif args == 1:
-                    content = function(item.data)
+                    content = function(item.source)
                 elif args == 2:
-                    content = function(item.data, item)
+                    content = function(item.source, item)
 
-                item.content = content
+                return content
+        return data

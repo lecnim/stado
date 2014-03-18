@@ -11,7 +11,7 @@ class TestItem(unittest.TestCase):
         """Item.source property should use posix path format."""
 
         item = SiteItem('a/b/c', '')
-        self.assertEqual('a/b/c', item.source)
+        self.assertEqual('a/b/c', item.id)
 
         item = SiteItem('a\\b\\c', '')
-        self.assertEqual('a/b/c', item.source)
+        self.assertEqual('a/b/c', item.id)

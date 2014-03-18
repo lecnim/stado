@@ -9,7 +9,9 @@ class Default(Extension):
     name = 'default_extension'
     extensions = None
 
-    deployer = CopyDeployer
+    do_not_render = True
+
+    deployer = CopyDeployer()
 
     # # deployer = CopyDeployer
     #

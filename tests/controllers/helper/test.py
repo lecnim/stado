@@ -113,9 +113,7 @@ class TestHelper(TestPlugin):
 
         # site.py
 
-        @self.app.before('str.html')
-        def page(path):
-            return {'hello': 'hello world'}
+        self.app.context('str.html', {'hello': 'hello world'})
 
         @self.app.helper
         def hello():

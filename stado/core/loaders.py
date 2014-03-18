@@ -48,29 +48,29 @@ class FileSystemItemLoader(ItemLoader):
 
 class FileItem(SiteItem):
 
-    def __init__(self, path, output):
+    def __init__(self, source_path, output_path):
 
         # File item source is same as item output. For example if source path is
         # "b.html", it be that same as a item output path: "output/b.html".
 
-        SiteItem.__init__(self, source=output, output=output, path=path)
+        SiteItem.__init__(self, id=output_path, output_path=output_path, source_path=source_path)
 
         # Item type is recognized using file extension.
-        self.type = os.path.splitext(path)[1][1:]
+        self.type = os.path.splitext(source_path)[1][1:]
 
         # If item content it not set - it will be read directly from file.
         self._data = None
 
     @property
-    def data(self):
+    def source(self):
         if self._data is None:
-            with open(self.path) as file:
-                print(self.path)
+            with open(self.source_path) as file:
+                print('READING', self.source_path)
                 return file.read()
         return self._data
 
-    @data.setter
-    def data(self, value):
+    @source.setter
+    def source(self, value):
         self._data = value
 
     def has_data(self):

@@ -29,7 +29,7 @@ class HTML(Extension):
 
         self.renderers = [self.render]
         self.loaders = []
-        self.deployer = DataDeployer
+        self.deployer = DataDeployer()
 
     def render(self, data, metadata):
         return self.site.template_engine.render(data, metadata)

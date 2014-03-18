@@ -15,6 +15,8 @@ class Extension(Plugin):
     #
     deployer = None
 
+    do_not_render = False
+
 
     def __init__(self, site):
         Plugin.__init__(self)

@@ -30,7 +30,7 @@ class TestBefore(TestPlugin):
         @self.app.before('page.html')
         def test(page):
             self.assertIsInstance(page, SiteItem)
-            return {'badger': page.source}
+            return {'badger': page.id}
         self.app.run()
 
         # tests
@@ -46,7 +46,7 @@ class TestBefore(TestPlugin):
 
         @self.app.before('page.html')
         def test(page):
-            page.data = 'TEST'
+            page.source = 'TEST'
         self.app.run()
 
         # tests

@@ -9,10 +9,9 @@ class TestPermalink(TestPlugin):
 
         # site.py
 
-        @self.app.before('page.html')
-        def url(page):
-            self.app.permalink(page, '/b')
-            self.assertEqual('/b', page.url, "should modify item.url after calling")
+        page = self.app.get('page.html')
+        self.app.permalink(page, '/b')
+        self.assertEqual('/b', page.permalink, "should modify item.url after calling")
         self.app.run()
 
         # tests
@@ -116,9 +115,8 @@ class TestPermalink(TestPlugin):
 
         # site.py
 
-        @self.app.before('page.html')
-        def url(page):
-            self.app.permalink(page, 'pretty')
+        page = self.app.get('page.html')
+        self.app.permalink(page, 'pretty')
         self.app.run()
 
         # tests

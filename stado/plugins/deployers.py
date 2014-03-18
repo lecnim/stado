@@ -7,7 +7,7 @@ class CopyDeployer:
     url = None
 
     @staticmethod
-    def deploy(content, path):
+    def deploy(source_path, path):
         """Copy content source file to patch."""
 
         directory_path = os.path.split(path)[0]
@@ -17,7 +17,7 @@ class CopyDeployer:
         if not os.path.exists(directory_path):
             os.makedirs(directory_path)
 
-        shutil.copy(content.path, path)
+        shutil.copy(source_path, path)
 
 
 
@@ -38,4 +38,4 @@ class DataDeployer:
 
 
         with open(path, mode='w') as file:
-            file.write(content.data)
+            file.write(content)

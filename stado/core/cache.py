@@ -24,39 +24,39 @@ class ItemCache:
 
     def __iter__(self):
         for item in self.items.values():
-            if item.enabled:
-                yield self.load_item(item.source)
+            if item.published:
+                yield self.load_item(item.id)
 
     def save_item(self, item):
         """Saves given item in cache."""
 
         # Store item object.
-        self.items[item.source] = item
+        self.items[item.id] = item
 
         # Store item data and metadata in cache.
         if item.has_data():
-            self.cache.save(item.source, item.data)
-        self.cache.save(item.source + '/metadata', item.metadata.dump())
+            self.cache.save(item.id, item.source)
+        self.cache.save(item.id + '/metadata', item.context.dump())
 
         # Clear data and metadata to free memory.
-        item.data = None
-        item.metadata.clear()
+        item.source = None
+        item.context.clear()
 
     def load_item(self, item_source):
         """Returns item from cache."""
 
         item = self.items[item_source]
-        if item.enabled:
-            item.data = self.cache.load(item.source)
-            item.metadata = self.cache.load(item.source + '/metadata')
+        if item.published:
+            item.source = self.cache.load(item.id)
+            item.context = self.cache.load(item.id + '/metadata')
             return item
         raise KeyError('Item is disabled: ' + item_source)
 
     def remove_item(self, item_source):
 
         item = self.items[item_source]
-        self.cache.remove(item.source)
-        self.cache.remove(item.source + '/metadata')
+        self.cache.remove(item.id)
+        self.cache.remove(item.id + '/metadata')
 
     def clear(self):
         """Removes all elements from cache."""

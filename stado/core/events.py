@@ -32,6 +32,12 @@ class EventsHandler:
             if event in obj.events.registered:
                 yield obj.events.registered[event](*args, **kwargs)
 
+    # TODO: clean DRY
+    def get(self, event):
+        for obj in self.subscribers:
+            if event in obj.events.registered:
+                yield obj.events.registered[event]
+
     def bind(self, events):
         self.registered.update(events)
 
@@ -44,3 +50,5 @@ class Events:
 
     def event(self, name, *args, **kwargs):
         return [i for i in self.events.notify(name, *args, **kwargs)]
+
+

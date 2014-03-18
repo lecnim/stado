@@ -87,4 +87,4 @@ class Before(Controller):
                     metadata = function(item)
 
                 if metadata:
-                    item.metadata.update(metadata)
+                    item.context.update(metadata)

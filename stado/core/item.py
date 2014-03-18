@@ -6,6 +6,7 @@ from .events import Events
 from .pathmatch import pathmatch
 
 
+
 class ItemTypes:
     """
     Storing content type models.
@@ -43,74 +44,65 @@ class SiteItem(dict, Events):
     Represents thing used to create site. For example site source files.
     """
 
-    def __init__(self, source, output, path=None):
+    def __init__(self, id, source_path=None, output_path=None):
         """
         Args:
-            source: Item is recognized by source property. For example controllers
-                use this.
-            output: Path in output directory, where item will be written.
-            path: Optionally full path to file which was used to create item.
+            id: Unique string, controllers gets items using its ids.
+            source_path: Path to source file.
+            output_path: Path relative to output directory.
 
         """
         Events.__init__(self)
 
-        # Absolute path to file which was used to create item for example: "a/b.html"
-        self.path = path
-        self.type = None
-        self.enabled = True
-
         # Item is recognized by controllers using this property.
-        self.source = os.path.normpath(source).replace('\\', '/')
+        # Each item must have unique id.
+        self.id = os.path.normpath(id).replace('\\', '/')
 
-        # Item content.
-        self.data = None
-
+        self.source_path = source_path
+        self.output_path = output_path
         # Default output path set by item loader.
-        self.default_output = output
-        self.output = output
-        # Title of output file, for example: 'b.html'
-        self.filename = os.path.split(self.default_output)[1]
+        self.default_output = output_path
+
+        self.published = True
+        self.source = None
 
         # Stores objects which are used to generate and save item content.
         self.loaders = []
         self.renderers = []
         self.deployer = None
+        self.deployers = []
 
+        # Private attributes.
+
+        self._is_loaded = False
+        self._extension = None
 
     # Properties.
 
     @property
-    def content(self):
-        return self.data
-    @content.setter
-    def content(self, value):
-        self.data = value
-
-    @property
-    def metadata(self):
+    def context(self):
         """Metadata dict, for example used during content rendering."""
         return self
-    @metadata.setter
-    def metadata(self, value):
-        self.clear()
 
+    @context.setter
+    def context(self, value):
+        self.clear()
         if value is not None:
             self.update(value)
 
-
     @property
-    def url(self):
+    def permalink(self):
         """Item will be available using this url."""
 
-        url_path = urllib.request.pathname2url(self.output)
+        url_path = urllib.request.pathname2url(self.output_path)
         # Url should starts with leading slash.
         if not url_path.startswith('/'):
             url_path = '/' + url_path
 
         return url_path
 
-    @url.setter
-    def url(self, value):
+    @permalink.setter
+    def permalink(self, value):
         """Set new item url."""
 
         keywords = re.findall("(:[a-zA-z]*)", value)
@@ -130,31 +122,37 @@ class SiteItem(dict, Events):
                 destination = destination.replace(key, str(items[key[1:]]))
 
         #//home/a.html => home/a.html
-        self.output = destination.lstrip(os.sep)
+        self.output_path = destination.lstrip(os.sep)
 
 
     # Methods.
 
+    def is_loaded(self):
+        return self._is_loaded
+
     def is_page(self):
         """Returns True if item is a page."""
-        if self.output.endswith('.html'):
+        if self.output_path.endswith('.html'):
             return True
         return False
 
+    def is_asset(self):
+        return not self.is_page()
+
     def has_data(self):
         """Returns True if item has data."""
-        return True if self.data else False
+        return True if self.source else False
 
     def match(self, *sources):
         """Returns True if item source matches one of given."""
 
         for source in sources:
-            if pathmatch(self.source, source):
+            if pathmatch(self.id, source):
                 return True
         return False
 
 
-    def set_type(self, model):
+    def set_extension(self, ext):
         """Sets item loaders, renderers and deployer. Also sets item url using
         deployer url pattern."""
 
@@ -162,13 +160,14 @@ class SiteItem(dict, Events):
         # self.type = type['extension']
 
         # Lists.
-        self.loaders = model.loaders
-        self.renderers = model.renderers
-        # Deployer object.
-        self.deployer = model.deployer
+        self._extension = ext
+        self.loaders = ext.loaders
+        self.renderers = ext.renderers
+        self.deployer = ext.deployer
+        self.deployers = [ext.deployer]
 
-        if model.url:
-            self.url = model.url
+        if ext.url:
+            self.permalink = ext.url
 
 
     def dump(self):
@@ -186,15 +185,46 @@ class SiteItem(dict, Events):
 
         for loader in self.loaders:
             if callable(loader):
-                data, metadata = loader(self.data)
+                data, metadata = loader(self.source)
             else:
-                data, metadata = loader.load(self.data)
+                data, metadata = loader.load(self.source)
 
-            self.data = data
-            self.metadata = metadata
+            if self.source is None:
+                self.source = data
+            # self.metadata = metadata
+            self.context.update(metadata)
+
+        self._is_loaded = True
 
         self.event('item.after_loading', self)
         return self
+
+
+    def generate(self, path):
+
+        # TODO: Clean this mess.
+
+        # Render and write rendered content.
+        if self._extension.do_not_render is False:
+            data = self.render()
+
+            self.event('item.before_deploying', self)
+            for i in self.deployers:
+                if callable(i):
+                    print(i)
+                    i(data, os.path.join(path, self.output_path))
+                else:
+                    i.deploy(data, os.path.join(path, self.output_path))
+            # self.deployer.deploy(data, os.path.join(path, self.output_path))
+            self.event('item.after_deploying', self)
+
+        # Only copy file to destination.
+        else:
+            self.event('item.before_deploying', self)
+            self.deployer.deploy(self.source_path, os.path.join(path, self.output_path))
+            self.event('item.after_deploying', self)
+
+        return True
 
 
     def render(self):
@@ -204,26 +234,20 @@ class SiteItem(dict, Events):
         # Event before rendering is started.
         self.event('item.before_rendering', self)
 
+        data = self.source
+
         for renderer in self.renderers:
             # self.event('renderer.before_rendering', self, renderer)
             if callable(renderer):
-                self.data = renderer(self.data, self.metadata.dump())
+                data = renderer(data, self.context.dump())
             else:
-                self.data = renderer.render(self.data, self.metadata.dump())
+                data = renderer.render(data, self.context.dump())
             # self.event('renderer.after_rendering', self, renderer)
 
         # Event rendering has ended.
-        self.event('item.after_rendering', self)
-        return self
+        # self.event('item.after_rendering', self, data)
 
-
-    def deploy(self, path):
-        """Writes page to output directory in given path"""
-
-        self.event('item.before_deploying', self)
-        # if callable(self.deployer):
-        #     self.deployer(self, os.path.join(path, self.output))
-        # else:
-        self.deployer.deploy(self, os.path.join(path, self.output))
-        self.event('item.after_deploying', self)
-        return self
+        for event in self.events.get('item.after_rendering'):
+            data = event(self, data)
+        print(data)
+        return data

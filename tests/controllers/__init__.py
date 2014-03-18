@@ -20,6 +20,9 @@ class TestPlugin(unittest.TestCase):
         self.app = Stado(os.path.join(self.path, 'data'),
                          output=self.temp_path)
 
+        self.site = self.app
+
+
         os.chdir(self.temp_path)
 
     def tearDown(self):

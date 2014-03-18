@@ -9,13 +9,10 @@ class TestIgnoreWithOtherControllers(TestPlugin):
 
         # site.py
 
-        @self.app.before('a.html')
-        def test(page):
-            self.app.ignore(page)
-
-        self.app.load().render()
+        page = self.app.get('a.html')
+        self.app.ignore(page)
         self.assertEqual([], [i for i in self.app.pages('a.html')])
-        self.app.deploy()
+        self.app.run()
 
         # tests
 
@@ -29,10 +26,11 @@ class TestIgnoreWithOtherControllers(TestPlugin):
         @self.app.after('a.html')
         def test(content, page):
             self.app.ignore(page)
+            return content
 
-        self.app.load().render()
+        self.app.run()
         self.assertEqual([], [i for i in self.app.pages('a.html')])
-        self.app.deploy()
+
 
         # tests
 

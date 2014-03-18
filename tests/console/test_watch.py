@@ -28,9 +28,9 @@ def modify_script(path):
         (
              '\nfrom stado import Stado'
              '\napp = Stado()'
-             '\n@app.before("a.html")'
-             '\ndef update(page):'
-             '\n    page.content = "updated"'
+             '\npage = app.get("a.html")'
+             '\npage.source = "updated"'
+             '\napp.save_item(page)'
              '\napp.run()'
         )
         file.write(script)
