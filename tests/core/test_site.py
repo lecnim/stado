@@ -8,7 +8,7 @@ from stado.core.site import Site
 
 
 class TestSite(unittest.TestCase):
-    """Base class for testing Site. Creates temporary directory."""
+    """Base class for testing Site. Sites output is temporary directory."""
 
     def setUp(self):
         self.temp_path = tempfile.mkdtemp()
@@ -29,6 +29,15 @@ class TestBuild(TestSite):
     """
     Site build() method
     """
+
+    def test_all(self):
+        """should build all site files by default"""
+
+        self.site.build()
+        f = []
+        for i in os.walk(self.temp_path):
+            f.extend(i[2])
+        self.assertEqual(8, len(f))
 
     def test_path(self):
         """should accept string as a path argument"""
@@ -203,10 +212,23 @@ class TestFind(TestSite):
     Site find() method
     """
 
-    def test_find(self):
+    def test(self):
         """should yield items"""
 
         self.assertIsInstance(self.site.find('*'), types.GeneratorType)
-
         sources = [i.source for i in self.site.find('*.html')]
         self.assertCountEqual(['index', 'about'], sources)
+
+    def test_excluded_file(self):
+        """should ignore files correctly"""
+
+        self.site.excluded_paths = ['**/ignore.html']
+        items = [i for i in self.site.find('blog/old/ignore.html')]
+        self.assertEqual(0, len(items))
+
+    def test_excluded_directories(self):
+        """should ignore directories correctly"""
+
+        self.site.excluded_paths = ['blog']
+        items = [i for i in self.site.find('blog/*')]
+        self.assertEqual(0, len(items))

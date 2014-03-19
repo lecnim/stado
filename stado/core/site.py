@@ -106,6 +106,7 @@ class Site(Events):
 
 
     # Controllers
+    # Stability: 2 - Unstable
 
     # route
 
@@ -150,12 +151,11 @@ class Site(Events):
     def find(self, path):
         """Yields items created using files in path."""
 
-        # TODO: Skipping py and __pycache__
-
-        # Create absolute path.
+        # Use absolute paths! Also excluded paths are absolute!
         path = os.path.join(self.path, path)
+        excluded = [os.path.join(self.path, i) for i in self.excluded_paths]
 
-        for item in self.loader.load(path, excluded=self.excluded_paths):
+        for item in self.loader.load(path, excluded=excluded):
             item.output_path = os.path.relpath(item.source_path, self.path)
             yield item
 
@@ -170,7 +170,7 @@ class Site(Events):
 
     # build
 
-    def build(self, path=None, *plugins, context=None, overwrite=True):
+    def build(self, path='**/*', *plugins, context=None, overwrite=True):
 
         # TODO: build() without arguments? maybe another function to build all
 
