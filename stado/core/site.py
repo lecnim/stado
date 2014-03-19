@@ -1,14 +1,14 @@
 import os
 import inspect
 
-from .loaders import FileSystemItemLoader, FileLoader
+from .loaders import FileLoader
 from .item import ItemTypes
 from .. import templates
 from .events import Events
 from .. import controllers
 from .. import plugins
 from .. import config as CONFIG
-from .cache import ItemCache, DictCache
+
 from .. import log
 from ..libs import glob2 as glob
 import shutil
@@ -26,8 +26,7 @@ class Site(Events):
 
     def __init__(self, path=None, output=None, config=None,
                  template_engine='mustache',
-                 cache=DictCache,
-                 loaders=(FileSystemItemLoader(),)):
+                 loaders=()):
         """
         Arguments:
             path: Items will be created using files in this path. Default path is
@@ -73,7 +72,6 @@ class Site(Events):
 
 
         self.item_types = ItemTypes()
-        self.cache = ItemCache(cache(self.output))
         self.loaders = loaders
 
 
@@ -142,6 +140,8 @@ class Site(Events):
 
     def find(self, path):
         """Yields items created using files in path."""
+
+        # TODO: Skipping py and __pycache__
 
         # Create absolute path.
         path = os.path.join(self.path, path)

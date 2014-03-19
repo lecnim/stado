@@ -3,7 +3,6 @@ import re
 import urllib.request
 
 from .events import Events
-from .pathmatch import pathmatch
 
 
 

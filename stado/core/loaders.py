@@ -1,34 +1,15 @@
 import os
 
 from .item import SiteItem
-from .finders import FileSystemItemFinder, FileFinder
+from .finders import FileFinder
 from .events import Events
-
 
 
 class ItemLoader(Events):
     pass
 
 
-
-# TODO: Ideas for other finder classes.
-
-class ZipItemLoader(ItemLoader):
-    """Only idea, can load items from zip files."""
-    pass
-
-class SQLiteItemLoader(ItemLoader):
-    """Only idea, can load items from SQLite database."""
-    pass
-
-class JsonItemLoader(ItemLoader):
-    """Only idea, can load items from JSON database."""
-    pass
-
-
-
 # Filesystem content loader.
-
 
 
 class FileLoader(ItemLoader):
@@ -43,26 +24,6 @@ class FileLoader(ItemLoader):
         for source_path in self.finder.find(path, excluded):
             output_path = os.path.relpath(source_path, path)
             yield FileItem(source_path, output_path)
-
-
-
-
-
-class FileSystemItemLoader(ItemLoader):
-
-    finder = FileSystemItemFinder()
-
-
-    def load(self, path, excluded_paths=None):
-
-        for content_path in self.finder.search(path, excluded_paths):
-
-            # output: Content will be written in output directory using this path.
-            #   For example: "about/index.html"
-            # id: Content is recognized by controllers using it is. Id is same as
-            #   source path.
-            output = os.path.relpath(content_path, path)
-            yield FileItem(content_path, output)
 
 
 class FileItem(SiteItem):
