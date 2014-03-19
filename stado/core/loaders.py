@@ -94,3 +94,6 @@ class FileItem(SiteItem):
 
     def has_data(self):
         return False if self._data is None else True
+
+    def is_source_modified(self):
+        return False if self._data is None else True

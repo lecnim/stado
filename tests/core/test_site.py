@@ -18,12 +18,74 @@ class TestSite(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.temp_path)
 
+    def compare_output(self, path, expected_source):
+        path = os.path.join(self.site.output, path)
+        self.assertTrue(os.path.exists(path))
+        with open(path) as page:
+            self.assertEqual(expected_source, page.read())
+
 
 class TestBuild(TestSite):
     """
-    Site build() method:
+    Site build() method
     """
-    pass
+
+    def test_path(self):
+        """should accept string as a path argument"""
+
+        self.site.build('index.html')
+        self.compare_output('index.html', 'index')
+
+    def test_item(self):
+        """should accept item object as a path argument"""
+
+        page = self.site.load('index.html')
+        self.site.build(page)
+        self.compare_output('index.html', 'index')
+
+    def test_calling_function(self):
+        """should accept function in plugins list"""
+
+        def uppercase(item):
+            item.source = item.source.upper()
+            return item
+
+        self.site.build('index.html', uppercase)
+        self.compare_output('index.html', 'INDEX')
+
+    def test_calling_class(self):
+        """should accept class in plugins list"""
+
+        class Hello:
+            def apply(self, item):
+                item.source = 'hello'
+
+        self.site.build('index.html', Hello)
+        self.compare_output('index.html', 'hello')
+
+    def test_not_overwrite(self):
+        """should not overwrite already built items if overwrite=False"""
+
+        def hello(item):
+            item.source = 'overwritten'
+
+        self.site.build('index.html', hello)
+        self.site.build('index.html', overwrite=False)
+        self.compare_output('index.html', 'overwritten')
+
+        page = self.site.load('index.html')
+        self.site.build(page, overwrite=False)
+        self.compare_output('index.html', 'overwritten')
+
+    def test_overwrite(self):
+        """should overwrite already built items if overwrite=True"""
+
+        def hello(item):
+            item.source = 'overwritten'
+
+        self.site.build('index.html')
+        self.site.build('index.html', hello, overwrite=True)
+        self.compare_output('index.html', 'overwritten')
 
 
 class TestRoute(TestSite):
@@ -45,7 +107,7 @@ class TestRoute(TestSite):
         """should create correct file with correct content"""
 
         self.site.route('/example.html', 'hello')
-        self._check_route('example.html', 'hello')
+        self.compare_output('example.html', 'hello')
 
     def test_function(self):
         """should use function as a argument"""
@@ -54,15 +116,15 @@ class TestRoute(TestSite):
             return 'hello'
 
         self.site.route('/example.html', hello)
-        self._check_route('example.html', 'hello')
+        self.compare_output('example.html', 'hello')
 
     def test_index(self):
         """should add index.html to url without extension: / => /index.html"""
 
         self.site.route('/', 'hello')
-        self._check_route('index.html', 'hello')
+        self.compare_output('index.html', 'hello')
         self.site.route('/another', 'wow')
-        self._check_route('another/index.html', 'wow')
+        self.compare_output('another/index.html', 'wow')
 
 
 class TestLoad(TestSite):
@@ -75,6 +137,7 @@ class TestLoad(TestSite):
         item = self.site.load('index.html')
         self.assertFalse(isinstance(item, list))
         self.assertEqual('index', item.source)
+        self.assertEqual('index.html', item.output_path)
 
     def test_load_multiple_file(self):
         """should return list of items if wildcards used"""

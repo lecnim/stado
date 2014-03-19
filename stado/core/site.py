@@ -11,7 +11,7 @@ from .. import config as CONFIG
 from .cache import ItemCache, DictCache
 from .. import log
 from ..libs import glob2 as glob
-
+import shutil
 
 class Site(Events):
     """
@@ -76,7 +76,10 @@ class Site(Events):
         self.cache = ItemCache(cache(self.output))
         self.loaders = loaders
 
+
+
         self.loader = FileLoader()
+        self.built_items = []
 
 
         # Loads plugins from stado.plugins package.
@@ -144,6 +147,7 @@ class Site(Events):
         path = os.path.join(self.path, path)
 
         for item in self.loader.load(path, excluded=self.excluded_paths):
+            item.output_path = os.path.relpath(item.source_path, self.path)
             yield item
 
 
@@ -151,9 +155,58 @@ class Site(Events):
         pass
 
 
-    def build(self, path, *plugins, context=None, overwrite=True):
-        pass
+    def build(self, path=None, *plugins, context=None, overwrite=True):
 
+        def build_item(item):
+            if context:
+                item.context = context
+            self.apply(item, *plugins)
+
+            if overwrite or not item.output_path in self.built_items:
+                self.deploy(item)
+
+        # string
+        if isinstance(path, str):
+            for item in self.find(path):
+                build_item(item)
+
+        # item
+        else:
+            build_item(path)
+
+
+    def deploy(self, item):
+
+        if not item.output_path in self.built_items:
+            self.built_items.append(item.output_path)
+
+        path = os.path.join(self.output, item.output_path)
+
+        # Create missing directories.
+        output_directory = os.path.split(path)[0]
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
+
+        if item.is_source_modified:
+            with open(path, mode='w') as file:
+                file.write(item.source)
+        else:
+            shutil.copy(item.source_path, path)
+
+
+    def apply(self, item, *plugins):
+
+        for plugin in plugins:
+
+            # Create object using class.
+            if inspect.isclass(plugin):
+                plugin = plugin()
+
+            if callable(plugin):
+                plugin(item)
+            else:
+                plugin.apply(item)
+        return item
 
 
 
