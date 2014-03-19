@@ -81,12 +81,16 @@ class Site(Events):
 
         self.registered = []
 
-        self.plugins = {}
 
         # Loads plugins from stado.plugins package.
-        # self.plugins = {}
-        # for i in plugins.load(self.config['plugins']):
-        #     self.plugins[i.name] = i(self)
+        self.plugins = {}
+        for i in plugins.load():
+            self.plugins[i.name] = i(self)
+
+
+        # plugins.load_plugin('html')
+
+
 
         # Loads controllers from stado.controllers package.
         # self.controllers = {}
@@ -209,25 +213,29 @@ class Site(Events):
         if not item.output_path in self.built_items:
             self.built_items.append(item.output_path)
 
-        path = os.path.join(self.output, item.output_path)
+        item.deploy(self.output)
 
-        # Create missing directories.
-        output_directory = os.path.split(path)[0]
-        if not os.path.exists(output_directory):
-            os.makedirs(output_directory)
 
-        if item.is_source_modified:
-            with open(path, mode='w') as file:
-                file.write(item.source)
-        else:
-            shutil.copy(item.source_path, path)
+    def apply(self, item, *plugins_list):
 
-    def apply(self, item, *plugins):
-
-        for plugin in plugins:
+        for plugin in plugins_list:
 
             if isinstance(plugin, str):
-                plugin = self.plugins.get(plugin)
+
+                # Already loaded
+                if plugin in self.plugins:
+                    plugin = self.plugins[plugin]
+
+                # Load plugin
+                else:
+
+                    # Import plugin module.
+                    plugin_class = plugins.load_plugin(plugin)
+
+                    self.plugins[plugin_class.name] = plugin_class(self)
+                    plugin = self.plugins[plugin_class.name]
+
+                # plugin = self.plugins.get(plugin)
 
 
             # Create object using class.

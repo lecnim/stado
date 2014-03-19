@@ -1,56 +1,57 @@
 from ..core.events import Events
 
 class Plugin(Events):
-    pass
-
-
-
-class Extension(Plugin):
-    name = None
-    extensions = []
-
-    url = None
-    loaders = []
-    renderers = []
-    #
-    deployer = None
-
-    do_not_render = False
-
 
     def __init__(self, site):
-        Plugin.__init__(self)
+        super().__init__()
 
-        # Reference to parent Site object.
-        self.site = site
-
-        # self.renderers = self._update_template_engine(self.renderers)
-
-        # Model with supporting any extension.
-        if self.extensions is None:
-            self.site.item_types.set(None, self)
-        else:
-            for e in self.extensions:
-                self.site.item_types.set(e, self)
-
-    def _load(self, data):
-        return self.load(data)
-    def load(self, data):
-        return data, {}
-
-    def _render(self, data, metadata):
-        self.event('renderer.before_rendering')
-        result = self.render(data, metadata)
-        self.event('renderer.after_rendering')
-        return result
-    def render(self, data, metadata):
-        return data
-
-    def _deploy(self, data, path):
-        return self.deploy(data, path)
-
-    def deploy(self, data, path):
-        return True
+#
+# class Extension(Plugin):
+#     name = None
+#     extensions = []
+#
+#     url = None
+#     loaders = []
+#     renderers = []
+#     #
+#     deployer = None
+#
+#     do_not_render = False
+#
+#
+#     def __init__(self, site):
+#         Plugin.__init__(self)
+#
+#         # Reference to parent Site object.
+#         self.site = site
+#
+#         # self.renderers = self._update_template_engine(self.renderers)
+#
+#         # Model with supporting any extension.
+#         if self.extensions is None:
+#             self.site.item_types.set(None, self)
+#         else:
+#             for e in self.extensions:
+#                 self.site.item_types.set(e, self)
+#
+#     def _load(self, data):
+#         return self.load(data)
+#     def load(self, data):
+#         return data, {}
+#
+#     def _render(self, data, metadata):
+#         self.event('renderer.before_rendering')
+#         result = self.render(data, metadata)
+#         self.event('renderer.after_rendering')
+#         return result
+#     def render(self, data, metadata):
+#         return data
+#
+#     def _deploy(self, data, path):
+#         return self.deploy(data, path)
+#
+#     def deploy(self, data, path):
+#         return True
 
     # def _update_template_engine(self, renderers):
     #     """Replaces "template_engine" with TemplateEngine object, in renderers
@@ -62,11 +63,12 @@ class Extension(Plugin):
 
 # Supported files types.
 
-from .extensions.default import Default
-from .extensions.markdown import Markdown
-from .extensions.html import HTML
-from .extensions.json import Json
-from .extensions.yaml import Yaml
+# from .extensions.default import Default
+# from .extensions.markdown import Markdown
+# from .extensions.html import HTML
+# from .extensions.json import Json
+# from .extensions.yaml import Yaml
+# from .html import Html
 
 
 
@@ -86,7 +88,19 @@ def load(select=None):
         module object
     """
 
-    for class_obj in get_subclasses(Extension):
-        print(class_obj)
+    for class_obj in get_subclasses(Plugin):
         if select is None or class_obj.name in select:
             yield class_obj
+
+import importlib
+
+def load_plugin(name):
+
+    # clsmembers = inspect.getmembers(sys.modules[__name__], inspect.isclass)
+
+    # module = importlib.import_module(name, 'stado.plugins')
+
+    module = importlib.import_module('stado.plugins.' + name)
+
+    return module.Plugin
+

@@ -20,15 +20,10 @@ class Controller(Events):
 
 # Plugins.
 
-from . import ignore
-from . import context
-from . import after
-from . import permalink
+
 from . import helper
 from . import layout
-from . import render
-from . import items
-from . import deprecated
+
 
 def load(select=None):
     """Yields controllers modules.
