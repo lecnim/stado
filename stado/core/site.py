@@ -79,11 +79,14 @@ class Site(Events):
         self.loader = FileLoader()
         self.built_items = []
 
+        self.registered = []
+
+        self.plugins = {}
 
         # Loads plugins from stado.plugins package.
-        self.plugins = {}
-        for i in plugins.load(self.config['plugins']):
-            self.plugins[i.name] = i(self)
+        # self.plugins = {}
+        # for i in plugins.load(self.config['plugins']):
+        #     self.plugins[i.name] = i(self)
 
         # Loads controllers from stado.controllers package.
         # self.controllers = {}
@@ -103,6 +106,8 @@ class Site(Events):
 
 
     # Controllers
+
+    # route
 
     def route(self, url, source):
 
@@ -126,6 +131,8 @@ class Site(Events):
             page.write(source)
 
 
+    # load
+
     def load(self, path):
         """Returns list of items created using files in path."""
 
@@ -137,6 +144,8 @@ class Site(Events):
             return items
 
         return items[0]
+
+    # find
 
     def find(self, path):
         """Yields items created using files in path."""
@@ -150,14 +159,30 @@ class Site(Events):
             item.output_path = os.path.relpath(item.source_path, self.path)
             yield item
 
+    # register
 
     def register(self, path, *plugins):
-        pass
+        self.registered.append([path, plugins])
 
+    def install(self, name, plugin):
+        self.plugins[name] = plugin
+
+
+    # build
 
     def build(self, path=None, *plugins, context=None, overwrite=True):
 
-        def build_item(item):
+        # TODO: build() without arguments? maybe another function to build all
+
+
+        def build_item(item, plugins):
+
+            if not plugins:
+
+                for pattern, plugins in self.registered:
+                    if item.match(pattern):
+                        self.apply(item, *plugins)
+
             if context:
                 item.context = context
             self.apply(item, *plugins)
@@ -165,15 +190,15 @@ class Site(Events):
             if overwrite or not item.output_path in self.built_items:
                 self.deploy(item)
 
+
         # string
         if isinstance(path, str):
             for item in self.find(path):
-                build_item(item)
+                build_item(item, plugins)
 
         # item
         else:
-            build_item(path)
-
+            build_item(path, plugins)
 
     def deploy(self, item):
 
@@ -193,10 +218,13 @@ class Site(Events):
         else:
             shutil.copy(item.source_path, path)
 
-
     def apply(self, item, *plugins):
 
         for plugin in plugins:
+
+            if isinstance(plugin, str):
+                plugin = self.plugins.get(plugin)
+
 
             # Create object using class.
             if inspect.isclass(plugin):
@@ -204,6 +232,9 @@ class Site(Events):
 
             if callable(plugin):
                 plugin(item)
+
+
+
             else:
                 plugin.apply(item)
         return item

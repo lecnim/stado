@@ -3,6 +3,7 @@ import re
 import urllib.request
 
 from .events import Events
+from ..libs import glob2 as glob
 
 
 
@@ -146,7 +147,7 @@ class SiteItem(dict, Events):
         """Returns True if item source matches one of given."""
 
         for source in sources:
-            if pathmatch(self.id, source):
+            if glob.fnmatch.fnmatch(self.id, source):
                 return True
         return False
 

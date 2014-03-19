@@ -88,6 +88,52 @@ class TestBuild(TestSite):
         self.compare_output('index.html', 'overwritten')
 
 
+class TestInstall(TestSite):
+    """
+    Site install() method
+    """
+
+    def test_function(self):
+
+        def plugin(item):
+            item.source = 'wow'
+
+        self.site.install('plugin', plugin)
+        self.site.build('index.html', 'plugin')
+        self.compare_output('index.html', 'wow')
+
+    def test_class(self):
+
+        class Plugin:
+            def apply(self, item):
+                item.source = 'wow'
+
+        self.site.install('plugin', Plugin)
+        self.site.build('index.html', 'plugin')
+        self.compare_output('index.html', 'wow')
+
+        # Test class instance.
+
+        self.site.install('plugin2', Plugin())
+        self.site.build('about.html', 'plugin2')
+        self.compare_output('about.html', 'wow')
+
+
+class TestRegister(TestSite):
+    """
+    Site register() method
+    """
+
+    def test(self):
+
+        def badger(item):
+            item.source = 'badger!'
+
+        self.site.register('**/*.html', badger)
+        self.site.build('index.html')
+        self.compare_output('index.html', 'badger!')
+
+
 class TestRoute(TestSite):
     """
     Site route() method
