@@ -31,3 +31,9 @@ def copytree(source, destination):
             shutil.copytree(s, d)
         else:
             shutil.copy2(s, d)
+
+def relative_path(path):
+    if os.path.isabs(path):
+        raise ValueError('Path must be relative: ' + path)
+    path = path.replace('\\', '/')
+    return os.path.normpath(path)

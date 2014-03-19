@@ -2,12 +2,13 @@ import os
 import inspect
 
 from .loaders import FileLoader
-from .item import ItemTypes
 from .. import templates
 from .events import Events
 from .. import controllers
 from .. import plugins
 from .. import config as CONFIG
+
+from ..utils import relative_path
 
 from .. import log
 from ..libs import glob2 as glob
@@ -71,7 +72,6 @@ class Site(Events):
             self.template_engine = template_engine(self.path)
 
 
-        self.item_types = ItemTypes()
         self.loaders = loaders
 
 
@@ -94,7 +94,7 @@ class Site(Events):
         #     self.controllers[i.name] = self.bind_controller(i(self))
 
 
-        self._find()
+        # self._find()
 
 
 
@@ -134,9 +134,11 @@ class Site(Events):
 
     # load
 
+
     def load(self, path):
         """Returns list of items created using files in path."""
 
+        path = relative_path(path)
         items = [i for i in self.find(path)]
 
         # Return list if wildcards used or path is pointing to directory.
@@ -151,6 +153,8 @@ class Site(Events):
     def find(self, path):
         """Yields items created using files in path."""
 
+        path = relative_path(path)
+
         # Use absolute paths! Also excluded paths are absolute!
         path = os.path.join(self.path, path)
         excluded = [os.path.join(self.path, i) for i in self.excluded_paths]
@@ -162,7 +166,7 @@ class Site(Events):
     # register
 
     def register(self, path, *plugins):
-        self.registered.append([path, plugins])
+        self.registered.append([relative_path(path), plugins])
 
     def install(self, name, plugin):
         self.plugins[name] = plugin
@@ -248,37 +252,37 @@ class Site(Events):
 
 
     # Shortcuts.
-
-    def get_item(self, item_source):
-        """Shortcut for self.cache.load_item()."""
-        return self.cache.load_item(item_source)
-
-    def save_item(self, item):
-        """Shortcut for self.cache.save_item()."""
-        self.cache.save_item(item)
-
-    @property
-    def items(self):
-        """Yields items from cache."""
-        for item in self.cache:
-            yield item
-
-    @property
-    def sources(self):
-        """Yield items sources available in cache."""
-        for source in self.cache.sources:
-            yield source
-
-
-    # Methods.
-
-    def _get(self, *source):
-
-        for item in self.cache:
-            if item.match(*source):
-                if not item.is_loaded():
-                    item.load()
-                yield item
+    #
+    # def get_item(self, item_source):
+    #     """Shortcut for self.cache.load_item()."""
+    #     return self.cache.load_item(item_source)
+    #
+    # def save_item(self, item):
+    #     """Shortcut for self.cache.save_item()."""
+    #     self.cache.save_item(item)
+    #
+    # @property
+    # def items(self):
+    #     """Yields items from cache."""
+    #     for item in self.cache:
+    #         yield item
+    #
+    # @property
+    # def sources(self):
+    #     """Yield items sources available in cache."""
+    #     for source in self.cache.sources:
+    #         yield source
+    #
+    #
+    # # Methods.
+    #
+    # def _get(self, *source):
+    #
+    #     for item in self.cache:
+    #         if item.match(*source):
+    #             if not item.is_loaded():
+    #                 item.load()
+    #             yield item
 
     def bind_controller(self, controller):
         """Binds events to given controller object. Installs controller as a site
@@ -295,61 +299,61 @@ class Site(Events):
 
     # Generating.
 
-    def run(self):
-        """Creates site: loads, renders, deploys."""
-
-        log.debug('Starting building site: {}'.format(self.path))
-        log.debug('\tRendering and deploying items...')
-
-        for item in self.cache:
-            if not item.is_loaded():
-                item.load()
-
-            log.debug('\t\t{} => {}'.format(item.id, item.output_path))
-            item.generate(self.output)
-
-        # Remove cache.
-
-        # TODO: clearing cache
-        # self.clear()
-
-    def generate(self):
-        self.run()
-
-    def _find(self):
-        """Find site items and stores them unloaded in cache."""
-
-        log.debug('\tFinding site items...')
-
-        # Use each content loader.
-        for loader in self.loaders:
-
-            # Skip site output directory.
-            excluded_paths = self.excluded_paths + [self.output]
-            for item in loader.load(self.path, excluded_paths):
-
-                log.debug('\t\t[ {0.type} ]  {0.id}'.format(item))
-
-                # Get item model with load(), render(), deploy() methods.
-                # Install this methods in Item.
-
-                model = self.item_types(item.type)
-                item.set_extension(model)
-
-                # Subscribe controller to item object events.
-                # for i in self.controllers.values():
-                #     item.events.subscribe(i)
-
-                # Loads item data and stores loaded item in cache.
-                self.cache.save_item(item)
-
-
-    # Cleaning.
-
-    def clear(self):
-        """Clearing site components."""
-
-        #for i in self.controllers.values():
-        #    del i.site
-        #del self.controllers
-        self.cache.clear()
+    # def run(self):
+    #     """Creates site: loads, renders, deploys."""
+    #
+    #     log.debug('Starting building site: {}'.format(self.path))
+    #     log.debug('\tRendering and deploying items...')
+    #
+    #     for item in self.cache:
+    #         if not item.is_loaded():
+    #             item.load()
+    #
+    #         log.debug('\t\t{} => {}'.format(item.id, item.output_path))
+    #         item.generate(self.output)
+    #
+    #     # Remove cache.
+    #
+    #     # TODO: clearing cache
+    #     # self.clear()
+    #
+    # def generate(self):
+    #     self.run()
+    #
+    # def _find(self):
+    #     """Find site items and stores them unloaded in cache."""
+    #
+    #     log.debug('\tFinding site items...')
+    #
+    #     # Use each content loader.
+    #     for loader in self.loaders:
+    #
+    #         # Skip site output directory.
+    #         excluded_paths = self.excluded_paths + [self.output]
+    #         for item in loader.load(self.path, excluded_paths):
+    #
+    #             log.debug('\t\t[ {0.type} ]  {0.id}'.format(item))
+    #
+    #             # Get item model with load(), render(), deploy() methods.
+    #             # Install this methods in Item.
+    #
+    #             model = self.item_types(item.type)
+    #             item.set_extension(model)
+    #
+    #             # Subscribe controller to item object events.
+    #             # for i in self.controllers.values():
+    #             #     item.events.subscribe(i)
+    #
+    #             # Loads item data and stores loaded item in cache.
+    #             self.cache.save_item(item)
+    #
+    #
+    # # Cleaning.
+    #
+    # def clear(self):
+    #     """Clearing site components."""
+    #
+    #     #for i in self.controllers.values():
+    #     #    del i.site
+    #     #del self.controllers
+    #     self.cache.clear()

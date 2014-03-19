@@ -5,6 +5,7 @@ import shutil
 import tempfile
 
 from stado.core.site import Site
+from stado.core.item import SiteItem
 
 
 class TestSite(unittest.TestCase):
@@ -12,8 +13,8 @@ class TestSite(unittest.TestCase):
 
     def setUp(self):
         self.temp_path = tempfile.mkdtemp()
-        path = os.path.dirname(__file__)
-        self.site = Site(os.path.join(path, 'data'), self.temp_path)
+        self.data_path = os.path.join(os.path.dirname(__file__), 'data')
+        self.site = Site(self.data_path, self.temp_path)
 
     def tearDown(self):
         shutil.rmtree(self.temp_path)
@@ -29,6 +30,14 @@ class TestBuild(TestSite):
     """
     Site build() method
     """
+
+    # exceptions
+
+    def test_absolute_path(self):
+        """should raise exception if path is absolute"""
+        self.assertRaises(ValueError, self.site.build, '/blog/post.html')
+
+    # path argument
 
     def test_all(self):
         """should build all site files by default"""
@@ -71,6 +80,8 @@ class TestBuild(TestSite):
 
         self.site.build('index.html', Hello)
         self.compare_output('index.html', 'hello')
+
+    # overwrite argument
 
     def test_not_overwrite(self):
         """should not overwrite already built items if overwrite=False"""
@@ -188,13 +199,12 @@ class TestLoad(TestSite):
     """
 
     def test_load_file(self):
-        """should return item if wildcards not used"""
-        item = self.site.load('index.html')
-        self.assertFalse(isinstance(item, list))
-        self.assertEqual('index', item.source)
-        self.assertEqual('index.html', item.output_path)
+        """should return one item if no wildcards used"""
 
-    def test_load_multiple_file(self):
+        item = self.site.load('index.html')
+        self.assertIsInstance(item, SiteItem)
+
+    def test_load_multiple_files(self):
         """should return list of items if wildcards used"""
 
         items = self.site.load('*.html')
@@ -205,6 +215,30 @@ class TestLoad(TestSite):
 
         items = self.site.load('blog')
         self.assertEqual(3, len(items))
+
+    # exceptions
+
+    def test_absolute_path(self):
+        """should raise exception if path is absolute"""
+        self.assertRaises(ValueError, self.site.load, '/blog/post.html')
+
+    # item attributes
+
+    def test_item_output_path(self):
+        """should set correct item output path (relative)"""
+        item = self.site.load('index.html')
+        self.assertEqual('index.html', item.output_path)
+
+    def test_item_source_path(self):
+        """should set correct item source path (absolute)"""
+        item = self.site.load('index.html')
+        self.assertEqual(os.path.join(self.data_path, 'index.html'),
+                         item.source_path)
+
+    def test_item_source(self):
+        """should set correct item source"""
+        item = self.site.load('index.html')
+        self.assertEqual('index', item.source)
 
 
 class TestFind(TestSite):
@@ -218,6 +252,14 @@ class TestFind(TestSite):
         self.assertIsInstance(self.site.find('*'), types.GeneratorType)
         sources = [i.source for i in self.site.find('*.html')]
         self.assertCountEqual(['index', 'about'], sources)
+
+    # exceptions
+
+    def test_absolute_path(self):
+        """should raise exception if path is absolute"""
+        self.assertRaises(ValueError, lambda: [i for i in self.site.find('/')])
+
+    # excluding
 
     def test_excluded_file(self):
         """should ignore files correctly"""
