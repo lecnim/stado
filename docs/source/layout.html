@@ -2,26 +2,38 @@
 <html lang="en">
 
 <head>
-    <title>Stadø – simple, single-file static site generator</title>
+    <title>{{ page.title }}</title>
     <meta charset="utf-8"/>
     <meta name="description" content="Stado is a simple, single-file, static site generator, powered by python scripts." />
 
-    <link href="docs/public/style.css" rel="stylesheet" type="text/css"/>
-    <link rel="shortcut icon" href="docs/public/favicon.png" type="image/png"/>
+    <link href="/docs/public/style.css" rel="stylesheet" type="text/css"/>
+    <link rel="shortcut icon" href="/docs/public/favicon.png" type="image/png"/>
 
     <style>
+
+
+
+
         h1 {
-            letter-spacing: 2px;
+            letter-spacing: 1px;
+/*            text-transform: uppercase;*/
+            line-height: 100%;
+            font-weight: 400;
+            font-size: 3.5em;
+/*            font-family: arial;*/
+
         }
         #content {
-            width: 32em;
+/*            width: 32em;*/
+            margin-right: 1em;
         }
         body {
-            width: 50em;
+/*            width: 50em;*/
         }
         header {
             margin-top: 4em;
-            margin-right: 2em;
+            margin-right: 4em;
+            margin-left: 1em;
         }
         li, p {
             line-height: 90%;
@@ -31,28 +43,32 @@
         }
         header img {
             margin-bottom: 2em;
+            display: none;
         }
         header a {
-            border-top: 4px solid rgb(200, 230, 200);
-            border-bottom: 6px solid rgb(200, 240, 200);
+/*            border-top: 4px solid rgb(249, 219, 206);;*/
+            border-bottom: 6px solid rgb(228, 210, 205);;
             text-align: center;
             letter-spacing: 1px;
             color: black;
-            font-size: 1.3em;
-            display: block;
+/*            font-size: 1.3em;*/
+            display: inline-block;
             padding: 1em 0;
             margin-top: 1.5em;
+            margin-right: 1em;
         }
         .version {
-            padding-top: 1.6em;
-            font-size: 0.85em;
+/*            padding-top: 1.6em;*/
+/*            font-size: 0.85em;*/
         }
         header a:hover {
             color: red;
         }
         .version strong {
-            font-size: 2.2em;
+/*            font-size: 2.2em;*/
         }
+
+
     </style>
 </head>
 
@@ -61,18 +77,34 @@
     <header>
         <img src="docs/public/logo.jpg" alt="logo" />
         <nav>
-                   <a
-               href="https://github.com/lecnim/stado/releases/download/v{{ page.stado_version }}/stado.py"
-               class="version">Download latest release
-               <strong>{{page.stado_version}}</strong></a>
-            <a href="docs/quick-start">quick-start</a>
-            <a href="docs">documentation</a>
+            <a href="/">Home</a>
+            <a href="https://github.com/lecnim/stado/releases/download/v{{ version }}/stado.py"
+               class="version">Download</a>
+            <a href="/docs/quick-start">Quick-start</a>
+            <a href="/docs">Documentation</a>
 
         </nav>
     </header>
 
     <section id="content">
+
+
+
         {{{ content }}}
+
+        {{# page.number_of_topics }}
+        <aside>
+            <nav>
+                <h1>Related topics</h1>
+                <ul>
+                {{# page.related_topics }}
+                    <li><a href="{{ url }}">{{ title }}</a></li>
+                {{/ page.related_topics }}
+                </ul>
+            </nav>
+        </aside>
+        {{/ page.number_of_topics }}
+
     </section>
 
     <footer>

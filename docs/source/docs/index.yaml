@@ -1,0 +1,27 @@
+title: Stadø documentation
+content: |
+
+    Stado documentation
+    ===================
+
+    Welcome to Stado's documentation. A bit small now, but it's growing constantly.
+
+    Quick-start
+    -----------
+    *Four steps to learn the Stado's basics. It's simple!*
+
+      {{# quickstart }}
+      - <a href="{{ url }}">{{ title }}</a>
+      {{/ quickstart }}
+
+
+
+
+    Controllers
+    -----------
+
+    *Control the site building process using controllers.*
+
+    {{# controllers }}
+    - [{{ title }}]({{ url }})
+    {{/ controllers }}

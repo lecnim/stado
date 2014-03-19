@@ -10,7 +10,7 @@ related_topics:
 
 content: |
 
-  controller / @after
+  controller » @after
   ===================
 
   Use the `@after` decorator to execute function **after** pages rendering. It is used

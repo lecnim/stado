@@ -10,7 +10,7 @@ related_topics:
 
 content: |
 
-  controller / assets
+  controller » assets
   ======
 
   This controller can be used inside @helper function. It iterates all assets

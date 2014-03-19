@@ -8,7 +8,7 @@ related_topics:
 
 content: |
 
-  controller / ignore
+  controller » ignore
   ======
 
   Use `ignore` controller to ignore certain paths.

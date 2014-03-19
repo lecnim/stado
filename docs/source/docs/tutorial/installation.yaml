@@ -6,7 +6,7 @@ related_topics:
 
 content: |
 
-  tutorial / installation
+  tutorial » installation
   ============
 
   Getting and installing stado should not take much time.
@@ -23,6 +23,9 @@ content: |
 
   Getting stado
   -------------
+
+  curl -O -L https://github.com/lecnim/stado/releases/download/v0.6.0/stado.py
+
 
   The best way to get stado is downloading the latest release version.
   Then you place *stado.py* file in empty directory. That's all!

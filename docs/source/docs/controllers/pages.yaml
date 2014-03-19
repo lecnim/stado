@@ -11,7 +11,7 @@ related_topics:
 
 content: |
 
-  controller / pages
+  controller » pages
   =====
 
   This controller can be used inside @helper function. It iterates all page

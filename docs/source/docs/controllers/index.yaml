@@ -3,12 +3,10 @@ related_topics:
 
   - title: 'Documentation overview'
     url: '..'
-  - title: 'Controllers overview'
-    url: '..'
 
 content: |
 
-  controller / Controllers
+  controller » Controllers
   ===========
 
   Controllers are objects which are used to controll the site building process.
