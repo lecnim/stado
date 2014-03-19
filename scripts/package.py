@@ -17,7 +17,7 @@ from scripts.flossytest import colored
 # Configuration.
 
 source = 'stado'                                # Path to stado source.
-output = os.path.join('../build', 'stado.py')   # Path to output file.
+output = os.path.join('build', 'stado.py')      # Path to output file.
 compression = zipfile.ZIP_DEFLATED              # Compression type.
 
 
