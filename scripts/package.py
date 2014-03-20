@@ -198,14 +198,27 @@ def test():
 
     # Force to use python module from build directory instead of source
     # package.
-    sys.path.insert(0, 'build/stado.py')
+
+    # TODO: clean this
+    i = os.path.abspath(__file__)
+    i = os.path.split(i)[0]
+    i = os.path.split(i)[0]
+    i = os.path.join(i, 'build/stado.py')
+    sys.path.insert(0, i)
 
     # Shut up logging.
-    from stado import config, log
-    config.log_level = 'CRITICAL'
-    log.setLevel('CRITICAL')
+    import stado
+
+    # Stop if zip package import failed
+    if not stado.IS_ZIP_PACKAGE:
+        print(colored('Cannot import {}. Is package built correctly?'
+                      .format(output), color='red'))
+        sys.exit(1)
+
+    stado.config.log_level = 'CRITICAL'
+    stado.log.setLevel('CRITICAL')
 
     from scripts import flossytest
     os.chdir('tests')
-    sys.argv.append('-b')
+    # sys.argv.append('-b')
     flossytest.run()

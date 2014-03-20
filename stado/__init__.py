@@ -1,11 +1,23 @@
 import sys
+import os
 import logging
+import zipimport
 
 from . import libs
 from . import config
 
 __version__ = '0.6.0'
 version = __version__
+
+
+# Constants
+
+# True if stado package is in zip file.
+IS_ZIP_PACKAGE = True if isinstance(__loader__, zipimport.zipimporter) \
+    else False
+# Absolute path pointing to stado package.
+PATH = os.path.split(os.path.dirname(__file__))[0] if IS_ZIP_PACKAGE \
+    else os.path.dirname(__file__)
 
 
 # Custom logger using python logging module.
