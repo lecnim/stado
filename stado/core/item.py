@@ -7,7 +7,7 @@ from .events import Events
 from ..libs import glob2 as glob
 
 
-class SiteItem(dict, Events):
+class SiteItem(Events):
     """
     Represents thing used to create site. For example site source files.
     """
@@ -29,19 +29,20 @@ class SiteItem(dict, Events):
         self._default_output = output_path
 
         self.source = None
+        self.context = {}
 
     # Properties.
 
-    @property
-    def context(self):
-        """Metadata dict, for example used during content rendering."""
-        return self
+    # @property
+    # def context(self):
+    #     """Metadata dict, for example used during content rendering."""
+    #     return self.context
 
-    @context.setter
-    def context(self, value):
-        self.clear()
-        if value is not None:
-            self.update(value)
+    # @context.setter
+    # def context(self, value):
+    #     self.clear()
+    #     if value is not None:
+    #         self.update(value)
 
     @property
     def permalink(self):
