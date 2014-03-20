@@ -6,7 +6,9 @@ from .events import Events
 
 
 class ItemLoader(Events):
-    pass
+    def load(self, path, excluded=()):
+        """Inherited class overrides this method."""
+        pass
 
 
 # Filesystem content loader.
@@ -33,7 +35,7 @@ class FileItem(SiteItem):
         # File item source is same as item output. For example if source path is
         # "b.html", it be that same as a item output path: "output/b.html".
 
-        SiteItem.__init__(self, id=output_path, output_path=output_path, source_path=source_path)
+        SiteItem.__init__(self, source_path, output_path)
 
         # Item type is recognized using file extension.
         self.type = os.path.splitext(source_path)[1][1:]
@@ -52,9 +54,6 @@ class FileItem(SiteItem):
     @source.setter
     def source(self, value):
         self._data = value
-
-    def has_data(self):
-        return False if self._data is None else True
 
     def is_source_modified(self):
         return False if self._data is None else True
