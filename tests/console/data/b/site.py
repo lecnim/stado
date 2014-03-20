@@ -1,4 +1,4 @@
 from stado import Stado
 
-app = Stado()
-app.run()
+site = Stado()
+site.build('**/*.html')
