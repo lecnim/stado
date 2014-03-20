@@ -1,6 +1,5 @@
 import os
 from stado import plugins
-from stado.core.item import SiteItem
 from tests.plugins import TestPlugin
 
 
@@ -43,16 +42,20 @@ class TestMustache(TestPlugin):
         x = self.plugin.render_string('{{ a.x }}', context={'a': hello()})
         self.assertEqual('2', x)
 
-
     def test_item(self):
+        """should substitute using item"""
 
         item = self.site.load('basic.html')
+        item.context['b'] = 'badger'
         x = self.plugin.render_string('{{ a.source }}', context={'a': item})
         self.assertEqual('{{ title }}', x)
+        x = self.plugin.render_string('{{ a.context.b }}', context={'a': item})
+        self.assertEqual('badger', x)
 
-    #
+    # loading
 
     def test_plugin_from_string(self):
+        """can be loaded using plugins name"""
 
         self.site.build('basic.html', 'mustache', context={'title': 'hello'})
         self.assertTrue(os.path.exists('basic.html'))
