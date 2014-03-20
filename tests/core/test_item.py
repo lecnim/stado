@@ -2,16 +2,9 @@ import unittest
 from stado.core.item import SiteItem
 
 
-class TestItem(unittest.TestCase):
+# TODO: SiteItem tests
+class TestSiteItem(unittest.TestCase):
     """
-
+    SiteItem
     """
-
-    def test_posix_source(self):
-        """Item.source property should use posix path format."""
-
-        item = SiteItem('a/b/c', '')
-        self.assertEqual('a/b/c', item.id)
-
-        item = SiteItem('a\\b\\c', '')
-        self.assertEqual('a/b/c', item.id)
+    pass
