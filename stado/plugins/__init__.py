@@ -6,7 +6,7 @@ from .. import IS_ZIP_PACKAGE, PATH
 
 
 class Plugin(Events):
-    def __init__(self, site):
+    def __init__(self, site=None):
         super().__init__()
 
 

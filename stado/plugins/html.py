@@ -1,11 +1,15 @@
 import os
 from . import Plugin
 
+
 class Html(Plugin):
+    """
+    Plugin html.
+    """
 
-    name = 'html'
-
-    def apply(self, item):
+    @staticmethod
+    def apply(item):
+        """Sets item output file extension to html."""
 
         base_path = os.path.splitext(item.url)[0]
         item.url = base_path + '.html'

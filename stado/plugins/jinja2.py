@@ -13,14 +13,9 @@ except ImportError:
 class Plugin:
     """Wrapper for jinja2 module."""
 
-    name = 'jinja2'
-
     def __init__(self, site):
 
-        print('JINJA!')
-
         loader = jinja2.FileSystemLoader(site.path)
-
         # Jinja2 environment set to site source path.
         self.environment = jinja2.Environment(loader=loader)
 
@@ -28,11 +23,8 @@ class Plugin:
     def render(self, source: str, context: dict):
         """Renders source with given context."""
 
-        print('RENDERING')
-
         template = self.environment.from_string(source)
         return template.render(**context)
-
 
     def apply(self, item):
         source = self.render(item.source, item.context)
