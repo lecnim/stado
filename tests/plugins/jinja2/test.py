@@ -11,7 +11,6 @@ class TestJinja2(TestPlugin):
         """should correctly substitute variables"""
 
         self.site.build('basic.html', 'jinja2', context={'title': 'hello'})
-
         self.assertTrue(os.path.exists('basic.html'))
         with open('basic.html') as page:
             self.assertEqual('hello', page.read())
@@ -21,7 +20,6 @@ class TestJinja2(TestPlugin):
 
         self.site.build('inheritance/page.html',
                         'jinja2')
-
         self.assertTrue(os.path.exists('inheritance/page.html'))
         with open('inheritance/page.html') as page:
             self.assertEqual('hello badger', page.read())
