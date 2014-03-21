@@ -4,10 +4,10 @@ from . import Plugin
 
 class Markdown(Plugin):
 
-    def apply(item):
+    def apply(self, item):
         item.source = markdown.markdown(item.source)
 
-    def render(source):
+    def render(self, source):
         return markdown.markdown(source)
 
 Plugin = Markdown
