@@ -52,13 +52,25 @@ class Build(Command):
             for directory in dirs:
                 # Set custom output directory.
                 if output: CONFIG.output = os.path.join(output, directory)
-                self.build_site(directory)
+                try:
+                    self.build_site(directory)
+                # Change output to default because other sites will use it
+                #  instead of correct one.
+                except:
+                    CONFIG.output = None
+                    raise
 
         # Build only given project.
         else:
             # Set custom output directory.
             CONFIG.output = output
-            self.build_site(site)
+            try:
+                self.build_site(site)
+            # Change output to default because other sites will use it instead
+            # of correct one.
+            except:
+                CONFIG.output = None
+                raise
 
         # This is default output directory.
         CONFIG.output = None
