@@ -1,7 +1,18 @@
 import os
+import unittest
 from tests.plugins import TestPlugin
 
 
+def requirements():
+    """Skip test if jinja2 not available."""
+    try:
+        import jinja2
+        return True
+    except ImportError:
+        return False
+
+
+@unittest.skipIf(not requirements(), 'require jinja2')
 class TestJinja2(TestPlugin):
     """
     Plugin Jinja2
