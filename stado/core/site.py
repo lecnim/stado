@@ -2,9 +2,7 @@ import os
 import inspect
 
 from .loaders import FileLoader
-from .. import templates
 from .events import Events
-from .. import controllers
 from .. import plugins
 from .. import config as CONFIG
 
@@ -26,23 +24,17 @@ class Site(Events):
     """
 
     def __init__(self, path=None, output=None, config=None,
-                 template_engine='mustache',
-                 loaders=()):
+                 loader=FileLoader()):
         """
         Arguments:
             path: Items will be created using files in this path. Default path is
                 same as path to python module file using this class.
             output:
                 Site will be build in this location.
-            template_engine:
-                Template engine class. Default is using mustache.
-            cache:
-                Cache class.
             loaders: List of ItemLoader classes used to create Items objects.
         """
 
         Events.__init__(self)
-
 
         # Set path to file path from where Site is used.
         if path is None:
@@ -63,44 +55,28 @@ class Site(Events):
 
         # Paths pointing to files or directories which will be ignored.
         self.excluded_paths = []
+        self.loader = loader
 
-        # Initializing template engine.
-        if isinstance(template_engine, str):
-            engine = templates.load(template_engine)
-            self.template_engine = engine(self.path)
-        else:
-            self.template_engine = template_engine(self.path)
-
-
-        self.loaders = loaders
-
-
-
-        self.loader = FileLoader()
         self.built_items = []
-
         self.registered = []
-
 
         # Loads plugins from stado.plugins package.
         self.plugins = {}
-        for i in plugins.load():
-            self.plugins[i.name] = i(self)
 
 
-        # plugins.load_plugin('html')
-
-
+        self.controllers = [
+            self.build,
+            self.register,
+            self.route,
+            self.find,
+            self.load,
+            self.apply
+        ]
 
         # Loads controllers from stado.controllers package.
         # self.controllers = {}
         # for i in controllers.load(self.config['controllers']):
         #     self.controllers[i.name] = self.bind_controller(i(self))
-
-
-        # self._find()
-
-
 
     @property
     def output(self):
@@ -135,9 +111,7 @@ class Site(Events):
         with open(path, 'w') as page:
             page.write(source)
 
-
     # load
-
 
     def load(self, path):
         """Returns list of items created using files in path."""
@@ -212,7 +186,6 @@ class Site(Events):
 
         if not item.output_path in self.built_items:
             self.built_items.append(item.output_path)
-
         item.deploy(self.output)
 
 
@@ -232,8 +205,18 @@ class Site(Events):
                     # Import plugin module.
                     plugin_class = plugins.load_plugin(plugin)
 
-                    self.plugins[plugin_class.name] = plugin_class(self)
-                    plugin = self.plugins[plugin_class.name]
+                    if inspect.isclass(plugin_class):
+                        self.plugins[plugin] = plugin_class(self)
+                    else:
+                        self.plugins[plugin] = plugin_class
+                    plugin = self.plugins[plugin]
+
+
+
+                    # if inspect.isclass(plugin_class)
+
+                    # self.plugins[plugin] = plugin_class
+                    # plugin = self.plugins[plugin]
 
                 # plugin = self.plugins.get(plugin)
 
@@ -251,117 +234,14 @@ class Site(Events):
                 plugin.apply(item)
         return item
 
-
-
-
-
-
-
-
-
-    # Shortcuts.
+    # def bind_controller(self, controller):
+    #     """Binds events to given controller object. Installs controller as a site
+    #     method if controller is callable. Returns given controller object."""
     #
-    # def get_item(self, item_source):
-    #     """Shortcut for self.cache.load_item()."""
-    #     return self.cache.load_item(item_source)
+    #     # Bind controller as a object method.
+    #     if controller.is_callable is True:
+    #         setattr(self, controller.name, controller)
     #
-    # def save_item(self, item):
-    #     """Shortcut for self.cache.save_item()."""
-    #     self.cache.save_item(item)
-    #
-    # @property
-    # def items(self):
-    #     """Yields items from cache."""
-    #     for item in self.cache:
-    #         yield item
-    #
-    # @property
-    # def sources(self):
-    #     """Yield items sources available in cache."""
-    #     for source in self.cache.sources:
-    #         yield source
-    #
-    #
-    # # Methods.
-    #
-    # def _get(self, *source):
-    #
-    #     for item in self.cache:
-    #         if item.match(*source):
-    #             if not item.is_loaded():
-    #                 item.load()
-    #             yield item
-
-    def bind_controller(self, controller):
-        """Binds events to given controller object. Installs controller as a site
-        method if controller is callable. Returns given controller object."""
-
-        # Bind controller as a object method.
-        if controller.is_callable is True:
-            setattr(self, controller.name, controller)
-
-        # self.events.subscribe(controller)
-        self.template_engine.events.subscribe(controller)
-        return controller
-
-
-    # Generating.
-
-    # def run(self):
-    #     """Creates site: loads, renders, deploys."""
-    #
-    #     log.debug('Starting building site: {}'.format(self.path))
-    #     log.debug('\tRendering and deploying items...')
-    #
-    #     for item in self.cache:
-    #         if not item.is_loaded():
-    #             item.load()
-    #
-    #         log.debug('\t\t{} => {}'.format(item.id, item.output_path))
-    #         item.generate(self.output)
-    #
-    #     # Remove cache.
-    #
-    #     # TODO: clearing cache
-    #     # self.clear()
-    #
-    # def generate(self):
-    #     self.run()
-    #
-    # def _find(self):
-    #     """Find site items and stores them unloaded in cache."""
-    #
-    #     log.debug('\tFinding site items...')
-    #
-    #     # Use each content loader.
-    #     for loader in self.loaders:
-    #
-    #         # Skip site output directory.
-    #         excluded_paths = self.excluded_paths + [self.output]
-    #         for item in loader.load(self.path, excluded_paths):
-    #
-    #             log.debug('\t\t[ {0.type} ]  {0.id}'.format(item))
-    #
-    #             # Get item model with load(), render(), deploy() methods.
-    #             # Install this methods in Item.
-    #
-    #             model = self.item_types(item.type)
-    #             item.set_extension(model)
-    #
-    #             # Subscribe controller to item object events.
-    #             # for i in self.controllers.values():
-    #             #     item.events.subscribe(i)
-    #
-    #             # Loads item data and stores loaded item in cache.
-    #             self.cache.save_item(item)
-    #
-    #
-    # # Cleaning.
-    #
-    # def clear(self):
-    #     """Clearing site components."""
-    #
-    #     #for i in self.controllers.values():
-    #     #    del i.site
-    #     #del self.controllers
-    #     self.cache.clear()
+    #     # self.events.subscribe(controller)
+    #     self.template_engine.events.subscribe(controller)
+    #     return controller

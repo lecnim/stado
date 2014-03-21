@@ -57,29 +57,30 @@ class WrapController:
 
 
 def default_site(path):
+
     global app
     global run
 
-    app = Site(path)
-    run = app.run
+    site = Site(path)
+    app = site
 
     module = sys.modules[__name__]
 
-    for name, plugin in app.controllers.items():
-        # setattr(module, name, plugin)
+    for function in site.controllers:
+        setattr(module, function.__name__, function)
 
-        setattr(module, name, WrapController(plugin))
 
 def clear_default_site():
     global app
     global run
+    site = app
 
     module = sys.modules[__name__]
 
-    for name, plugin in app.controllers.items():
-        setattr(module, name, None)
 
-    app.clear()
+    for function in site.controllers:
+        setattr(module, function.__name__, None)
+
     app = None
     run = None
 

@@ -9,7 +9,7 @@ host = 'localhost'
 port = 4000
 
 # 'DEBUG' is used in debug mode, it's logical...
-log_level = 'INFO'
+log_level = 'DEBUG'
 
 # Sleep interval during waiting loop. For example used in watch or view commands.
 wait_interval = 0.2
@@ -24,4 +24,4 @@ def get_default_site_config():
         'controllers': None,
         'plugins': None,
     }
-    
+
