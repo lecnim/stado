@@ -37,3 +37,10 @@ def relative_path(path):
         raise ValueError('Path must be relative: ' + path)
     path = path.replace('\\', '/')
     return os.path.normpath(path)
+
+
+def get_subclasses(c):
+    subclasses = c.__subclasses__()
+    for d in list(subclasses):
+        subclasses.extend(get_subclasses(d))
+    return subclasses
