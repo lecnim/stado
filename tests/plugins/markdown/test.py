@@ -8,7 +8,7 @@ class TestMarkdown(TestPlugin):
     """
     def setUp(self):
         super().setUp()
-        self.plugin = plugins.load_plugin('markdown')
+        self.plugin = plugins.load_plugin('markdown')()
 
     # plugin module
 
@@ -16,6 +16,6 @@ class TestMarkdown(TestPlugin):
         """should correctly convert item markdown source to html"""
 
         item = self.site.load('page.md')
-        self.plugin(item)
+        self.plugin.apply(item)
 
         self.assertEqual('<h1>header</h1>', item.source)
