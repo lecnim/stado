@@ -1,3 +1,8 @@
+"""
+Plugin sets item output file extension to html.
+For example: 'page.md' => 'page.html'
+"""
+
 import os
 from . import Plugin
 
