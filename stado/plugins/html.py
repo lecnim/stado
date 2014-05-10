@@ -13,5 +13,3 @@ class Html(Plugin):
 
         base_path = os.path.splitext(item.url)[0]
         item.url = base_path + '.html'
-
-Plugin = Html

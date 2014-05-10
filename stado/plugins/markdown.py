@@ -9,5 +9,3 @@ class Markdown(Plugin):
 
     def render(self, source):
         return markdown.markdown(source)
-
-Plugin = Markdown

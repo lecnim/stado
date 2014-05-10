@@ -1,8 +1,12 @@
 import importlib
 import sys
 
+from .. import log
+from .. import utils
 from ..core.events import Events
 from .. import IS_ZIP_PACKAGE, PATH
+
+import inspect
 
 
 class Plugin(Events):
@@ -28,14 +32,30 @@ def load_plugin(name):
         if IS_ZIP_PACKAGE:
             sys.path.remove(PATH)
 
-    # Get plugin object.
+    # Get plugin classes.
 
-    if hasattr(module, 'apply'):
-        plugin = module.apply
-    elif hasattr(module, 'Plugin'):
-        plugin = module.Plugin
-    else:
-        raise AttributeError('module ' + name + ' is not plugin')
+    for name, obj in inspect.getmembers(module):
+        if inspect.isclass(obj):
 
-    return plugin
+            # Object is plugin only if it inherits from parent Plugin class.
+            if obj != Plugin and Plugin in inspect.getmro(obj):
+                return obj
+
+
+
+
+
+    # if hasattr(module, 'apply'):
+    #     plugin = module.apply
+    # elif hasattr(module, 'Plugin'):
+    #
+    #     if Plugin in inspect.getmro()
+    #
+    #     plugin = module.Plugin
+    #     a = inspect.getmro(plugin)
+    #     print(utils.get_subclasses(plugin))
+    # else:
+    #     raise AttributeError('module ' + name + ' is not plugin')
+    #
+    # return plugin
 

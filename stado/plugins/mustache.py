@@ -70,5 +70,3 @@ class Mustache(Plugin):
 
     def render_string(self, source, context):
         return self.render(source, context)
-
-Plugin = Mustache

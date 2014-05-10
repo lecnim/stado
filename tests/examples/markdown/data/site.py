@@ -2,4 +2,4 @@
 
 from stado import build
 
-build('*.md', 'markdown', 'html')
+build('**/*.md', 'markdown', 'html')
