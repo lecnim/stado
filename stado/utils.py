@@ -44,3 +44,8 @@ def get_subclasses(c):
     for d in list(subclasses):
         subclasses.extend(get_subclasses(d))
     return subclasses
+
+
+def camel_case(name):
+    """Converts name to CameCase. Example 'foo_bar' => 'FooBar'"""
+    return name.title().replace(' ', '').replace('_', '')
