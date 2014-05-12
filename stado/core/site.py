@@ -61,7 +61,7 @@ class Site(Events):
         self.registered = []
 
         # Loads plugins from stado.plugins package.
-        self.plugins = {}
+        self.plugins = plugins.PluginsManager(self)
 
 
         self.controllers = [
@@ -138,6 +138,7 @@ class Site(Events):
         excluded = [os.path.join(self.path, i) for i in self.excluded_paths]
 
         for item in self.loader.load(path, excluded=excluded):
+            item.site = self
             item.output_path = os.path.relpath(item.source_path, self.path)
             yield item
 
@@ -146,16 +147,11 @@ class Site(Events):
     def register(self, path, *plugins):
         self.registered.append([relative_path(path), plugins])
 
-    def install(self, name, plugin):
-        self.plugins[name] = plugin
-
-
     # build
 
     def build(self, path='**/*', *plugins, context=None, overwrite=True):
 
         # TODO: build() without arguments? maybe another function to build all
-
 
         def build_item(item, plugins):
 
@@ -190,58 +186,23 @@ class Site(Events):
 
 
     def apply(self, item, *plugins_list):
+        """Uses plugins on given item. Argument plugins_list accepts string,
+        Plugin class, Plugin instance or function."""
 
-        for plugin in plugins_list:
+        for i in plugins_list:
 
-            if isinstance(plugin, str):
+            # Plugin as a function or method. Do not install it, just execute.
+            if inspect.isroutine(i):
+                i(item)
 
-                # Already loaded
-                if plugin in self.plugins:
-                    plugin = self.plugins[plugin]
-
-                # Load plugin
-                else:
-
-                    # Import plugin module.
-                    plugin_class = plugins.load_plugin(plugin)
-
-                    if inspect.isclass(plugin_class):
-                        self.plugins[plugin] = plugin_class(self)
-                    else:
-                        self.plugins[plugin] = plugin_class
-                    plugin = self.plugins[plugin]
-
-
-
-                    # if inspect.isclass(plugin_class)
-
-                    # self.plugins[plugin] = plugin_class
-                    # plugin = self.plugins[plugin]
-
-                # plugin = self.plugins.get(plugin)
-
-
-            # Create object using class.
-            if inspect.isclass(plugin):
-                plugin = plugin()
-
-            if callable(plugin):
-                plugin(item)
-
-
-
+            # Plugin as a string, class or Plugin instance.
             else:
-                plugin.apply(item)
-        return item
+                plugin = self.plugins.get(i)
 
-    # def bind_controller(self, controller):
-    #     """Binds events to given controller object. Installs controller as a site
-    #     method if controller is callable. Returns given controller object."""
-    #
-    #     # Bind controller as a object method.
-    #     if controller.is_callable is True:
-    #         setattr(self, controller.name, controller)
-    #
-    #     # self.events.subscribe(controller)
-    #     self.template_engine.events.subscribe(controller)
-    #     return controller
+                # Plugin can be also function or method!
+                if callable(plugin):
+                    plugin(item)
+                else:
+                    plugin.apply(item)
+
+        return item

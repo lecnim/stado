@@ -10,7 +10,7 @@ class TestMustache(TestPlugin):
 
     def setUp(self):
         super().setUp()
-        self.plugin = plugins.load_plugin('mustache')()
+        self.plugin = plugins.load_plugin('mustache')(self.site)
 
     # supported types
 

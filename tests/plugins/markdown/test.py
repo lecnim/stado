@@ -8,7 +8,7 @@ class TestMarkdown(TestPlugin):
     """
     def setUp(self):
         super().setUp()
-        self.plugin = plugins.load_plugin('markdown')()
+        self.plugin = plugins.load_plugin('markdown')(self.site)
 
     # plugin module
 

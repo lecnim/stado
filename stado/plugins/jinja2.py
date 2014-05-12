@@ -15,20 +15,18 @@ except ImportError:
 class Jinja2(Plugin):
     """Wrapper for jinja2 module."""
 
-    def __init__(self, site):
-        super().__init__()
+    def install(self, site):
 
-        loader = jinja2.FileSystemLoader(site.path)
         # Jinja2 environment set to site source path.
-        self.environment = jinja2.Environment(loader=loader)
+        loader = jinja2.FileSystemLoader(site.path)
+        env = jinja2.Environment(loader=loader)
 
-
-    def render(self, source: str, context: dict):
-        """Renders source with given context."""
-
-        template = self.environment.from_string(source)
-        return template.render(**context)
+        # Set local variables.
+        return {'environment': env}
 
     def apply(self, item):
-        source = self.render(item.source, item.context)
-        item.source = source
+        """Renders source with given context and apply to item."""
+
+        env = self.get_local(item.site, 'environment')
+        template = env.from_string(item.source)
+        item.source = template.render(**item.context)
