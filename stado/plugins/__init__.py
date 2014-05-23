@@ -16,6 +16,8 @@ class Plugin(Events):
     def install(self, site):
         pass
 
+    # Locals
+
     def set_local(self, site, name, value):
         site.plugins.locals[self][name] = value
 
@@ -24,15 +26,6 @@ class Plugin(Events):
 
     def get_locals(self, site):
         return site.plugins.locals[self]
-
-    def set_global(self, site, name, value):
-        site.plugins.globals[self.__class__][name] = value
-
-    def get_global(self, site, name):
-        return site.plugins.locals[self.__class__].get(name)
-
-    def get_globals(self, site):
-        return site.plugins.locals[self.__class__]
 
 
 class PluginsManager:
@@ -44,8 +37,6 @@ class PluginsManager:
 
         # Plugins locals variables. Each plugin instance has it own.
         self.locals = {}
-        # Plugins global variables. Each plugin class has it own.
-        self.globals = {}
         # Here are plugins instances that are auto created because of
         # string usage in site.apply() or site.build() methods. For example:
         # site.build('*.html', 'html') => it will creates html plugin and stores
@@ -103,9 +94,6 @@ class PluginsManager:
 
         if plugin in self.plugins:
             raise AttributeError('Plugin already installed')
-
-        if not plugin.__class__ in self.globals:
-            self.globals[plugin.__class__] = {}
 
         self.plugins.append(plugin)
         variables = plugin.install(self.site)

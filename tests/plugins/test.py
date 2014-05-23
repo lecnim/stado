@@ -3,6 +3,7 @@ import unittest
 from tests.plugins.example_plugin import ExamplePlugin, Class, function, example
 from tests.plugins.example_apply import apply
 from stado import plugins
+from stado.core.site import Site
 
 
 class Plugin(plugins.Plugin):
@@ -21,12 +22,27 @@ class TestPluginManager(unittest.TestCase):
     def setUp(self):
         self.manager = plugins.PluginsManager(site=None)
 
-    # locals / globals
+    # Local variables
 
-    # TODO:
+    def test_locals(self):
+        """should support local variables (stored in site object)"""
 
+        site_a = Site()
+        site_b = Site()
+        p = Plugin()
 
-    # plugin instance
+        site_a.plugins.install(p)
+        site_b.plugins.install(p)
+
+        p.set_local(site_a, 'msg', 'a')
+        p.set_local(site_b, 'msg', 'b')
+
+        self.assertEqual('a', p.get_local(site_a, 'msg'))
+        self.assertEqual('b', p.get_local(site_b, 'msg'))
+        self.assertEqual({'msg': 'a'}, p.get_locals(site_a))
+        self.assertEqual({'msg': 'b'}, p.get_locals(site_b))
+
+    # Plugin instance
 
     def test_install_instance(self):
         """should install plugin instance: Plugin()"""
@@ -45,7 +61,7 @@ class TestPluginManager(unittest.TestCase):
         self.assertEqual(1, plugin.i)
         self.assertEqual(x, plugin)
 
-    # plugin class
+    # Plugin class
 
     def test_install_class(self):
         """should install plugin class: Plugin"""
@@ -62,7 +78,7 @@ class TestPluginManager(unittest.TestCase):
         self.assertEqual(x, y)
         self.assertEqual(1, x.i)
 
-    # plugin from string - class
+    # Plugin from string - class
 
     def test_install_class_from_string(self):
         """should import class from string and install it"""
@@ -95,7 +111,7 @@ class TestPluginManager(unittest.TestCase):
         self.assertEqual(x, y)
         self.assertEqual(1, y.i)
 
-    # plugin from string - function
+    # Plugin from string - function
 
     def test_install_function_from_string(self):
         """should import function from string and install it"""
@@ -105,7 +121,7 @@ class TestPluginManager(unittest.TestCase):
         plugin = self.manager.get('example_plugin.function')
         self.assertEqual(function, plugin)
 
-    # plugin from string - instance
+    # Plugin from string - instance
 
     def test_install_instance_from_string(self):
         """should import instance from string and install it"""
