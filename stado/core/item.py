@@ -33,17 +33,6 @@ class SiteItem(Events):
 
     # Properties.
 
-    # @property
-    # def context(self):
-    #     """Metadata dict, for example used during content rendering."""
-    #     return self.context
-
-    # @context.setter
-    # def context(self, value):
-    #     self.clear()
-    #     if value is not None:
-    #         self.update(value)
-
     @property
     def permalink(self):
         """Item will be available using this url."""

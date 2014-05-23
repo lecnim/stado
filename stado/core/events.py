@@ -4,8 +4,8 @@ class EventsHandler:
     """Basic events system. How  it works:
 
     - Object which receives events must bind them to methods using bind()
-    - Object which send events must subscribe objects which receives events using
-      subscribe()
+    - Object which send events must subscribe objects which receives events
+      using subscribe()
     - Object send event using notify() method.
 
     """
@@ -26,17 +26,10 @@ class EventsHandler:
             self.subscribers.append(obj)
             self.subscribers.sort(key=lambda x: getattr(x, 'order', 10))
 
-
     def notify(self, event, *args, **kwargs):
         for obj in self.subscribers:
             if event in obj.events.registered:
                 yield obj.events.registered[event](*args, **kwargs)
-
-    # TODO: clean DRY
-    def get(self, event):
-        for obj in self.subscribers:
-            if event in obj.events.registered:
-                yield obj.events.registered[event]
 
     def bind(self, events):
         self.registered.update(events)
@@ -50,5 +43,3 @@ class Events:
 
     def event(self, name, *args, **kwargs):
         return [i for i in self.events.notify(name, *args, **kwargs)]
-
-

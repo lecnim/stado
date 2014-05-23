@@ -47,7 +47,6 @@ class FileItem(SiteItem):
     def source(self):
         if self._data is None:
             with open(self.source_path) as file:
-                print('READING', self.source_path)
                 return file.read()
         return self._data
 

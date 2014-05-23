@@ -1,6 +1,6 @@
 """
 Finders classes. They are used to get paths pointing to files which can be uses
-to create Content objects.
+to create Item objects.
 """
 
 import os

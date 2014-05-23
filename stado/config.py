@@ -15,13 +15,3 @@ log_level = 'DEBUG'
 wait_interval = 0.2
 # Checking for modified files.
 watch_interval = 1
-
-
-def get_default_site_config():
-    """Returns dict with default site configuration."""
-    return {
-        # List of controllers and plugins. If None, all available are loaded.
-        'controllers': None,
-        'plugins': None,
-    }
-

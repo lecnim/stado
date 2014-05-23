@@ -6,7 +6,7 @@ import zipimport
 from . import libs
 from . import config
 
-__version__ = '0.6.0'
+__version__ = '1.0.0a'
 version = __version__
 
 
@@ -38,65 +38,40 @@ def get_logger():
 log = get_logger()
 
 
+# Default site.
 
-
-# Default app.
-
-app = None
-run = None
-
-
-class WrapController:
-
-    def __init__(self, controller):
-        self.controller = controller
-    def __call__(self, *args, **kwargs):
-        # if not app.is_loaded:
-        #     app.load()
-        return self.controller(*args, **kwargs)
-
+site = None
 
 def default_site(path):
 
-    global app
-    global run
-
+    global site
     site = Site(path)
-    app = site
 
     module = sys.modules[__name__]
 
+    # Set module functions shortcuts to site methods.
     for function in site.controllers:
         setattr(module, function.__name__, function)
 
-
 def clear_default_site():
-    global app
-    global run
-    site = app
 
+    global site
     module = sys.modules[__name__]
 
-
+    # Remove module functions to site methods shortcuts.
     for function in site.controllers:
         setattr(module, function.__name__, None)
 
-    app = None
-    run = None
+    site = None
 
 
+#
 
 from .core.site import Site
 from .console import Console
 
-
-
-
-
 # Shortcuts for site.py
 Stado = Site
-
-
 
 # Run stado. Get arguments and pass them to console.
 if __name__ == "__main__":

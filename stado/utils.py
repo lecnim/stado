@@ -32,15 +32,21 @@ def copytree(source, destination):
         else:
             shutil.copy2(s, d)
 
+
 def relative_path(path):
+    """Checks if path is relative and uniforms slashes. Raises ValueError if
+    path is absolute."""
+
     if os.path.isabs(path):
         raise ValueError('Path must be relative: ' + path)
     path = path.replace('\\', '/')
     return os.path.normpath(path)
 
 
-def get_subclasses(c):
-    subclasses = c.__subclasses__()
+def get_subclasses(class_):
+    """Returns subclasses of given class"""
+
+    subclasses = class_.__subclasses__()
     for d in list(subclasses):
         subclasses.extend(get_subclasses(d))
     return subclasses

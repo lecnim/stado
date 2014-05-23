@@ -34,9 +34,6 @@ class Helper:
 class Mustache(Plugin):
     """Wrapper for pystache module."""
 
-    name = 'mustache'
-    requirements = 'Require pystache module! http://github.com/defunkt/pystache'
-
     def apply(self, item):
         item.source = self.render(item.source, item.context)
 

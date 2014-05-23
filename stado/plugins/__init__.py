@@ -162,25 +162,27 @@ def _import_module(name):
     return module
 
 
-# TODO: Clean this!
 def load_plugin(name, package='stado.plugins'):
 
+    # For example: foo-module.bar
     if '.' in name:
+
+        # foo.bar => module_name: foo-module, class_name: bar
         module_name, class_name = name.split('.', 1)
         module_name = module_name.replace('-', '_')
-
         module = _import_module(package + '.' + module_name)
 
         default_class = getattr(module, class_name)
         if not default_class:
-            raise AttributeError('Plugin has no attribute {}'.format(class_name))
+            raise AttributeError('plugin {}: has no attribute {}'
+                                 .format(module_name, class_name))
         return default_class
 
     else:
-        name = name.replace('-', '_')
-
-        module_name = name
-        class_name = utils.camel_case(name)
+        # foo-module => foo_module
+        module_name = name.replace('-', '_')
+        # foo_module => FooModule
+        class_name = utils.camel_case(module_name)
 
         module = _import_module(package + '.' + module_name)
 
@@ -188,7 +190,8 @@ def load_plugin(name, package='stado.plugins'):
         if hasattr(module, 'apply'):
             # Apply function must be callable!
             if not callable(module.apply):
-                raise TypeError('plugin apply function must be callable')
+                raise TypeError('plugin {}: apply attribute must be callable'
+                                .format(module_name))
             return module.apply
 
         # Try to get default plugin class, for example if plugin module is
@@ -198,10 +201,11 @@ def load_plugin(name, package='stado.plugins'):
 
             # Error, default class object is not class!
             if not inspect.isclass(default_class):
-                raise TypeError('plugin object {} must be class, not {}'
-                                .format(class_name, type(default_class)))
+                raise TypeError('plugin {}: default plugin class is {}'
+                                .format(module_name, type(default_class)))
             return default_class
 
         # There is no default plugin!
         else:
-            raise ImportError('Plugin module has no default plugin class')
+            raise ImportError('plugin {}: has no default plugin class or apply '
+                              'function'.format(module_name))

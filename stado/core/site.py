@@ -5,12 +5,9 @@ from .loaders import FileLoader
 from .events import Events
 from .. import plugins
 from .. import config as CONFIG
-
 from ..utils import relative_path
-
-from .. import log
 from ..libs import glob2 as glob
-import shutil
+
 
 class Site(Events):
     """
@@ -23,7 +20,7 @@ class Site(Events):
 
     """
 
-    def __init__(self, path=None, output=None, config=None,
+    def __init__(self, path=None, output=None,
                  loader=FileLoader()):
         """
         Arguments:
@@ -39,11 +36,6 @@ class Site(Events):
         # Set path to file path from where Site is used.
         if path is None:
             path = os.path.split(inspect.stack()[1][1])[0]
-
-        # Configuration loading.
-        self.config = CONFIG.get_default_site_config()
-        if config:
-            self.config.update(config)
 
         # Absolute path to site source directory.
         self.path = os.path.normpath(path)
@@ -63,7 +55,7 @@ class Site(Events):
         # Loads plugins from stado.plugins package.
         self.plugins = plugins.PluginsManager(self)
 
-
+        # This methods are used in default site.
         self.controllers = [
             self.build,
             self.register,
@@ -73,17 +65,11 @@ class Site(Events):
             self.apply
         ]
 
-        # Loads controllers from stado.controllers package.
-        # self.controllers = {}
-        # for i in controllers.load(self.config['controllers']):
-        #     self.controllers[i.name] = self.bind_controller(i(self))
-
     @property
     def output(self):
         if CONFIG.output:
             return CONFIG.output
         return self._output
-
 
     # Controllers
     # Stability: 2 - Unstable
@@ -167,7 +153,6 @@ class Site(Events):
 
             if overwrite or not item.output_path in self.built_items:
                 self.deploy(item)
-
 
         # string
         if isinstance(path, str):
