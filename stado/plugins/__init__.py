@@ -99,6 +99,8 @@ class PluginsManager:
         """Installs plugin instance, creates global and local variables for
          plugin. Returns plugin instance."""
 
+        log.debug("Installing plugin (object): " + str(plugin))
+
         if plugin in self.plugins:
             raise AttributeError('Plugin already installed')
 
@@ -115,6 +117,8 @@ class PluginsManager:
         """Creates link to plugin instance created from plugin class.
         Returns plugin instance."""
 
+        log.debug("Installing plugin (class): " + str(class_))
+
         plugin = class_()
         self.links[class_] = plugin
         return self._install_object(plugin)
@@ -125,6 +129,8 @@ class PluginsManager:
         Args:
             name (str): For example 'foo' will import 'stado.plugins.foo'
         """
+
+        log.debug("Installing plugin (string): " + name)
 
         plugin = load_plugin(name, package=self.package)
 

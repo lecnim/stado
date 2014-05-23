@@ -5,6 +5,7 @@ from .loaders import FileLoader
 from .events import Events
 from .. import plugins
 from .. import config as CONFIG
+from .. import log
 from ..utils import relative_path
 from ..libs import glob2 as glob
 
@@ -20,8 +21,7 @@ class Site(Events):
 
     """
 
-    def __init__(self, path=None, output=None,
-                 loader=FileLoader()):
+    def __init__(self, path=None, output=None, loader=FileLoader()):
         """
         Arguments:
             path: Items will be created using files in this path. Default path is
@@ -77,6 +77,8 @@ class Site(Events):
     # route
 
     def route(self, url, source):
+
+        log.debug('Adding route: ' + url)
 
         path = os.path.join(self.output, url.lstrip('/'))
 
@@ -164,6 +166,8 @@ class Site(Events):
             build_item(path, plugins)
 
     def deploy(self, item):
+
+        log.debug('Deploying item: ' + item.url)
 
         if not item.output_path in self.built_items:
             self.built_items.append(item.output_path)
