@@ -21,17 +21,6 @@ class TestFileLoader(TestInCurrentDirectory):
         self.assertEqual(8, len(contents))
         self.assertIsInstance(contents[0], FileItem)
 
-    # TODO:
-    # def test_content_source(self):
-    #
-    #     loader = FileLoader()
-    #     contents = [i for i in loader.load('data')]
-    #
-    #     sources = [i.id for i in contents]
-    #     self.assertCountEqual(['a.html', 'b.html', 'image.jpg', 'b/b.md'],
-    #                           sources)
-
-
     def test_item_output_path(self):
         """should generated correct item output path"""
 

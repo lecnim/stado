@@ -48,9 +48,9 @@ class SiteItem(Events):
     def permalink(self, value):
         """Set new item url."""
 
+        value = self.__permalink_style(value)
         keywords = re.findall("(:[a-zA-z]*)", value)
         destination = os.path.normpath(value)
-        destination = self.__permalink_style(destination)
 
         path, filename = os.path.split(self._default_output)
 

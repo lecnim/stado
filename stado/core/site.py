@@ -128,6 +128,8 @@ class Site(Events):
         for item in self.loader.load(path, excluded=excluded):
             item.site = self
             item.output_path = os.path.relpath(item.source_path, self.path)
+            # FIXME: correct default output path
+            item._default_output = item.output_path
             yield item
 
     # register
