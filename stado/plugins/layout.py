@@ -16,9 +16,7 @@ class Layout(Plugin):
         self.path = path
         self.context = context if context else {}
 
-    def apply(self, item):
-
-        site = item.site
+    def apply(self, site, item):
 
         template = site.load(self.path)
         template.context['content'] = item.source
@@ -28,6 +26,6 @@ class Layout(Plugin):
 
         engine = site.plugins.get(self.engine)
 
-        engine.apply(template)
+        engine.apply(site, template)
 
         item.source = template.source

@@ -24,9 +24,9 @@ class Jinja2(Plugin):
         # Set local variables.
         return {'environment': env}
 
-    def apply(self, item):
+    def apply(self, site, item):
         """Renders source with given context and apply to item."""
 
-        env = self.get_local(item.site, 'environment')
+        env = self.get_local(site, 'environment')
         template = env.from_string(item.source)
         item.source = template.render(**item.context)

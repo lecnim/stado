@@ -12,8 +12,7 @@ class Html(Plugin):
     Plugin html.
     """
 
-    @staticmethod
-    def apply(item):
+    def apply(self, site, item):
         """Sets item output file extension to html."""
 
         base_path = os.path.splitext(item.url)[0]

@@ -5,7 +5,7 @@ import shutil
 import tempfile
 
 from stado.core.site import Site
-from stado.core.item import SiteItem
+from stado.core.item import SiteItem, FileItem, Item
 from stado.plugins import Plugin
 
 
@@ -58,9 +58,24 @@ class TestBuild(TestSite):
     def test_item(self):
         """should accept item object as a path argument"""
 
+        # default
+
         page = self.site.load('index.html')
         self.site.build(page)
         self.compare_output('index.html', 'index')
+
+        # FileItem
+
+        i = FileItem('/about.html', os.path.join(self.data_path, 'about.html'))
+        self.site.build(i)
+        self.compare_output('about.html', 'about')
+
+        # Item
+
+        i = Item('/foo', 'hello world')
+        self.site.build(i)
+        self.compare_output('foo', 'hello world')
+
 
     def test_calling_function(self):
         """should accept function in plugins list"""
@@ -76,7 +91,7 @@ class TestBuild(TestSite):
         """should accept class in plugins list"""
 
         class Hello(Plugin):
-            def apply(self, item):
+            def apply(self, site, item):
                 item.source = 'hello'
 
         self.site.build('index.html', Hello)
@@ -86,7 +101,7 @@ class TestBuild(TestSite):
         """should accept plugin instance in plugins list"""
 
         class Hello(Plugin):
-            def apply(self, item):
+            def apply(self, site, item):
                 item.source = 'hello'
 
         self.site.build('index.html', Hello())

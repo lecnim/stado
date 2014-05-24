@@ -1,7 +1,7 @@
 import os
 
 from stado.core.loaders import FileLoader
-from stado.core.loaders import FileItem
+from stado.core.item import SiteItem
 from tests import TestInCurrentDirectory
 
 
@@ -19,7 +19,7 @@ class TestFileLoader(TestInCurrentDirectory):
         contents = [i for i in loader.load('data')]
 
         self.assertEqual(8, len(contents))
-        self.assertIsInstance(contents[0], FileItem)
+        self.assertIsInstance(contents[0], SiteItem)
 
     def test_item_output_path(self):
         """should generated correct item output path"""

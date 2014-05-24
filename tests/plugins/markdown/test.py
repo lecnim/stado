@@ -16,6 +16,6 @@ class TestMarkdown(TestPlugin):
         """should correctly convert item markdown source to html"""
 
         item = self.site.load('page.md')
-        self.plugin.apply(item)
+        self.plugin.apply(self.site, item)
 
         self.assertEqual('<h1>header</h1>', item.source)

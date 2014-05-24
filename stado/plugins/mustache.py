@@ -34,7 +34,7 @@ class Helper:
 class Mustache(Plugin):
     """Wrapper for pystache module."""
 
-    def apply(self, item):
+    def apply(self, site, item):
         item.source = self.render(item.source, item.context)
 
     def render(self, source: str, context: dict):

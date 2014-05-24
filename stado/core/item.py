@@ -3,8 +3,10 @@ import re
 import shutil
 import urllib.request
 
+from .. import utils
 from .events import Events
 from ..libs import glob2 as glob
+
 
 
 class SiteItem(Events):
@@ -28,8 +30,25 @@ class SiteItem(Events):
         # Default output path set by item loader.
         self._default_output = output_path
 
-        self.source = None
+        # If item content is not set - it will be read directly from file.
+        self._data = None
         self.context = {}
+
+    # File reading optimisation.
+
+    @property
+    def source(self):
+        if self._data is None:
+            with open(self.source_path) as file:
+                return file.read()
+        return self._data
+
+    @source.setter
+    def source(self, value):
+        self._data = value
+
+    def is_source_modified(self):
+        return False if self._data is None else True
 
     # Properties.
 
@@ -70,6 +89,11 @@ class SiteItem(Events):
 
     def __permalink_style(self, permalink):
         if permalink == 'pretty-html':
+
+            # Prevent 'index.html' => 'index/index.html'
+            if self.url.endswith('index.html'):
+                return '/:path/:filename'
+
             return '/:path/:name/index.html'
         elif permalink == 'default':
             return '/:path/:filename'
@@ -90,18 +114,13 @@ class SiteItem(Events):
     def match(self, *sources):
         """Returns True if item source matches one of given."""
 
+        if self.source_path is None:
+            return False
+
         for source in sources:
             if glob.fnmatch.fnmatch(self.source_path, source):
                 return True
         return False
-
-    def is_source_modified(self):
-        return True
-
-    def dump(self):
-        """Returns new dict with item metadata."""
-
-        return dict(self)
 
     def deploy(self, path):
 
@@ -112,8 +131,20 @@ class SiteItem(Events):
         if not os.path.exists(output_directory):
             os.makedirs(output_directory)
 
-        if self.is_source_modified:
+        if self.is_source_modified():
             with open(path, mode='w') as file:
                 file.write(self.source)
         else:
             shutil.copy(self.source_path, path)
+
+
+class FileItem(SiteItem):
+
+    def __init__(self, url, source_path):
+        super().__init__(source_path, utils.relative_path(url.strip('/')))
+
+class Item(SiteItem):
+
+    def __init__(self, url, source=''):
+        super().__init__(None, utils.relative_path(url.strip('/')))
+        self.source = source

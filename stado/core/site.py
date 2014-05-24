@@ -101,6 +101,7 @@ class Site(Events):
 
     # load
 
+    # TODO: Return only one item
     def load(self, path):
         """Returns list of items created using files in path."""
 
@@ -126,7 +127,6 @@ class Site(Events):
         excluded = [os.path.join(self.path, i) for i in self.excluded_paths]
 
         for item in self.loader.load(path, excluded=excluded):
-            item.site = self
             item.output_path = os.path.relpath(item.source_path, self.path)
             # FIXME: correct default output path
             item._default_output = item.output_path
@@ -194,6 +194,6 @@ class Site(Events):
                 if callable(plugin):
                     plugin(item)
                 else:
-                    plugin.apply(item)
+                    plugin.apply(self, item)
 
         return item

@@ -16,6 +16,9 @@ class Plugin(Events):
     def install(self, site):
         pass
 
+    def apply(self, site, item):
+        pass
+
     # Locals
 
     def set_local(self, site, name, value):
