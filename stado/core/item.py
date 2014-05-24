@@ -33,6 +33,7 @@ class SiteItem(Events):
         # If item content is not set - it will be read directly from file.
         self._data = None
         self.context = {}
+        self._helpers = []
 
     # File reading optimisation.
 
@@ -110,6 +111,20 @@ class SiteItem(Events):
         self.permalink = value
 
     # Methods.
+
+    def install_helpers(self, helpers):
+        """Adds helpers to items context."""
+
+        for key, value in helpers.items():
+            # Do not overwrite existing variables.
+            if not key in self.context:
+                self.context[key] = value
+                self._helpers.append(key)
+
+    def remove_helpers(self):
+        """Removes helpers from items context."""
+        for key in self._helpers:
+            del self.context[key]
 
     def match(self, *sources):
         """Returns True if item source matches one of given."""

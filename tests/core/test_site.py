@@ -282,3 +282,81 @@ class TestFind(TestSite):
         self.site.excluded_paths = ['blog']
         items = [i for i in self.site.find('blog/*')]
         self.assertEqual(0, len(items))
+
+
+class TestHelper(TestSite):
+    """
+    Site helper() method
+    """
+
+    def test_removing(self):
+        """should remove helpers after building"""
+
+        @self.site.helper
+        def hello():
+            return 'hello world'
+
+        i = Item('/foo', '{{ hello }}')
+        self.site.build(i, 'mustache')
+        self.assertFalse('hello' in i.context)
+
+    # Test types.
+
+    def test_str(self):
+        """should works correctly if string returned"""
+
+        @self.site.helper
+        def hello():
+            return 'hello world'
+
+        i = Item('/foo', '{{ hello }}')
+        self.site.build(i, 'mustache')
+        self.compare_output('foo', 'hello world')
+
+    def test_list(self):
+        """should works correctly if list returned"""
+
+        @self.site.helper
+        def test():
+            return [1, 2, 3]
+
+        i = Item('/foo', '{{# test }}{{.}}{{/ test }}')
+        self.site.build(i, 'mustache')
+        self.compare_output('foo', '123')
+
+    def test_list_of_dict(self):
+        """should works correctly if list of dict returned"""
+
+        @self.site.helper
+        def test():
+            return [{'a': 1}, {'a': 2}, {'a':3}]
+
+        i = Item('/foo', '{{# test }}{{a}}{{/ test }}')
+        self.site.build(i, 'mustache')
+        self.compare_output('foo', '123')
+
+    def test_dict(self):
+        """should works correctly if dict returned"""
+
+        @self.site.helper
+        def test():
+            return {'key': 'value'}
+
+        i = Item('/foo', '{{ test.key }}')
+        self.site.build(i, 'mustache')
+        self.compare_output('foo', 'value')
+
+    # Other tests.
+
+    def test_do_not_overwrite_context(self):
+        """should not overwrite already existing context key"""
+
+        i = Item('/foo', '{{ foo }}')
+        i.context['foo'] = 'bar'
+
+        @self.site.helper
+        def foo():
+            return 'helpers rulezz'
+
+        self.site.build(i, 'mustache')
+        self.compare_output('foo', 'bar')

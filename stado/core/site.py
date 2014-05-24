@@ -50,6 +50,7 @@ class Site(Events):
         self.loader = loader
 
         self.built_items = []
+        self.helpers = {}
         self.registered = []
 
         # Loads plugins from stado.plugins package.
@@ -119,10 +120,6 @@ class Site(Events):
             raise IOError('Path not found: ' + path)
 
         items = [i for i in self.find(path)]
-        #
-        # if not items:
-        #     raise IOError('')
-
         return items[0]
 
     # find
@@ -148,6 +145,28 @@ class Site(Events):
     def register(self, path, *plugins):
         self.registered.append([relative_path(path), plugins])
 
+    # helper
+
+    def helper(self, function):
+        self.helpers[function.__name__] = function
+
+    def _install_helpers(self, item):
+        """Adds helpers to items context. Returns list of added helpers keys."""
+
+        x = []
+        for key, value in self.helpers.items():
+            # Do not overwrite existing variables.
+            if not key in item.context:
+                item.context[key] = value
+                x.append(key)
+        return x
+
+    def _remove_helpers(self, item, helpers):
+        """Removes helpers from items context."""
+        for key in helpers:
+            if key in item.context:
+                del item.context[key]
+
     # build
 
     def build(self, path='**/*', *plugins, context=None, overwrite=True):
@@ -156,6 +175,9 @@ class Site(Events):
 
         def build_item(item, plugins):
 
+            # Add helpers to items context.
+            item.install_helpers(self.helpers)
+
             if not plugins:
 
                 for pattern, plugins in self.registered:
@@ -163,8 +185,11 @@ class Site(Events):
                         self.apply(item, *plugins)
 
             if context:
+                # TODO: Ok? What when item is build again?
                 item.context = context
             self.apply(item, *plugins)
+
+            item.remove_helpers()
 
             if overwrite or not item.output_path in self.built_items:
                 self.deploy(item)

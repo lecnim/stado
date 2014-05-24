@@ -1,7 +1,7 @@
 import os
 from stado.plugins.layout import Layout
-
 from tests.plugins import TestPlugin
+
 
 class TestLayout(TestPlugin):
     """
@@ -44,3 +44,16 @@ class TestLayout(TestPlugin):
         with open('page.html') as page:
             self.assertEqual('hello world', page.read())
 
+    # Helpers
+
+    def test_helpers(self):
+        """can use site helpers"""
+
+        @self.site.helper
+        def helper():
+            return 'hello world'
+
+        item = self.site.load('helper.html')
+        self.site.build(item, Layout('helper.html', engine='mustache'))
+        with open('helper.html') as page:
+            self.assertEqual('hello world!', page.read())
