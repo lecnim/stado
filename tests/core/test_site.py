@@ -199,23 +199,24 @@ class TestLoad(TestSite):
         item = self.site.load('index.html')
         self.assertIsInstance(item, SiteItem)
 
-    def test_load_multiple_files(self):
-        """should return list of items if wildcards used"""
-
-        items = self.site.load('*.html')
-        self.assertEqual(2, len(items))
-
-        items = self.site.load('*.jpg')
-        self.assertEqual(1, len(items))
-
-        items = self.site.load('blog')
-        self.assertEqual(3, len(items))
-
     # exceptions
+
+    def test_wildcards(self):
+        """should raise error if wildcard is used"""
+
+        self.assertRaises(ValueError, self.site.load, '*.html')
 
     def test_absolute_path(self):
         """should raise exception if path is absolute"""
         self.assertRaises(ValueError, self.site.load, '/blog/post.html')
+
+    def test_directory(self):
+        """should raise exception if path is directory"""
+        self.assertRaises(ValueError, self.site.load, 'blog')
+
+    def test_file_not_found(self):
+        """should raise exception if file not found"""
+        self.assertRaises(IOError, self.site.load, 'missing.html')
 
     # item attributes
 
@@ -247,6 +248,18 @@ class TestFind(TestSite):
         self.assertIsInstance(self.site.find('*'), types.GeneratorType)
         sources = [i.source for i in self.site.find('*.html')]
         self.assertCountEqual(['index', 'about'], sources)
+
+    def test_results(self):
+        """should yield correct amount of items"""
+
+        items = [i for i in self.site.find('*.html')]
+        self.assertEqual(2, len(items))
+
+        items = [i for i in self.site.find('*.jpg')]
+        self.assertEqual(1, len(items))
+
+        items = [i for i in self.site.find('blog')]
+        self.assertEqual(3, len(items))
 
     # exceptions
 

@@ -101,17 +101,27 @@ class Site(Events):
 
     # load
 
-    # TODO: Return only one item
     def load(self, path):
         """Returns list of items created using files in path."""
 
         path = relative_path(path)
-        items = [i for i in self.find(path)]
 
-        # Return list if wildcards used or path is pointing to directory.
-        if (glob.has_magic(path) or
-            os.path.isdir(os.path.join(self.path, path))):
-            return items
+        # Errors:
+
+        if glob.has_magic(path):
+            raise ValueError('load() do not support wildcards: ' + path)
+
+        if os.path.isdir(os.path.join(self.path, path)):
+            raise ValueError('argument path should points to file, '
+                             'not directory:')
+
+        if not os.path.exists(os.path.join(self.path, path)):
+            raise IOError('Path not found: ' + path)
+
+        items = [i for i in self.find(path)]
+        #
+        # if not items:
+        #     raise IOError('')
 
         return items[0]
 
@@ -124,6 +134,7 @@ class Site(Events):
 
         # Use absolute paths! Also excluded paths are absolute!
         path = os.path.join(self.path, path)
+
         excluded = [os.path.join(self.path, i) for i in self.excluded_paths]
 
         for item in self.loader.load(path, excluded=excluded):
