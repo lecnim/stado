@@ -76,7 +76,6 @@ class TestBuild(TestSite):
         self.site.build(i)
         self.compare_output('foo', 'hello world')
 
-
     def test_calling_function(self):
         """should accept function in plugins list"""
 
@@ -106,6 +105,17 @@ class TestBuild(TestSite):
 
         self.site.build('index.html', Hello())
         self.compare_output('index.html', 'hello')
+
+    # context
+
+    def test_context_restore(self):
+        """should restore items context after building it."""
+
+        i = self.site.load('index.html')
+        i.context['foo'] = 'hello world'
+        self.site.build(i, context={'foo': 'bar'})
+
+        self.assertEqual('hello world', i.context['foo'])
 
     # overwrite argument
 
@@ -299,6 +309,28 @@ class TestHelper(TestSite):
         i = Item('/foo', '{{ hello }}')
         self.site.build(i, 'mustache')
         self.assertFalse('hello' in i.context)
+
+    def test_context(self):
+        """should correctly works with custom context argument in build"""
+
+        @self.site.helper
+        def hello():
+            return 'hello world'
+
+        i = Item('/foo', '{{ hello }}')
+        self.site.build(i, 'mustache', context={'a': 1})
+        self.compare_output('foo', 'hello world')
+
+    def test_context_overwrite(self):
+        """should not overwrite custom context argument in build"""
+
+        @self.site.helper
+        def hello():
+            return 'hello world'
+
+        i = Item('/foo', '{{ hello }}')
+        self.site.build(i, 'mustache', context={'hello': 'bar'})
+        self.compare_output('foo', 'bar')
 
     # Test types.
 

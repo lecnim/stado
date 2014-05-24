@@ -175,31 +175,31 @@ class Site(Events):
 
         def build_item(item, plugins):
 
-            # Add helpers to items context.
-            item.install_helpers(self.helpers)
-
+            # No plugins given, try to get registered ones.
             if not plugins:
-
                 for pattern, plugins in self.registered:
                     if item.match(pattern):
                         self.apply(item, *plugins)
 
+            # Backup items context, in case of custom context argument.
+            x = item.context
             if context:
-                # TODO: Ok? What when item is build again?
                 item.context = context
+
             self.apply(item, *plugins)
+            # Restore original context
+            item.context = x
 
-            item.remove_helpers()
-
+            # Overwrite previously build item only if it is enabled!
             if overwrite or not item.output_path in self.built_items:
                 self.deploy(item)
 
-        # string
+        # String - path to file/files/directory.
         if isinstance(path, str):
             for item in self.find(path):
                 build_item(item, plugins)
 
-        # item
+        # SiteItem object.
         else:
             build_item(path, plugins)
 
@@ -216,6 +216,9 @@ class Site(Events):
         """Uses plugins on given item. Argument plugins_list accepts string,
         Plugin class, Plugin instance or function."""
 
+        # Add helpers to items context.
+        item.install_helpers(self.helpers)
+
         for i in plugins_list:
 
             # Plugin as a function or method. Do not install it, just execute.
@@ -231,5 +234,7 @@ class Site(Events):
                     plugin(item)
                 else:
                     plugin.apply(self, item)
+
+        item.remove_helpers()
 
         return item
