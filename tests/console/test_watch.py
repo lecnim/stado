@@ -18,7 +18,6 @@ def modify_file(path):
 
 def create_file(path):
     """Creates new file with 'hello world' data."""
-    print("CREATING", path)
     with open(path, 'w') as file:
        file.write('hello world')
 
