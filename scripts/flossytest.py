@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 flosstest - colorful and clean output to python unittest.
 """
@@ -480,9 +479,14 @@ def run():
     if sys.argv[0].endswith("__main__.py"):
         sys.argv[0] = "python -m unittest"
     __unittest = True
-    from unittest.main import main, TestProgram, USAGE_AS_MAIN
 
-    TestProgram.USAGE = USAGE_AS_MAIN
+    # Check if python version >= 3.4
+    if sys.hexversion >= 0x030400F0:
+        from unittest.main import main
+    else:
+        from unittest.main import main, TestProgram, USAGE_AS_MAIN
+        TestProgram.USAGE = USAGE_AS_MAIN
+
     main(module=None)
 
 if __name__ == "__main__":
