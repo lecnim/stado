@@ -9,7 +9,7 @@ import traceback
 
 from . import Command, CommandError
 from .build import Build
-from .. import config
+from .. import config, Site
 from .. import log
 
 
@@ -46,24 +46,53 @@ class Watch(Command):
 
         # Watch only given site.
         if site:
-            path = os.path.join(cwd, site)
 
-            # User must give existing site!
-            if not os.path.exists(path):
-                raise CommandError('Failed to watch, site not found: ' + path)
 
-            self.watch_site(path, site, output)
+            Site.stats.record()
+
+            path = os.path.abspath(site)
+
+            # Build python script
+            # Get Site objects sources + outputs
+            self.console.build(path, output)
+
+            for source, output in Site.stats.get():
+                self.watch_site(source, site, output)
+
+            Site.stats.clear()
+            Site.stats.disable()
+
+
+            # # path = os.path.join(cwd, site)
+            #
+            # # User must give existing site!
+            # if not os.path.exists(path):
+            #     raise CommandError('Failed to watch, site not found: ' + path)
+            #
+            # self.watch_site(path, site, output)
 
         # Watch all sites.
         else:
-            for directory in os.listdir(cwd):
-                path = os.path.join(cwd, directory)
 
-                if output:
-                    # Output directory is: ./<output>/<site>
-                    self.watch_site(path, directory, os.path.join(output, directory))
-                else:
-                    self.watch_site(path, directory)
+            Site.stats.record()
+            self.console.build(site, output=output)
+
+            for source, output in Site.stats.get():
+                self.watch_site(source, site, output)
+
+            Site.stats.clear()
+            Site.stats.disable()
+
+
+            #
+            # for directory in os.listdir(cwd):
+            #     path = os.path.join(cwd, directory)
+            #
+            #     if output:
+            #         # Output directory is: ./<output>/<site>
+            #         self.watch_site(path, directory, os.path.join(output, directory))
+            #     else:
+            #         self.watch_site(path, directory)
 
 
         # Monitoring.
@@ -106,7 +135,15 @@ class Watch(Command):
         log.info('{} - Rebuilding site: {}.'.format(t, site))
 
         try:
+            Site.stats.record()
             self.console.build(site, output)
+
+            self.file_monitor.clear()
+            for source, output in Site.stats.get():
+                self.watch_site(source, site, output)
+
+            Site.stats.clear()
+            Site.stats.disable()
 
         # TODO: Better error message, now it is default python trackback.
         except Exception as error:

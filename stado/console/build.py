@@ -104,7 +104,8 @@ class Build(Command):
 
         # Create default site as a shortcut.
         # Now you can directly import: "from stado import run, before"
-        default_site(path)
+
+        default_site(os.path.dirname(path))
 
         if not os.path.exists(path):
             raise CommandError('Failed to build, site not found: ' + path)

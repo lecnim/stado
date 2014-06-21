@@ -11,6 +11,24 @@ from ..utils import relative_path
 from ..libs import glob2 as glob
 
 
+class Stats:
+
+    def __init__(self):
+        self.enabled = False
+        self.db = []
+
+    def record(self):
+        self.enabled = True
+
+    def get(self):
+        return self.db
+
+    def clear(self):
+        self.db = []
+
+    def disable(self):
+        self.enabled = False
+
 class Site(Events):
     """
     This is site. Use run() method to build it.
@@ -22,21 +40,21 @@ class Site(Events):
 
     """
 
-    _instances = set()
+    stats = Stats()
 
-    @classmethod
-    def get_instances(cls):
-        dead = set()
-        for ref in cls._instances:
-            obj = ref()
-            if obj is not None:
-                yield obj
-            else:
-                dead.add(ref)
-        cls._instances -= dead
-
-
-    _all = set()
+    # @classmethod
+    # def get_instances(cls):
+    #     dead = set()
+    #     for ref in cls._instances:
+    #         obj = ref()
+    #         if obj is not None:
+    #             yield obj
+    #         else:
+    #             dead.add(ref)
+    #     cls._instances -= dead
+    #
+    #
+    # _all = set()
 
     def __init__(self, path=None, output=None, loader=FileLoader()):
         """
@@ -50,12 +68,24 @@ class Site(Events):
 
         Events.__init__(self)
 
-        self._instances.add(weakref.ref(self))
-        self._all.add(self)
 
-        # Set path to file path from where Site is used.
+
+
+
+        # self._instances.add(weakref.ref(self))
+        # self._all.add(self)
+
+        # # Set path to file path from where Site is used.
         if path is None:
             path = os.path.split(inspect.stack()[1][1])[0]
+            print('p', path)
+        else:
+            print('>', path, output)
+        # if path is None:
+        #     path = os.path.dirname(os.path.abspath(__file__))
+        #     print('>', path)
+        # else:
+        #     print(path)
 
         # Absolute path to site source directory.
         self.path = os.path.normpath(path)
@@ -85,6 +115,10 @@ class Site(Events):
             self.load,
             self.apply
         ]
+
+
+        if Site.stats.enabled:
+            Site.stats.db.append([self.path, self.output])
 
     @property
     def output(self):
