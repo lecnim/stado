@@ -1,5 +1,6 @@
 import os
 import inspect
+import weakref
 
 from .loaders import FileLoader
 from .events import Events
@@ -21,6 +22,22 @@ class Site(Events):
 
     """
 
+    _instances = set()
+
+    @classmethod
+    def get_instances(cls):
+        dead = set()
+        for ref in cls._instances:
+            obj = ref()
+            if obj is not None:
+                yield obj
+            else:
+                dead.add(ref)
+        cls._instances -= dead
+
+
+    _all = set()
+
     def __init__(self, path=None, output=None, loader=FileLoader()):
         """
         Arguments:
@@ -32,6 +49,9 @@ class Site(Events):
         """
 
         Events.__init__(self)
+
+        self._instances.add(weakref.ref(self))
+        self._all.add(self)
 
         # Set path to file path from where Site is used.
         if path is None:

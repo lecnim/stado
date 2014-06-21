@@ -36,6 +36,13 @@ class Command:
             return True
         return False
 
+    def is_python_script(self, path):
+
+        if os.path.isfile(path) and path.endswith('.py'):
+            return True
+
+        return False
+
 
     def event(self, name):
         """Execute event method in Console object."""
