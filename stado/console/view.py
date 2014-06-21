@@ -6,7 +6,7 @@ import socketserver
 socketserver.TCPServer.allow_reuse_address = True
 
 import os
-from . import Command
+from . import Command, CommandError
 from .build import Build
 from .. import config
 from .. import log
@@ -62,10 +62,14 @@ class View(Command):
 
         # Server will serve files from current working directory.
         # So change current working directory to site output.
-        if output:
-            os.chdir(output)
-        else:
-            os.chdir(os.path.join(self.cwd, site, config.build_dir))
+        output_path = output if output else os.path.join(self.cwd, site,
+                                                         config.build_dir)
+        # Nothing was build, output not exists!
+        if not os.path.exists(output_path):
+            raise CommandError('Output directory is empty or not exists!')
+
+        os.chdir(output_path)
+
 
         log.debug('Starting development server...')
         log.debug('\tPath: {}'.format(os.getcwd()))

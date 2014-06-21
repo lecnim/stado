@@ -1,11 +1,13 @@
 """Command: watch"""
 
 import os
+import sys
 import time
 import threading
 import datetime
+import traceback
 
-from . import Command
+from . import Command, CommandError
 from .build import Build
 from .. import config
 from .. import log
@@ -45,6 +47,11 @@ class Watch(Command):
         # Watch only given site.
         if site:
             path = os.path.join(cwd, site)
+
+            # User must give existing site!
+            if not os.path.exists(path):
+                raise CommandError('Failed to watch, site not found: ' + path)
+
             self.watch_site(path, site, output)
 
         # Watch all sites.
@@ -98,7 +105,12 @@ class Watch(Command):
         t = time.strftime('%H:%M:%S')
         log.info('{} - Rebuilding site: {}.'.format(t, site))
 
-        self.console.build(site, output)
+        try:
+            self.console.build(site, output)
+
+        # TODO: Better error message, now it is default python trackback.
+        except Exception as error:
+            traceback.print_exc()
 
         if events:
             self.event('after_rebuild')
