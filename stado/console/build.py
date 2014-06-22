@@ -26,26 +26,28 @@ class Build(Command):
     def install(self, parser):
         """Add arguments to command line parser."""
 
-        parser.add_argument('site', default=None, nargs='?')
+        parser.add_argument('path', default=None, nargs='?')
         parser.add_argument('--output', '-o')
         parser.set_defaults(function=self.run)
 
 
-    def run(self, site=None, output=None):
+    def run(self, path=None, output=None):
         """Command-line interface will execute this method if user type 'build'
         command."""
 
-        path = site
-
-
-        # Build all projects.
-        if site is None:
+        # Command run without arguments.
+        # Run all python scripts in current working directory.
+        if path is None:
 
             log.info('Searching sites...')
 
-            for fp in os.listdir('.'):
-                if os.path.isfile(fp) and fp.endswith('.py'):
-                    self.build_site(fp)
+            files = [i for i in os.listdir('.') if
+                     os.path.isfile(i) and i.endswith('.py')]
+
+            # Build sites in alphabetical order, it is important when
+            # development server is assigning ports.
+            for i in sorted(files):
+                self.build_site(i)
 
 
             # # List of directories in current working directory.
@@ -75,10 +77,19 @@ class Build(Command):
                 self.build_site(path)
 
             else:
-                for i in os.listdir(path):
-                    fp = os.path.join(path, i)
-                    if os.path.isfile(fp) and fp.endswith('.py'):
-                        self.build_site(fp)
+
+
+
+
+                files = [os.path.join(path, i) for i in os.listdir(path) if
+                         os.path.isfile(os.path.join(path, i)) and os.path.join(path, i).endswith('.py')]
+
+                for i in sorted(files):
+                    self.build_site(i)
+                # for i in os.listdir(path):
+                #     fp = os.path.join(path, i)
+                #     if os.path.isfile(fp) and fp.endswith('.py'):
+                #         self.build_site(fp)
 
 
             # # Set custom output directory.
@@ -116,7 +127,7 @@ class Build(Command):
             timer = utils.Timer()
 
             try:
-                runpy.run_path(path)
+                runpy.run_path(path, init_globals={'g':'hehe'})
             except FileNotFoundError:
                raise CommandError('Failed to build, file not found: ' + path)
 

@@ -1,35 +1,32 @@
 """Tests command: edit"""
 
-import os
-import urllib.request
-
+from stado import config
 from tests.console.test_view import TestViewSite
-from tests.console.test_watch import TestWatchSite, create_file
+from tests.console.test_watch import TestWatch
 
 
 class TestEditView(TestViewSite):
-    """Command edit:"""
+    """Command edit (testing development server)"""
 
-    command = 'edit'
+    _command = 'edit'
 
-class TestEditWatch(TestWatchSite):
-    """Command edit + watch:"""
+class TestEditWatch(TestWatch):
+    """Command edit (testing watcher with development server)"""
 
-    command = 'edit'
-
+    _command = 'edit'
 
     def test_server_use_updated_files(self):
-        """Server should use files updated by watcher."""
+        """server should use files updated by watcher"""
 
-        self.shell.before_waiting = (create_file,
-                                     [os.path.join(self.temp_path, 'a', 'new.html')])
-        self.shell.after_rebuild = self._check_url
-        self.shell('edit a')
+        result = ''
 
-    def _check_url(self):
+        def test():
+            nonlocal result
+            result = self.read_url('new.html', config.host, config.port)
+            self.console.stop_waiting()
 
-        # Getting content from urls.
-        a = urllib.request.urlopen('http://localhost:4000/new.html').read()
-        self.shell.stop_waiting()
+        self.queue_create_file('x', 'new.html')
+        self.console.after_rebuild = test
+        self.command('x')
 
-        self.assertEqual('hello world', a.decode('UTF-8'))
+        self.assertEqual('hello', result)

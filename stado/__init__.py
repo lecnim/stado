@@ -2,6 +2,7 @@ import sys
 import os
 import logging
 import zipimport
+import inspect
 
 from . import libs
 from . import config
@@ -46,12 +47,25 @@ def default_site(path):
 
     global site
     site = Site(path)
+    site._is_default = True
 
     module = sys.modules[__name__]
 
-    # Set module functions shortcuts to site methods.
-    for function in site.controllers:
-        setattr(module, function.__name__, function)
+    # # Set module functions shortcuts to site methods.
+    # for function in site.controllers:
+    #     setattr(module, function.__name__, function)
+
+    for i in inspect.getmembers(site, predicate=inspect.ismethod):
+
+        name, func = i
+        try:
+            print(func.is_controller)
+        except:
+            pass
+
+        if hasattr(func, 'is_controller'):
+            print(func.__name__)
+            setattr(module, func.__name__, func)
 
 def clear_default_site():
 
@@ -59,8 +73,12 @@ def clear_default_site():
     module = sys.modules[__name__]
 
     # Remove module functions to site methods shortcuts.
-    for function in site.controllers:
-        setattr(module, function.__name__, None)
+    # for function in site.controllers:
+    #     setattr(module, function.__name__, None)
+
+    for i in inspect.getmembers(site, predicate=inspect.ismethod):
+        name, func = i
+        if hasattr(func, 'is_controller'): setattr(module, func.__name__, None)
 
     site = None
 
@@ -68,6 +86,7 @@ def clear_default_site():
 #
 
 from .core.site import Site
+from .core.item import Item, FileItem
 from .console import Console
 
 # Shortcuts for site.py

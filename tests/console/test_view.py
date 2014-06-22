@@ -1,11 +1,7 @@
 """Tests command: view"""
 
-import os
-import tempfile
-import shutil
 import urllib.request
-
-from stado.console import Console
+from stado import config
 from tests.console import TestCommand
 
 
@@ -19,65 +15,91 @@ class TestViewSite(TestCommand):
 
     """
 
-    command = 'view'
+    _command = 'view'
 
-    def setUp(self):
-        TestCommand.setUp(self)
+    def read_url(self, url, host, port):
+        url = 'http://{}:{}/{}'.format(host, port, url)
+        return urllib.request.urlopen(url).read().decode('UTF-8')
 
-        self.shell = Console()
+    # View module.
 
+    def test_module(self):
+        """should serve module output files [stado.py view module.py]"""
 
-    def test_server(self):
-        """should run server and return True."""
+        def test():
+            a = self.read_url('a.html', config.host, config.port)
+            self.console.stop_waiting()
 
-        self.shell.before_waiting = self._test_server
-        returned = self.shell(self.command + ' a')
+            self.assertEqual('a', a)
 
-        self.assertTrue(returned)
+        self.console.before_waiting = test
+        self.command('script_a.py')
 
+    # View package.
 
-    def _test_server(self):
+    def test_package(self):
+        """should serve package output files [stado.py view package]"""
 
-        # Getting content from urls.
-        a = urllib.request.urlopen('http://localhost:4000/a.html').read()
-        self.shell.stop_waiting()
+        def test():
+            a = self.read_url('a.html', config.host, config.port)
+            b = self.read_url('b.html', config.host, config.port + 1)
+            self.console.stop_waiting()
 
-        self.assertEqual('hello world', a.decode('UTF-8'))
+            self.assertEqual('a', a)
+            self.assertEqual('b', b)
 
+        self.console.before_waiting = test
+        self.command('y')
+
+    # View with no arguments.
+
+    def test(self):
+        """should serve current directory output files [stado.py view]"""
+
+        def test():
+            a = self.read_url('a.html', config.host, config.port)
+            b = self.read_url('b.html', config.host, config.port + 1)
+            self.console.stop_waiting()
+
+            self.assertEqual('a', a)
+            self.assertEqual('b', b)
+
+        self.console.before_waiting = test
+        self.command()
+
+    #
 
     def test_host_and_port(self):
         """--host --port: should run server on custom host and port."""
 
-        self.shell.before_waiting = self._test_host_and_port
-        self.shell(self.command + ' a --host 127.0.0.2 --port 3000')
+        def test():
+            a = self.read_url('a.html', host='127.0.0.2', port=3000)
+            self.console.stop_waiting()
 
-    def _test_host_and_port(self):
+            self.assertEqual('a', a)
 
-        # Getting content from urls.
-        a = urllib.request.urlopen('http://127.0.0.2:3000/a.html').read()
-        self.shell.stop_waiting()
+        self.console.before_waiting = test
+        self.command('script_a.py --host 127.0.0.2 --port 3000')
 
-        self.assertEqual('hello world', a.decode('UTF-8'))
+    #
 
+    def test_port_order(self):
+        """should assign server ports in alphabetical order"""
 
-    def test_output_option(self):
-        """--output: should run server in custom output directory."""
+        # In alphabetical order of script file name, for example:
+        # a.py => 4000
+        # b.py => 4001
+        # z.py => 4002
 
-        output_path = tempfile.mkdtemp()
+        def test():
+            a = self.read_url('foo.html', config.host, config.port)
+            b = self.read_url('foo.html', config.host, config.port + 1)
+            c = self.read_url('foo.html', config.host, config.port + 2)
+            self.console.stop_waiting()
 
-        self.shell.before_waiting = self._test_output_option
-        self.shell(self.command + ' a --output ' + output_path)
+            self.assertEqual('a', a)
+            self.assertEqual('b', b)
+            self.assertEqual('c', c)
 
-        # Should build site in output directory.
-        path = os.path.join(output_path, 'a.html')
-        self.assertTrue(os.path.exists(path))
-
-        shutil.rmtree(output_path)
-
-    def _test_output_option(self):
-
-        # Getting content from urls.
-        a = urllib.request.urlopen('http://localhost:4000/a.html').read()
-        self.shell.stop_waiting()
-
-        self.assertEqual('hello world', a.decode('UTF-8'))
+        self.console.before_waiting = test
+        self.command('sort')

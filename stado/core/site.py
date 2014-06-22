@@ -2,6 +2,8 @@ import os
 import inspect
 import weakref
 
+from functools import wraps
+
 from .loaders import FileLoader
 from .events import Events
 from .. import plugins
@@ -9,6 +11,65 @@ from .. import config as CONFIG
 from .. import log
 from ..utils import relative_path
 from ..libs import glob2 as glob
+
+
+
+
+class InstanceTracker:
+
+    def __init__(self):
+
+        self.enabled = False
+        self.records = {}
+        self.order = []
+
+
+    def __getitem__(self, item):
+        return self.records[item]
+
+    def __iter__(self):
+        for i in self.records:
+            yield i
+
+    def enable(self):
+        self.enabled = True
+
+    def disable(self):
+        self.enabled = False
+
+    def update(self, instance):
+
+        if not self.enabled:
+            return False
+
+        # Not installed.
+        if not id(instance) in self.records.keys():
+            self.records[id(instance)] = {}
+            self.order.append(self.records[id(instance)])
+
+        self.records[id(instance)].update({
+            'source': instance.path,
+            'output': instance.output,
+            'is_default': instance._is_default,
+            'is_used': instance.is_used
+        })
+
+
+
+    def dump(self, skip_unused=False):
+
+        if not self.enabled:
+            raise Exception('Cannot dump() if tracker is disabled! '
+                            'Enable it first!')
+
+        if skip_unused:
+            x = [i for i in self.order if i['is_used']]
+        else:
+            x = self.order
+        self.records = {}
+        self.order = []
+        self.disable()
+        return x
 
 
 class Stats:
@@ -29,6 +90,27 @@ class Stats:
     def disable(self):
         self.enabled = False
 
+
+def controller(function):
+
+
+
+    function.is_controller = True
+
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+
+        site = args[0]
+
+        if not function in site.controllers:
+            site._used_controllers.add(function)
+            site.__class__._tracker.update(site)
+
+        return function(*args, **kwargs)
+    return wrapper
+
+
+
 class Site(Events):
     """
     This is site. Use run() method to build it.
@@ -41,6 +123,8 @@ class Site(Events):
     """
 
     stats = Stats()
+
+    _tracker = InstanceTracker()
 
     # @classmethod
     # def get_instances(cls):
@@ -69,7 +153,8 @@ class Site(Events):
         Events.__init__(self)
 
 
-
+        self._is_default = False
+        self._used_controllers = set()
 
 
         # self._instances.add(weakref.ref(self))
@@ -78,9 +163,7 @@ class Site(Events):
         # # Set path to file path from where Site is used.
         if path is None:
             path = os.path.split(inspect.stack()[1][1])[0]
-            print('p', path)
-        else:
-            print('>', path, output)
+
         # if path is None:
         #     path = os.path.dirname(os.path.abspath(__file__))
         #     print('>', path)
@@ -107,18 +190,18 @@ class Site(Events):
         self.plugins = plugins.PluginsManager(self)
 
         # This methods are used in default site.
-        self.controllers = [
-            self.build,
-            self.register,
-            self.route,
-            self.find,
-            self.load,
-            self.apply
-        ]
+        self.controllers = set()
 
+
+        for i in inspect.getmembers(self, predicate=inspect.ismethod):
+            name, func = i
+            print(func)
+            if hasattr(func, 'is_controller'): print(i)
 
         if Site.stats.enabled:
-            Site.stats.db.append([self.path, self.output])
+            Site.stats.db.append([self.path, self.output, False])
+
+        Site._tracker.update(self)
 
     @property
     def output(self):
@@ -126,11 +209,16 @@ class Site(Events):
             return CONFIG.output
         return self._output
 
+    @property
+    def is_used(self):
+        return True if self._used_controllers else False
+
     # Controllers
     # Stability: 2 - Unstable
 
     # route
 
+    @controller
     def route(self, url, source):
 
         log.debug('Adding route: ' + url)
@@ -156,6 +244,7 @@ class Site(Events):
 
     # load
 
+    @controller
     def load(self, path):
         """Returns list of items created using files in path."""
 
@@ -178,6 +267,7 @@ class Site(Events):
 
     # find
 
+    @controller
     def find(self, path):
         """Yields items created using files in path."""
 
@@ -196,11 +286,13 @@ class Site(Events):
 
     # register
 
+    @controller
     def register(self, path, *plugins):
         self.registered.append([relative_path(path), plugins])
 
     # helper
 
+    @controller
     def helper(self, function):
         self.helpers[function.__name__] = function
 
@@ -223,6 +315,7 @@ class Site(Events):
 
     # build
 
+    @controller
     def build(self, path='**/*', *plugins, context=None, overwrite=True):
 
         # TODO: build() without arguments? maybe another function to build all
@@ -265,7 +358,7 @@ class Site(Events):
             self.built_items.append(item.output_path)
         item.deploy(self.output)
 
-
+    @controller
     def apply(self, item, *plugins_list):
         """Uses plugins on given item. Argument plugins_list accepts string,
         Plugin class, Plugin instance or function."""

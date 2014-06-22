@@ -175,6 +175,7 @@ class Console:
 
     def stop_waiting(self):
         """Stops waiting loop in commands. For example stops development server."""
+        log.debug('Console stop all services!')
         self.commands['watch'].stop()
         self.commands['view'].stop()
         self.commands['edit'].stop()

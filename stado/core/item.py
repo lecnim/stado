@@ -92,8 +92,8 @@ class SiteItem(Events):
         if permalink == 'pretty-html':
 
             # Prevent 'index.html' => 'index/index.html'
-            if self.url.endswith('index.html'):
-                return '/:path/:filename'
+            if os.path.splitext(self.url)[0].endswith('index'):
+                return '/:path/:name.html'
 
             return '/:path/:name/index.html'
         elif permalink == 'default':

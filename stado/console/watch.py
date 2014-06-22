@@ -42,68 +42,30 @@ class Watch(Command):
         """Command-line interface will execute this method if user type 'watch'
         command."""
 
-        cwd = os.getcwd()
+        path = site
 
         # Watch only given site.
         if site:
-
-
-            Site.stats.record()
-
             path = os.path.abspath(site)
 
-            # Build python script
-            # Get Site objects sources + outputs
-            self.console.build(path, output)
+        Site._tracker.enable()
+        self.console.build(path, output)
 
-            for source, output in Site.stats.get():
-                self.watch_site(source, site, output)
+        records = Site._tracker.dump(skip_unused=True)
+        outputs = [i['output'] for i in records if i['is_used']]
 
-            Site.stats.clear()
-            Site.stats.disable()
-
-
-            # # path = os.path.join(cwd, site)
-            #
-            # # User must give existing site!
-            # if not os.path.exists(path):
-            #     raise CommandError('Failed to watch, site not found: ' + path)
-            #
-            # self.watch_site(path, site, output)
-
-        # Watch all sites.
-        else:
-
-            Site.stats.record()
-            self.console.build(site, output=output)
-
-            for source, output in Site.stats.get():
-                self.watch_site(source, site, output)
-
-            Site.stats.clear()
-            Site.stats.disable()
-
-
-            #
-            # for directory in os.listdir(cwd):
-            #     path = os.path.join(cwd, directory)
-            #
-            #     if output:
-            #         # Output directory is: ./<output>/<site>
-            #         self.watch_site(path, directory, os.path.join(output, directory))
-            #     else:
-            #         self.watch_site(path, directory)
+        for i in records:
+            if i['is_used']:
+                self.watch_site(i['source'], site, outputs)
 
 
         # Monitoring.
+        print(self.file_monitor.observers)
+        log.debug('MONITOR START')
         self.file_monitor.start()
         if wait: self.event('before_waiting')
 
-        log.info('Watching for changes...')
-        for i in self.file_monitor.observers:
-            log.debug('\tWatching: {}'.format(i.path))
-            for e in i.exclude:
-                log.debug('\t\tExclude: {}'.format(e))
+        self.log()
 
 
         while not self.file_monitor.stopped and wait is True:
@@ -111,13 +73,24 @@ class Watch(Command):
 
         return True
 
+    def log(self):
+        log.info('Watching for changes...')
+        for i in self.file_monitor.observers:
+            log.debug('  Watching: {}'.format(i.path))
+            log.debug('  Args: {}'.format(i.args))
+            for e in i.exclude:
+                log.debug('    Exclude: {}'.format(e))
+
 
     def watch_site(self, path, site, output=None):
         """Add site files to file monitor."""
 
         # Exclude output directory to prevent rebuild looping.
         if output:
-            exclude = [output]
+            if isinstance(output, str):
+                exclude = [output]
+            else:
+                exclude = output
         else:
             exclude = [os.path.join(path, config.build_dir)]
 
@@ -128,29 +101,49 @@ class Watch(Command):
         self.update(site, output)
 
     def update(self, site, output, events=True):
-        """This method is run by file monitor each time when site files were
-        changed."""
+        """This method is run by file monitor each time when files in source
+        directory of site were modified.
+
+        IMPORTANT!
+        This method is always run in Timer thread, main thread is waiting in
+        wait loop.
+
+
+        """
 
         t = time.strftime('%H:%M:%S')
         log.info('{} - Rebuilding site: {}.'.format(t, site))
 
+        Site._tracker.enable()
+
         try:
-            Site.stats.record()
             self.console.build(site, output)
-
-            self.file_monitor.clear()
-            for source, output in Site.stats.get():
-                self.watch_site(source, site, output)
-
-            Site.stats.clear()
-            Site.stats.disable()
+            # self.file_monitor.start()
 
         # TODO: Better error message, now it is default python trackback.
-        except Exception as error:
-            traceback.print_exc()
+        # except Exception as error:
+        #     Site._tracker.dump(skip_unused=True)
+        #     traceback.print_exc()
+        except:
+            raise
+        else:
+
+            records = Site._tracker.dump(skip_unused=True)
+            outputs = [i['output'] for i in records if i['is_used']]
+
+            self.file_monitor.observers = []
+
+            for i in records:
+                if i['is_used']:
+                    self.watch_site(i['source'], site, outputs)
+
+            self.log()
+
 
         if events:
             self.event('after_rebuild')
+
+        return records
 
 
     def stop(self):
@@ -276,13 +269,20 @@ class FileMonitor:
     def check(self):
         """Checks each observer. Runs by self.monitor thread."""
 
+        log.debug('CHECK' + str(threading.current_thread()))
+
         with self.lock:
             if not self.stopped:
 
                 for i in self.observers[:]:
-                    if i.check(): i.run_function()
+                    if i.check():
+                        log.debug('MODIFIED' + i.path)
+                        i.run_function()
+                    else:
+                        log.debug('NOT MODIFIED' + i.path)
 
                 self.monitor = threading.Timer(self.interval, self.check)
+                self.monitor.name = 'Watcher' + str(len(self.observers))
                 self.monitor.daemon = True
                 self.monitor.start()
 

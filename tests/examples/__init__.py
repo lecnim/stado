@@ -19,6 +19,9 @@ class TestExample(unittest.TestCase):
 
     def setUp(self):
         self.cwd = os.getcwd()
+
+
+
         os.chdir(self.path)
 
         self.temp_path = tempfile.mkdtemp()
