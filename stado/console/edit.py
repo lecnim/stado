@@ -25,67 +25,49 @@ class Edit(Command):
         self.stopped = True
         self.cwd = None
 
-
     def install(self, parser):
         """Add arguments to command line parser."""
 
         parser.add_argument('site', default=None, nargs='?')
         parser.add_argument('--port', '-p', type=int, default=config.port)
         parser.add_argument('--host', '-h', default=config.host)
-        parser.add_argument('--output', '-o')
         parser.set_defaults(function=self.run)
 
+        self.view = self.console.commands['view']
+        self.watch = self.console.commands['watch']
 
-    def run(self, site=None, host=None, port=None, output=None):
+    def run(self, site=None, host=None, port=None):
         """Command-line interface will execute this method if user type 'edit'
         command."""
-
-        for i in threading.enumerate():
-            print(i)
-            print(i.is_alive())
-
-        while len(threading.enumerate()) > 1:
-            pass
 
         self.cwd = os.getcwd()
         self.stopped = False
 
-        # self.console.build(site, output)
-        # Use custom update method.
-
-        # build()
-        # get list of build sites
+        # Track Site instances.
         Site._tracker.enable()
-        self.console.build(site, output)
-
+        self.console.build(site)
         records = Site._tracker.dump(skip_unused=True)
 
-        # add this sites to watcher
-        self.console.commands['watch'].file_monitor.stop()
-        self.console.commands['watch'].file_monitor.clear()
-        self.console.commands['watch'].event_update = self.update
+        # Add build sites to watcher.
+        watcher = self.console['watch']
+        watcher.update_function = self.update
+        # self.console.commands['watch'].file_monitor.disable()
+        # self.console.commands['watch'].file_monitor.clear()
+        # self.console.commands['watch'].event_update = self.update
 
-        outputs = [i['output'] for i in records if i['is_used']]
-
+        outputs = [i['output'] for i in records]
         for i in records:
-            if i['is_used']:
-                print(i)
-                self.console.commands['watch'].watch_site(i['source'], site, outputs)
+            watcher.watch_site(i['script'], i['source'], outputs)
 
-        # run watcher
+        # Run watcher.
+        watcher.file_monitor.enable()
+        watcher.log()
 
-        self.console.commands['watch'].file_monitor.start()
-        self.console.commands['watch'].log()
+        # self.console.commands['view'].stop()
+        # self.console.commands['view'].servers = []
 
-
-
-
-        # self.console.watch(site, output, wait=False)
-        self.console.commands['view'].stop()
-        self.console.commands['view'].servers = []
-
+        # Run development servers.
         for i in records:
-
             self.console.commands['view'].start_server(i['output'], host, port)
             port = port + 1
 
@@ -96,13 +78,21 @@ class Edit(Command):
         # Monitoring.
         self.event('before_waiting')
 
-        while not self.stopped:
+        while not self.is_stopped:
             time.sleep(config.wait_interval)
 
         return True
 
+    @property
+    def is_stopped(self):
+        if self.stopped and \
+           self.console['watch'].is_stopped and \
+           self.console['view'].is_stopped:
+            return True
+        return False
 
-    def update(self, site, output):
+
+    def update(self, site):
         """Overwrites update method in watch command."""
 
         # Stop server here.
@@ -115,7 +105,7 @@ class Edit(Command):
 
         # Run rebuild from watch command, but without triggering events.
         # self.console.commands['watch'].file_monitor.stop()
-        records = self.console.commands['watch'].update(site, output, events=False)
+        records = self.console.commands['watch'].update(site, trigger_event=False)
         # self.console.commands['watch'].file_monitor.start()
 
         # Change to working directory to site output => server will serve from it.
@@ -139,4 +129,7 @@ class Edit(Command):
         """Stops command (stops development server and watcher)."""
 
         self.stopped = True
+        self.console['watch'].stop()
+        self.console['view'].stop()
+
         

@@ -1,6 +1,7 @@
 """Tests command: watch"""
 
 import os
+import shutil
 from stado import config
 from tests.console import TestCommand
 
@@ -59,6 +60,15 @@ class TestWatch(TestCommand):
                 file.write('hello')
         self.console.before_waiting = (create,
                                        [os.path.join(self.temp_path, *path)])
+
+    def remove_file(self, *path):
+        """BE CAREFUL! Removes given file."""
+        os.remove(os.path.join(self.temp_path, *path))
+
+    def remove_directory(self, *path):
+        """BE CAREFUL! Removes directory recursively."""
+        p = os.path.join(os.path.join(self.temp_path, *path))
+        shutil.rmtree(p)
 
     # Module
 
@@ -125,6 +135,34 @@ class TestWatch(TestCommand):
         self.command()
         self.assertEqual('hello', self.read_file('output_a', 'new.html'))
 
+    # Removing files.
+
+    def test_module_remove_file(self):
+        """watcher should react on file removing [stado.py watch module.py]"""
+
+        def remove():
+            """Clears output directory and removes one source file."""
+            self.remove_directory('output_a')
+            self.remove_file('a.html')
+
+        self.console.before_waiting = remove
+        self.command('script_a.py')
+        path = os.path.join(self.temp_path, 'output_a', 'a.html')
+        self.assertFalse(os.path.exists(path))
+
+    def test_package_remove_file(self):
+        """watcher should react on file removing [stado.py watch package]"""
+
+        def remove():
+            """Clears output directory and removes one source file."""
+            self.remove_directory('x', config.build_dir)
+            self.remove_file('x', 'foo.html')
+
+        self.console.before_waiting = remove
+        self.command('x')
+        path = os.path.join(self.temp_path, config.build_dir, 'foo.html')
+        self.assertFalse(os.path.exists(path))
+
     # Modifying python script file.
 
     def test_module_modify_script(self):
@@ -149,25 +187,94 @@ class TestWatch(TestCommand):
         self.command()
         self.assertEqual('test', self.read_file(config.build_dir, 'test.html'))
 
+    # Adding new python scripts.
+
+    def test_module_create_site(self):
+        """watcher should build every new site instance in module"""
+
+        def modify():
+            with open(os.path.join(self.temp_path, 'script_a.py'), 'w') as file:
+                script = \
+                    (
+                        '\nfrom stado import Site'
+                        '\na = Site()'
+                        '\na.route("/a.html", "a")'
+                        '\nb = Site()'
+                        '\nb.route("/b.html", "b")'
+                    )
+                file.write(script)
+
+        self.console.before_waiting = modify
+        self.command('script_a.py')
+        self.assertEqual('a', self.read_file(config.build_dir, 'a.html'))
+        self.assertEqual('b', self.read_file(config.build_dir, 'b.html'))
+
+    def test_package_create_script(self):
+        """watcher should build every new script in package"""
+
+        def modify():
+            with open(os.path.join(self.temp_path, 'x', 'x.py'), 'w') as file:
+                script = \
+                    (
+                        '\nfrom stado import Site'
+                        '\na = Site("foo", output="out")'
+                        '\na.route("/a.html", "a")'
+                    )
+                file.write(script)
+
+        self.console.before_waiting = modify
+        self.command('x')
+        self.assertEqual('a', self.read_file('x', 'foo', 'out', 'a.html'))
+
+    # Removing python script.
+
+    # TODO:
+    # def test_module_remove_site(self):
+    #
+    #     def modify():
+    #         with open(os.path.join(self.temp_path, 'script_a.py'), 'w') as file:
+    #             file.write('pass')
+    #
+    #     self.console.before_waiting = modify
+    #     self.command('script_a.py')
+    #     self.assertEqual('a', self.read_file(config.build_dir, 'a.html'))
+    #     self.assertEqual('b', self.read_file(config.build_dir, 'b.html'))
+
+    # TODO:
+    # def test_package_remove_script(self):
+    #
+    #     def modify():
+    #         os.remove(os.path.join(self.temp_path, 'script_b.py'))
+    #         with open(os.path.join(self.temp_path, 'g.html'), 'w') as file:
+    #             file.write('pass')
+    #
+    #     self.console.before_waiting = modify
+    #     self.command()
+
     # Multiple rebuilding.
 
-    def test_module_rebuild(self):
+    def test_rebuild(self):
         """watcher should correctly rebuilds sites multiple times"""
 
-        def function():
-            """Creates new file 'x.html'"""
+        def second_rebuild():
             self.console.after_rebuild = self.console.stop_waiting
-            with open(os.path.join(self.temp_path, 'x.html'), 'w') as file:
-                file.write('hello')
+            path = os.path.join(self.temp_path, 'z', 'b', 'new.html')
+            with open(path, 'w') as file:
+                file.write('hello b')
+
+        def rebuild():
+            self.console.after_rebuild = second_rebuild
+            path = os.path.join(self.temp_path, 'z', 'a', 'new.html')
+            with open(path, 'w') as file:
+                file.write('hello a')
 
         # After first rebuild trigger another one.
-        self.console.after_rebuild = function
-        self.queue_create_file('new.html')
-        self.command('script_a.py')
+        self.console.after_rebuild = rebuild
+        self.queue_create_file('z', 'a', 'new.html')
+        self.command('z')
 
-        self.assertEqual('hello', self.read_file('output_a', 'new.html'))
-        self.assertEqual('hello', self.read_file('output_a', 'x.html'))
-
+        self.assertEqual('hello a', self.read_file('z', 'a', 'output', 'new.html'))
+        self.assertEqual('hello b', self.read_file('z', 'b', 'output', 'new.html'))
 
     # TODO: Removing files?
     # TODO: Adding another site object to already existing script.

@@ -58,13 +58,8 @@ def default_site(path):
     for i in inspect.getmembers(site, predicate=inspect.ismethod):
 
         name, func = i
-        try:
-            print(func.is_controller)
-        except:
-            pass
 
         if hasattr(func, 'is_controller'):
-            print(func.__name__)
             setattr(module, func.__name__, func)
 
 def clear_default_site():

@@ -7,7 +7,7 @@ from stado.console import Console, CommandError
 from tests.console import TestCommand
 
 
-class TestNewSite(TestCommand):
+class TestNew(TestCommand):
     """Command new <site>:
 
     Important!
@@ -28,7 +28,7 @@ class TestNewSite(TestCommand):
 
         Console().__call__('new test')
 
-        self.assertTrue(os.path.exists(os.path.join(self.temp_path, 'a')))
+        self.assertTrue(os.path.exists(os.path.join(self.temp_path, 'test')))
 
 
         with open(os.path.join(self.temp_path, 'test', 'site.py')) as file:
@@ -41,5 +41,5 @@ class TestNewSite(TestCommand):
     def test_site_exists(self):
         """should raise error when creating site which already exits."""
 
-        self.assertFalse(Console().__call__('new a'))
+        self.assertTrue(Console().__call__('new a'))
         self.assertRaises(CommandError, Console().commands['new'].run, 'a')

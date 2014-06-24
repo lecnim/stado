@@ -97,6 +97,9 @@ class Console:
             parser.add_argument('-d', '--debug', action="store_true")
             i.install(parser)
 
+    def __getitem__(self, item):
+        return self.commands[item]
+
 
     # Shortcuts to commands.
 

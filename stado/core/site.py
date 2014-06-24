@@ -50,6 +50,7 @@ class InstanceTracker:
         self.records[id(instance)].update({
             'source': instance.path,
             'output': instance.output,
+            'script': instance._script_path,
             'is_default': instance._is_default,
             'is_used': instance.is_used
         })
@@ -72,23 +73,6 @@ class InstanceTracker:
         return x
 
 
-class Stats:
-
-    def __init__(self):
-        self.enabled = False
-        self.db = []
-
-    def record(self):
-        self.enabled = True
-
-    def get(self):
-        return self.db
-
-    def clear(self):
-        self.db = []
-
-    def disable(self):
-        self.enabled = False
 
 
 def controller(function):
@@ -122,8 +106,6 @@ class Site(Events):
 
     """
 
-    stats = Stats()
-
     _tracker = InstanceTracker()
 
     # @classmethod
@@ -156,6 +138,7 @@ class Site(Events):
         self._is_default = False
         self._used_controllers = set()
 
+        self._script_path = inspect.stack()[1][1]
 
         # self._instances.add(weakref.ref(self))
         # self._all.add(self)
@@ -163,6 +146,8 @@ class Site(Events):
         # # Set path to file path from where Site is used.
         if path is None:
             path = os.path.split(inspect.stack()[1][1])[0]
+        else:
+            path = os.path.abspath(path)
 
         # if path is None:
         #     path = os.path.dirname(os.path.abspath(__file__))
@@ -172,9 +157,11 @@ class Site(Events):
 
         # Absolute path to site source directory.
         self.path = os.path.normpath(path)
+
+
         # Absolute path to site output directory.
         if output:
-            self._output = output
+            self._output = os.path.join(self.path, output)
         else:
             self._output = os.path.join(self.path, CONFIG.build_dir)
 
@@ -192,14 +179,12 @@ class Site(Events):
         # This methods are used in default site.
         self.controllers = set()
 
+        #
+        # for i in inspect.getmembers(self, predicate=inspect.ismethod):
+        #     name, func = i
+        #     if hasattr(func, 'is_controller'): print(i)
 
-        for i in inspect.getmembers(self, predicate=inspect.ismethod):
-            name, func = i
-            print(func)
-            if hasattr(func, 'is_controller'): print(i)
 
-        if Site.stats.enabled:
-            Site.stats.db.append([self.path, self.output, False])
 
         Site._tracker.update(self)
 

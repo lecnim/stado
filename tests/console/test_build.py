@@ -35,6 +35,9 @@ class TestBuild(TestCommand):
         # ~temp/output_a
         self.assertEqual('a', self.read_file('output_a', 'a.html'))
 
+        # Check output directory content.
+        self.assertCountEqual(['a.html'], os.listdir('output_a'))
+
     def test_package_output(self):
         """should correctly build package directory [stado.py build package]"""
 
@@ -60,3 +63,23 @@ class TestBuild(TestCommand):
         self.command()
         self.assertEqual('a', self.read_file('output_a', 'a.html'))
         self.assertEqual('b', self.read_file('output_b', 'b.html'))
+
+        # Check output directory content.
+        self.assertCountEqual(['a.html'], os.listdir('output_a'))
+        self.assertCountEqual(['b.html'], os.listdir('output_b'))
+
+    #
+
+    def test_relative_path(self):
+        """should accepts relative path as an argument"""
+
+        self.command(os.path.join('x', 'foo', 'script.py'))
+        self.assertEqual('bar', self.read_file('x', 'foo', config.build_dir,
+                                               'foo', 'foo.html'))
+
+    def test_absolute_path(self):
+        """should accepts absolute path a an argument"""
+
+        p = os.path.join(self.temp_path, 'x')
+        self.command(os.path.join(p, 'script.py'))
+        self.assertEqual('bar', self.read_file(p, config.build_dir, 'foo.html'))

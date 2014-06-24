@@ -1,20 +1,18 @@
 """Command: view"""
 
+import os
+import time
 import threading
-import http.server
 import socketserver
 import urllib
 import posixpath
 from http.server import SimpleHTTPRequestHandler
-socketserver.TCPServer.allow_reuse_address = True
 
-import os
 from . import Command, CommandError
-from .build import Build
 from .. import config, Site
 from .. import log
-import time
 
+socketserver.TCPServer.allow_reuse_address = True
 
 
 class View(Command):
@@ -30,117 +28,98 @@ class View(Command):
             config.port)],
         ["-h, --host", "Specify the host to listen on. (default: {})".format(
             config.host)],
-        Build.options[0]
+        #Build.options[0]
     ]
 
-
     def __init__(self, user_interface):
-        Command.__init__(self, user_interface)
+        super().__init__(user_interface)
 
-        self.server = DevelopmentServer()
-
+        # List of all currently running development servers.
         self.servers = []
-
-        self.cwd = os.getcwd()
-
 
     def install(self, parser):
         """Add arguments to command line parser."""
 
-        parser.add_argument('site', default=None, nargs='?')
+        parser.add_argument('path', default=None, nargs='?')
         parser.add_argument('--port', '-p', type=int, default=config.port)
         parser.add_argument('--host', '-h', default=config.host)
-        parser.add_argument('--output', '-o', default=None)
         parser.set_defaults(function=self.run)
 
+    #
 
-    def run(self, site=None, host=None, port=None, output=None, wait=True, build=True):
+    @property
+    def is_stopped(self):
+        """Checks if command has stop running."""
+        return True if self.are_servers_stopped() else False
+
+    def run(self, path=None, host=None, port=None, stop_thread=True):
         """Command-line interface will execute this method if user type 'view'
         command."""
 
+        if not self.are_servers_stopped():
+            raise CommandError('Command view is already running! It must be '
+                               'stopped before running it again')
 
-        # Path pointing to current working directory.
-        self.cwd = os.getcwd()
+        # List of every tracked Site object.
+        Site._tracker.enable()
+        self.console.build(path)
+        records = Site._tracker.dump(skip_unused=True)
 
-        # Build site.
-        if build:
-
-            Site._tracker.enable()
-            self.console.build(site, output)
-
-            records = Site._tracker.dump(skip_unused=True)
-            print(records)
-
-            for i in records:
-
-
-                self.start_server(i['output'], host, port)
-                port = port + 1
-
-
-
-
-            #     self.watch_site(source, site, output)
-
-
-        # Server will serve files from current working directory.
-        # So change current working directory to site output.
-        # output_path = output if output else os.path.join(self.cwd, site,
-        #                                                  config.build_dir)
-        # Nothing was build, output not exists!
-        # if not os.path.exists(output_path):
-        #     raise CommandError('Output directory is empty or not exists!')
-
-        # os.chdir(output_path)
-
-
-        # log.debug('Starting development server...')
-        # log.debug('\tPath: {}'.format(os.getcwd()))
-        # self.server.start(host, port)
-
-
-        # log.info('You can view site at: http://{}:{}'.format(host, port))
+        for i in records:
+            self.start_server(i['output'], host, port)
+            port += 1
 
         # Waiting loop.
-        if wait: self.event('before_waiting')
+        if stop_thread:
+            self.event('before_waiting')
 
-        while not self.servers[0].stopped and wait is True:
+        while not self.are_servers_stopped() and stop_thread is True:
             time.sleep(config.wait_interval)
 
         return True
 
+    #
 
-    def start_server(self, path, host, port):
+    def start_server(self, path, host=None, port=None):
+        """Starts development server and serve files from path on given host
+        and port."""
+
+        # Default host and port.
+        if host is None:
+            host = config.host
+        if port is None:
+            port = config.port
 
         log.debug('Starting development server...')
         log.debug('  Path: ' + path)
 
-        s = DevelopmentServer()
-        self.servers.append(s)
-        s.path = path
-        s.start(host, port)
+        server = DevelopmentServer()
+        self.servers.append(server)
+
+        server.path = path
+        server.start(host, port)
 
         log.info('You can view site at: http://{}:{}'.format(host, port))
 
-
     def stop(self):
-        """Stops command (stops development server)."""
+        """Stops development server."""
 
         log.debug('Stopping development server...')
-
-        # Change current working directory to previous directory.
-        # os.chdir(self.cwd)
-        # self.server.stop()
-
         for i in self.servers:
             i.stop()
-
         log.debug('Done!')
 
+    def are_servers_stopped(self):
+        """Returns True if all servers are shutdown."""
 
-#
+        for i in self.servers:
+            if not i.is_stopped:
+                return False
+        return True
+
 
 class HTTPRequestHandler(SimpleHTTPRequestHandler):
+    """From python standard library, but added server root path option."""
 
     _root_path = os.getcwd()
 
@@ -171,24 +150,32 @@ class HTTPRequestHandler(SimpleHTTPRequestHandler):
             path += '/'
         return path
 
+
 class DevelopmentServer:
     """Development server using python build-in server."""
 
     def __init__(self):
 
-        self.stopped = True     # Server status.
-        self.server = None      # TCPServer object.
+        self._stopped = True     # Server status.
+
+        self.thread = None
+        self.server = None       # TCPServer object.
 
         self.path = None
         self.host = None
         self.port = None
 
+    @property
+    def is_stopped(self):
+        if self._stopped is True and not self.thread.is_alive():
+            return True
+        return False
 
     def restart(self):
         """Restarts development server."""
 
         # Stop server if not already stopped.
-        if not self.stopped:
+        if not self._stopped:
             self.stop()
 
         # Server objects.
@@ -200,15 +187,14 @@ class DevelopmentServer:
         self.server = socketserver.TCPServer((self.host, self.port), Handler)
 
         # Start a thread with the server.
-        server_thread = threading.Thread(
+        self.thread = threading.Thread(
             name='Server({}:{})'.format(self.host, self.port),
             target=self.server.serve_forever)
         # Exit the server thread when the main thread terminates.
-        server_thread.daemon = True
-        server_thread.start()
+        self.thread.daemon = True
+        self.thread.start()
 
-        self.stopped = False
-
+        self._stopped = False
 
     def start(self, host, port):
         """Starts development server.
@@ -216,13 +202,12 @@ class DevelopmentServer:
         Arguments:
             port: Port number.
             host: Host name.
-            threaded: If True, server will be run in another thread.
         Returns:
             True if started successfully, False if already running.
 
         """
 
-        if not self.stopped:
+        if not self._stopped:
             return False
 
         self.host = host
@@ -231,12 +216,10 @@ class DevelopmentServer:
         self.restart()
         return True
 
-
     def stop(self):
         """Stops development server."""
 
         if self.server is not None:
-
-            self.stopped = True
+            self._stopped = True
             self.server.shutdown()
             self.server.server_close()

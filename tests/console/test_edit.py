@@ -1,14 +1,15 @@
 """Tests command: edit"""
 
 from stado import config
-from tests.console.test_view import TestViewSite
+from tests.console.test_view import TestView
 from tests.console.test_watch import TestWatch
 
 
-class TestEditView(TestViewSite):
+class TestEditView(TestView):
     """Command edit (testing development server)"""
 
     _command = 'edit'
+
 
 class TestEditWatch(TestWatch):
     """Command edit (testing watcher with development server)"""
@@ -30,3 +31,16 @@ class TestEditWatch(TestWatch):
         self.command('x')
 
         self.assertEqual('hello', result)
+
+    def test_add_site(self):
+
+
+
+        pass
+
+    def test_remove_site(self):
+        pass
+
+# Prevent running test from this classes.
+del TestWatch
+del TestView

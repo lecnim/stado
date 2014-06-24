@@ -5,7 +5,7 @@ from stado import config
 from tests.console import TestCommand
 
 
-class TestViewSite(TestCommand):
+class TestView(TestCommand):
     """Command view
 
     Important!

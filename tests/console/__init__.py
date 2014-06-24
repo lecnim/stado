@@ -41,7 +41,8 @@ class TestCommand(unittest.TestCase):
         """Returns data from given path, relative to current temp path."""
 
         fp = os.path.join(self.temp_path, *path)
-        self.assertTrue(os.path.exists(fp))
+        self.assertTrue(os.path.exists(fp),
+                        msg='path not found: ' + fp)
 
         with open(fp) as file:
             return file.read()
