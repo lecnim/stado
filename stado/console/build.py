@@ -3,10 +3,11 @@
 import os
 import runpy
 
-from . import Command, CommandError
+from . import Command, CommandError, Event
 from .. import log
 from .. import utils
 from .. import default_site, clear_default_site, Site
+
 
 
 def build_site(path):
@@ -45,18 +46,22 @@ class Build(Command):
 
     name = 'build'
 
-    usage = "build [site] [options]\n    build [options]"
-    summary = "Build the site or group of sites in output directory."
-    description = ""
-    options = []
+    # usage = "build [site] [options]\n    build [options]"
+    # summary = "Build the site or group of sites in output directory."
+    # description = ""
+    # options = []
 
     #
 
-    def install(self, parser):
+    def install_in_parser(self, parser):
         """Add arguments to command line parser."""
 
-        parser.add_argument('path', default=None, nargs='?')
-        parser.set_defaults(function=self.run)
+        sub_parser = parser.add_parser(self.name, add_help=False)
+
+        sub_parser.add_argument('path', default=None, nargs='?')
+        sub_parser.set_defaults(function=self.run)
+
+        return sub_parser
 
     def run(self, path=None):
         """Command-line interface will execute this method if user type 'build'
@@ -95,6 +100,7 @@ class Build(Command):
                     build_site(i)
 
         # TODO: It always should return True?
+        self.event(Event(self, 'on_run'))
         return True
 
     def build_path(self, path):

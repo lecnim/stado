@@ -3,16 +3,16 @@
 import urllib.request
 from stado import config
 from tests.console import TestCommandNew
-from stado.console import View
+from stado.console import View, Console
 
 
 class TestView(TestCommandNew):
     """Command view
 
     Important!
-    This test is done in temporary directory. Use self.temp_path to get path to it.
-    During tests current working directory is self.temp_path. Previous working
-    directory is self.cwd.
+    This test is done in temporary directory. Use self.temp_path to get path to
+    it. During tests current working directory is self.temp_path. Previous
+    working directory is self.cwd.
 
     """
 
@@ -22,7 +22,9 @@ class TestView(TestCommandNew):
         url = 'http://{}:{}/{}'.format(host, port, url)
         return urllib.request.urlopen(url).read().decode('UTF-8')
 
-    # View module.
+    #
+    # Integration tests.
+    #
 
     def test_serve_module_output(self):
         """should serve module output files"""
@@ -74,9 +76,7 @@ class TestView(TestCommandNew):
         self.assertEqual('a', a)
         self.assertEqual('b', b)
 
-    #
-
-    def test_host_and_port(self):
+    def test_run_host_and_port(self):
         """can run server on custom host and port."""
 
         # Prepare files.
@@ -91,9 +91,7 @@ class TestView(TestCommandNew):
         # Tests.
         self.assertEqual('a', a)
 
-    #
-
-    def test_port_order(self):
+    def test_run_port_order(self):
         """should assign server ports in alphabetical order"""
 
         # In alphabetical order of script file name, for example:
@@ -122,3 +120,26 @@ class TestView(TestCommandNew):
         self.assertEqual('a', a)
         self.assertEqual('b', b)
         self.assertEqual('z', c)
+
+    # TODO: Same port or same host as a argument in run!
+
+    #
+    # Console.
+    #
+
+    def test_console(self):
+        """should works with console"""
+
+        # Prepare files.
+        self.create_file('script.py', 'from stado import route\n'
+                                      'route("/a.html", "a")')
+
+        def on_event(event):
+            if event.cmd.name == 'view' and event.type == 'on_run':
+                a = self.read_url('a.html', config.host, config.port)
+                console.stop()
+                self.assertEqual('a', a)
+
+        console = Console()
+        console.events.subscribe(on_event)
+        console(self.command_class.name + ' script.py')

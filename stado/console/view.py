@@ -8,8 +8,9 @@ import urllib
 import posixpath
 from http.server import SimpleHTTPRequestHandler
 
-from . import Command, CommandError
-from .. import config, Site
+from . import Command, CommandError, Event
+from .build import Build
+from .. import config
 from .. import log
 
 socketserver.TCPServer.allow_reuse_address = True
@@ -20,32 +21,45 @@ class View(Command):
 
     name = 'view'
 
-    usage = "view [site] [options]"
-    summary = "Build the site and start the development web server."
-    description = ''
-    options = [
-        ["-p, --port", "Specify the port to listen on. (default: {})".format(
-            config.port)],
-        ["-h, --host", "Specify the host to listen on. (default: {})".format(
-            config.host)],
-        #Build.options[0]
-    ]
+    def __init__(self, build_cmd=None):
+        """
+        Args:
+            build_cmd: Build class instance. If None, new one is created.
+        """
+        super().__init__()
 
-    def __init__(self, user_interface):
-        super().__init__(user_interface)
+        if build_cmd is None: build_cmd = Build()
+        self.build_cmd = build_cmd
 
         # List of all currently running development servers.
         self.servers = []
 
-    def install(self, parser):
-        """Add arguments to command line parser."""
+    # I hate argparser...
 
-        parser.add_argument('path', default=None, nargs='?')
-        parser.add_argument('--port', '-p', type=int, default=config.port)
-        parser.add_argument('--host', '-h', default=config.host)
-        parser.set_defaults(function=self.run)
+    def install_in_parser(self, parser):
+        """Add sub-parser with arguments to parser."""
+
+        sub_parser = parser.add_parser(
+            self.name,
+            usage='{} [path] [options]'.format(self.name),
+            description='Build the site and start the development web server.')
+        sub_parser.set_defaults(function=self.run)
+        sub_parser.add_argument('path', default=None, nargs='?', help='path')
+        self._install_options(sub_parser)
+        return sub_parser
+
+    def _install_options(self, parser):
+        """Install optional arguments in parser."""
+
+        parser.add_argument('--port', '-p', type=int, default=config.port,
+                            help='Specify the port to listen on.')
+        parser.add_argument('--host', '-hh', default=config.host,
+                            help='Specify the host to listen on.')
 
     #
+
+    def build(self, path):
+        return self.build_cmd.build_path(path)
 
     @property
     def is_stopped(self):
@@ -64,17 +78,16 @@ class View(Command):
         if port is None: port = config.port
 
         # List of every tracked Site object.
-        Site._tracker.enable()
-        self.console.build(path)
-        records = Site._tracker.dump(skip_unused=True)
+        records = self.build(path)
 
+        # Start new thread for each server.
         for i in records:
             self.start_server(i['output'], host, port)
             port += 1
 
-        # Waiting loop.
-        if stop_thread:
-            self.event('before_waiting')
+        # Event 'on_run' should be send at the end of method,
+        # before waiting loop.
+        self.event(Event(self, 'on_run'))
 
         while not self.are_servers_stopped() and stop_thread is True:
             time.sleep(config.wait_interval)

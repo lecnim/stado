@@ -5,7 +5,14 @@ import traceback
 
 from ..errors import StadoError
 from .. import log, config
+from ..libs.events import EventHandler
 
+
+class Event:
+    def __init__(self, cmd, type, **kwargs):
+        self.cmd = cmd
+        self.type = type
+        self.kwargs = kwargs
 
 class CommandError(StadoError):
     """Raises when command generates error."""
@@ -17,8 +24,8 @@ class Command:
     name = ''
     summary = ''
 
-    def __init__(self, console):
-        self.console = console
+    def __init__(self):
+        self.event = EventHandler()
 
     def install(self, parser):
         """Overwritten by inheriting class."""
@@ -45,18 +52,18 @@ class Command:
         return False
 
 
-    def event(self, name):
-        """Execute event method in Console object."""
-
-        method = getattr(self.console, name)
-
-        if isinstance(method, (list, tuple)):
-            if len(method) == 2:
-                method[0](*method[1])
-            else:
-                method[0](*method[1], **method[2])
-        else:
-            method()
+    # def event(self, name):
+    #     """Execute event method in Console object."""
+    #
+    #     method = getattr(self.console, name)
+    #
+    #     if isinstance(method, (list, tuple)):
+    #         if len(method) == 2:
+    #             method[0](*method[1])
+    #         else:
+    #             method[0](*method[1], **method[2])
+    #     else:
+    #         method()
 
 
 
@@ -75,15 +82,29 @@ class Console:
 
     def __init__(self):
 
+
+        self.events = EventHandler()
+
         # Available commands.
 
+        build = Build()
+        build.event.subscribe(self.on_event)
+        watch = Watch(build)
+        watch.event.subscribe(self.on_event)
+
+        view = View(build)
+        view.event.subscribe(self.on_event)
+
+        edit = Edit(build, watch, view)
+        # edit.event.subscribe(self.on_event)
+
         self.commands = {
-            Build.name: Build(self),
-            Watch.name: Watch(self),
-            View.name: View(self),
-            Edit.name: Edit(self),
-            Help.name: Help(self),
-            New.name: New(self),
+            Build.name: build,
+            Watch.name: watch,
+            View.name: view,
+            Edit.name: edit,
+            Help.name: Help(),
+            New.name: New(),
         }
 
         # Create command line parser.
@@ -94,9 +115,9 @@ class Console:
         # Add subparsers from commands.
 
         for i in self.commands.values():
-            parser = subparsers.add_parser(i.name, add_help=False)
-            parser.add_argument('-d', '--debug', action="store_true")
-            i.install(parser)
+            # parser = subparsers.add_parser(i.name, add_help=False)
+            # parser.add_argument('-d', '--debug', action="store_true")
+            i.install_in_parser(subparsers)
 
     def __getitem__(self, item):
         return self.commands[item]
@@ -116,6 +137,22 @@ class Console:
     def help(self, *args, **kwargs):
         self.commands['help'].run(*args, **kwargs)
 
+    # on_view_start
+    # on_build_start
+    # on_edit_start
+    # on_watch_start
+
+    # Events:
+
+    # console.subscribe('on_start', callable, *args, **kwargs)
+    # console.event('on_start')
+
+    # on_start
+    # on_stop
+
+    def on_event(self, event):
+        self.events.notify(event)
+        pass
 
     # Execute command.
 
@@ -127,9 +164,9 @@ class Console:
         # print('')
 
         # No arguments!
-        if not len(sys.argv) > 1 and not arguments:
-            self.help()
-            return True
+        # if not len(sys.argv) > 1 and not arguments:
+        #     self.help()
+        #     return True
 
         # Arguments from sys.args or from method arguments.
         if not arguments:
@@ -193,6 +230,18 @@ class Console:
         self.commands['view'].stop()
         log.debug('edit')
         self.commands['edit'].stop()
+
+
+    def stop(self):
+        log.debug('Stopping all console services!')
+
+        if not self.commands['watch'].is_stopped:
+            self.commands['watch'].stop()
+        log.debug('view')
+        self.commands['view'].stop()
+        # log.debug('edit')
+        # self.commands['edit'].stop()
+
 
     def after_rebuild(self):
         """Runs after site rebuild, usually by watcher."""

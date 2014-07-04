@@ -24,10 +24,7 @@ class TestCommandNew(unittest.TestCase):
         # Set current working directory to temporary directory with sites.
         os.chdir(self.temp_path)
 
-        self.console = Console()
-        # For faster checking files changes.
-        self.console.set_interval(0.1)
-        self.command = self.command_class(self.console)
+        self.command = self.command_class()
 
     def tearDown(self):
 

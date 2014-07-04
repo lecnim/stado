@@ -2,17 +2,14 @@
 
 import os
 import time
-import threading
 import traceback
-import fnmatch
 
-from contextlib import contextmanager
-
-from . import Command, CommandError
+from . import Command, CommandError, Event
 from .build import Build
-from .. import config, Site
+from .. import config
 from .. import log
 from ..libs import watchers
+
 
 
 class Watch(Command):
@@ -20,15 +17,19 @@ class Watch(Command):
 
     name = 'watch'
 
-    usage = 'watch [site] [options]\n    watch [options]'
-    summary = 'Build the site or group of sites and watch for changes.'
-    description = ''
-    options = Build.options
+    # usage = 'watch [site] [options]\n    watch [options]'
+    # summary = 'Build the site or group of sites and watch for changes.'
+    # description = ''
+    # options = Build.options
 
     #
 
-    def __init__(self, command_line):
-        super().__init__(command_line)
+    def __init__(self, build_cmd=None):
+        super().__init__()
+
+        # Default build command.
+        if build_cmd is None: build_cmd = Build()
+        self.build_cmd = build_cmd
 
         # Yes, this object is watching for changes in files.
         # self.file_monitor = FileMonitor()
@@ -38,14 +39,16 @@ class Watch(Command):
 
         self._is_stopped = True
 
-    def install(self, parser):
+    def install_in_parser(self, parser):
         """Add arguments to command line parser."""
 
-        parser.add_argument('path', default=None, nargs='?')
-        parser.set_defaults(function=self.run)
+        sub_parser = parser.add_parser(self.name, add_help=False)
+        sub_parser.add_argument('path', default=None, nargs='?')
+        sub_parser.set_defaults(function=self.run)
+        return sub_parser
 
     def build(self, path):
-        return self.console.commands['build'].build_path(path)
+        return self.build_cmd.build_path(path)
 
     #
 
@@ -93,12 +96,10 @@ class Watch(Command):
         # Monitoring.
         # New thread with file watcher is started here. This new thread will
         # run update() method if content of source directory was modified.
-        #
-        # if stop_thread:
-        #     self.event('before_waiting')
+
         self.file_monitor.start()
 
-        # self.console.on_run_watch(self)
+        self.event(Event(self, 'on_run'))
 
         # Wait here until a watcher thread is not dead!
         while self.file_monitor.is_alive and stop_thread is True:

@@ -3,7 +3,8 @@
 import os
 from stado import config
 from tests.console import TestCommandNew
-from stado.console import Build
+from stado.console import Build, Console
+
 
 class TestBuild(TestCommandNew):
     """Command build
@@ -89,3 +90,27 @@ class TestBuild(TestCommandNew):
         self.command.run(os.path.join(p, 'script.py'))
         self.assertEqual('bar', self.read_file('x/foo/' + config.build_dir
                                                + '/foo.html'))
+
+    #
+    # Console.
+    #
+
+    def test_console(self):
+        """should works with console"""
+
+        # Prepare files.
+        self.create_file('script.py',
+                         'from stado import route\nroute("/a.html", "a")')
+
+        ok = False
+        def on_event(event):
+            nonlocal ok
+            if event.cmd.name == 'build' and event.type == 'on_run':
+                ok = True
+
+        console = Console()
+        console.events.subscribe(on_event)
+        console(self.command_class.name)
+
+        self.assertEqual('a', self.read_file(config.build_dir + '/a.html'))
+        self.assertTrue(ok, msg='events do not work!')

@@ -3,12 +3,13 @@
 from stado import config
 from tests.console.test_view import TestView
 from tests.console.test_watch import TestWatch
+from stado.console.edit import Edit
 
 
 class TestEditView(TestView):
     """Command edit (testing development server)"""
 
-    _command = 'edit'
+    command_class = Edit
 
 
 class TestEditWatch(TestWatch):

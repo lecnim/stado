@@ -30,11 +30,14 @@ class New(Command):
 
 
 
-    def install(self, parser):
+    def install_in_parser(self, parser):
         """Add arguments to command line parser."""
 
-        parser.add_argument('site')
-        parser.set_defaults(function=self.run)
+        sub_parser = parser.add_parser(self.name, add_help=False)
+        sub_parser.add_argument('site')
+        sub_parser.set_defaults(function=self.run)
+
+        return sub_parser
 
 
     def run(self, site):

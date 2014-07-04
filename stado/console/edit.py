@@ -5,8 +5,10 @@ import time
 import threading
 
 from . import Command
-from .view import View
 from .. import config, Site
+from .build import Build
+from .watch import Watch
+from .view import View
 
 
 class Edit(Command):
@@ -14,29 +16,43 @@ class Edit(Command):
 
     name = 'edit'
 
-    usage = 'edit [site] [options]'
-    summary = 'Build the site, watch for changes and run development server.'
-    description = ''
-    options = View.options
+    # usage = 'edit [site] [options]'
+    # summary = 'Build the site, watch for changes and run development server.'
+    # description = ''
+    # options = View.options
 
-    def __init__(self, console):
-        Command.__init__(self, console)
+    def __init__(self, build_cmd=None, watch_cmd=None, view_cmd=None):
+
+        if build_cmd is None: build_cmd = Build()
+        if watch_cmd is None: watch_cmd = Watch(build_cmd)
+        if view_cmd is None: View(build_cmd)
+
+        self.build_cmd = build_cmd
+        self.watch_cmd = watch_cmd
+        self.view_cmd = view_cmd
 
         self.stopped = True
         self.cwd = None
 
-    def install(self, parser):
+    def install_in_parser(self, parser):
         """Add arguments to command line parser."""
 
-        parser.add_argument('site', default=None, nargs='?')
-        parser.add_argument('--port', '-p', type=int, default=config.port)
-        parser.add_argument('--host', '-h', default=config.host)
-        parser.set_defaults(function=self.run)
+        sub_parser = parser.add_parser(self.name, add_help=False)
 
-        self.view = self.console.commands['view']
-        self.watch = self.console.commands['watch']
+        sub_parser.add_argument('site', default=None, nargs='?')
+        sub_parser.add_argument('--port', '-p', type=int, default=config.port)
+        sub_parser.add_argument('--host', '-h', default=config.host)
+        sub_parser.set_defaults(function=self.run)
 
-    def run(self, site=None, host=None, port=None):
+        return sub_parser
+
+        # self.view = self.console.commands['view']
+        # self.watch = self.console.commands['watch']
+
+    def build(self, path):
+        return self.build_cmd.build_path(path)
+
+    def run(self, site=None, host=None, port=None, stop_thread=True):
         """Command-line interface will execute this method if user type 'edit'
         command."""
 
@@ -44,24 +60,18 @@ class Edit(Command):
         self.stopped = False
 
         # Track Site instances.
-        Site._tracker.enable()
-        self.console.build(site)
-        records = Site._tracker.dump(skip_unused=True)
+        records = self.build(site)
 
         # Add build sites to watcher.
-        watcher = self.console['watch']
-        watcher.update_function = self.update
-        # self.console.commands['watch'].file_monitor.disable()
-        # self.console.commands['watch'].file_monitor.clear()
-        # self.console.commands['watch'].event_update = self.update
+        self.watch_cmd.update_function = self.update
 
         outputs = [i['output'] for i in records]
         for i in records:
-            watcher.watch_site(i['script'], i['source'], outputs)
+            self.watch_cmd.watch_site(i['script'], i['source'], outputs)
 
         # Run watcher.
-        watcher.file_monitor.start()
-        watcher.log()
+        self.watch_cmd.file_monitor.start()
+        self.watch_cmd.log()
 
         # self.console.commands['view'].stop()
         # self.console.commands['view'].servers = []
