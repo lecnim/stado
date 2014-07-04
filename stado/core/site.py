@@ -149,6 +149,8 @@ class Site(Events):
         else:
             path = os.path.abspath(path)
 
+        print(path, inspect.stack()[1][1])
+
         # if path is None:
         #     path = os.path.dirname(os.path.abspath(__file__))
         #     print('>', path)

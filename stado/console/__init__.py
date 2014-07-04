@@ -1,6 +1,7 @@
 import os
 import sys
 import argparse
+import traceback
 
 from ..errors import StadoError
 from .. import log, config
@@ -156,6 +157,8 @@ class Console:
             except StadoError as error:
                 msg = 'Oops! Error! Something went wrong:\n{}'
                 log.error(msg.format(error))
+                raise
+                # traceback.print_exc()
                 return False
 
         log.setLevel(config.log_level)
@@ -167,10 +170,13 @@ class Console:
 
     def set_interval(self, value):
         """Sets watcher interval."""
-        self.commands['watch'].file_monitor.interval = value
+        self.commands['watch'].file_monitor.check_interval = value
 
 
     # Events:
+
+    def on_rebuild(self, path):
+        pass
 
     def before_waiting(self):
         """Runs before waiting loop in command run() method."""
@@ -179,8 +185,13 @@ class Console:
     def stop_waiting(self):
         """Stops waiting loop in commands. For example stops development server."""
         log.debug('Console stop all services!')
-        self.commands['watch'].stop()
+        log.debug('watch')
+
+        if not self.commands['watch'].is_stopped:
+            self.commands['watch'].stop()
+        log.debug('view')
         self.commands['view'].stop()
+        log.debug('edit')
         self.commands['edit'].stop()
 
     def after_rebuild(self):

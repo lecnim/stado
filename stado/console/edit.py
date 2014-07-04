@@ -60,7 +60,7 @@ class Edit(Command):
             watcher.watch_site(i['script'], i['source'], outputs)
 
         # Run watcher.
-        watcher.file_monitor.enable()
+        watcher.file_monitor.start()
         watcher.log()
 
         # self.console.commands['view'].stop()
@@ -80,6 +80,9 @@ class Edit(Command):
 
         while not self.is_stopped:
             time.sleep(config.wait_interval)
+
+        print(watcher.file_monitor.check_thread.is_alive())
+        print(threading.active_count())
 
         return True
 
@@ -129,7 +132,8 @@ class Edit(Command):
         """Stops command (stops development server and watcher)."""
 
         self.stopped = True
-        self.console['watch'].stop()
+        if not self.console['watch'].is_stopped:
+            self.console['watch'].stop()
         self.console['view'].stop()
 
         

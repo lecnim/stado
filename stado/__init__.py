@@ -46,8 +46,10 @@ site = None
 def default_site(path):
 
     global site
-    site = Site(path)
+    site = Site(os.path.dirname(path))
     site._is_default = True
+    site._script_path = path
+    # TODO: Maybe another tracker update here?
 
     module = sys.modules[__name__]
 

@@ -6,7 +6,7 @@ import runpy
 from . import Command, CommandError
 from .. import log
 from .. import utils
-from .. import default_site, clear_default_site
+from .. import default_site, clear_default_site, Site
 
 
 def build_site(path):
@@ -20,7 +20,7 @@ def build_site(path):
 
     # Create default site as a shortcut.
     # Now you can directly import: "from stado import run, before"
-    default_site(os.path.dirname(p))
+    default_site(p)
 
     if not os.path.exists(p):
         raise CommandError('Failed to build, file not found: ' + path)
@@ -96,3 +96,8 @@ class Build(Command):
 
         # TODO: It always should return True?
         return True
+
+    def build_path(self, path):
+        Site._tracker.enable()
+        self.run(path)
+        return Site._tracker.dump(skip_unused=True)

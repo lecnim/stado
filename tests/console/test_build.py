@@ -2,84 +2,90 @@
 
 import os
 from stado import config
-from tests.console import TestCommand
+from tests.console import TestCommandNew
+from stado.console import Build
 
-
-class TestBuild(TestCommand):
+class TestBuild(TestCommandNew):
     """Command build
 
     Important!
-    This test is done in temporary directory. Use self.temp_path to get path to it.
-    During tests current working directory is self.temp_path. Previous working
-    directory is self.cwd.
+    This test is done in temporary directory. Use self.temp_path to get path to
+    it. During tests current working directory is self.temp_path. Previous
+    working directory is self.cwd.
 
     """
 
-    _command = 'build'
+    command_class = Build
 
     #
 
-    def test_return(self):
+    def test_run_return(self):
         """should return True if building successful"""
 
-        self.assertTrue(self.command('script_a.py'))
-        self.assertTrue(self.command('x'))
-        self.assertTrue(self.command())
+        self.create_file('script.py', 'from stado import route\n'
+                                      'route("/a.html", "a")')
+        self.create_file('x/script.py', 'from stado import route\n'
+                                        'route("/a.html", "a")')
 
-    #
+        self.assertTrue(self.command.run('script.py'))
+        self.assertTrue(self.command.run())
+        self.assertTrue(self.command.run('x'))
 
-    def test_module_output(self):
-        """should correctly build module file [stado.py build module.py]"""
+    def test_output(self):
+        """should correctly build files in output"""
 
-        self.command('script_a.py')
-        # ~temp/output_a
-        self.assertEqual('a', self.read_file('output_a', 'a.html'))
+        # $ stado.py build module.py
 
-        # Check output directory content.
-        self.assertCountEqual(['a.html'], os.listdir('output_a'))
+        self.create_file('script.py', 'from stado import route\n'
+                                      'route("/a.html", "a")')
+        self.command.run('script.py')
 
-    def test_package_output(self):
-        """should correctly build package directory [stado.py build package]"""
+        self.assertEqual('a', self.read_file(config.build_dir + '/a.html'))
+        self.assertCountEqual(['a.html'], os.listdir(config.build_dir))
 
-        # ~temp/x
+        # $ stado.py build
 
-        self.command('x')
-        self.assertEqual('bar', self.read_file('x', config.build_dir,
-                                               'foo.html'))
+        self.create_file('script_b.py',
+                         'from stado import Site\n'
+                         'Site(output="output_b").route("/b.html", "b")')
+        self.command.run()
+
+        self.assertEqual('a', self.read_file(config.build_dir + '/a.html'))
+        self.assertEqual('b', self.read_file('output_b/b.html'))
+        self.assertCountEqual(['a.html'], os.listdir(config.build_dir))
+        self.assertCountEqual(['b.html'], os.listdir('output_b'))
+
+        # $ stado.py build package
+
+        self.create_file('x/script.py', 'from stado import route\n'
+                                        'route("/foo.html", "bar")')
+        self.create_file('x/foo/script.py', 'from stado import route\n'
+                                            'route("/foo.html", "bar")')
+        self.command.run('x')
+
+        self.assertEqual('bar',
+                         self.read_file('x/' + config.build_dir + '/foo.html'))
 
         path = os.path.join(self.temp_path, 'x', 'foo', config.build_dir)
         self.assertFalse(os.path.exists(path),
                          msg='Should run scrips only from top directory!')
 
-        # ~temp/y
-
-        self.command('y')
-        self.assertEqual('a', self.read_file('y', config.build_dir, 'a.html'))
-        self.assertEqual('b', self.read_file('y', config.build_dir, 'b.html'))
-
-    def test_output(self):
-        """should correctly build current directory [stado.py build]"""
-
-        self.command()
-        self.assertEqual('a', self.read_file('output_a', 'a.html'))
-        self.assertEqual('b', self.read_file('output_b', 'b.html'))
-
-        # Check output directory content.
-        self.assertCountEqual(['a.html'], os.listdir('output_a'))
-        self.assertCountEqual(['b.html'], os.listdir('output_b'))
-
-    #
-
     def test_relative_path(self):
         """should accepts relative path as an argument"""
 
-        self.command(os.path.join('x', 'foo', 'script.py'))
-        self.assertEqual('bar', self.read_file('x', 'foo', config.build_dir,
-                                               'foo', 'foo.html'))
+        self.create_file('x/foo/script.py', 'from stado import route\n'
+                                            'route("/foo.html", "bar")')
+        self.command.run(os.path.join('x', 'foo', 'script.py'))
+        self.assertEqual('bar',
+                         self.read_file('x/foo/' + config.build_dir
+                                        + '/foo.html'))
 
     def test_absolute_path(self):
         """should accepts absolute path a an argument"""
 
-        p = os.path.join(self.temp_path, 'x')
-        self.command(os.path.join(p, 'script.py'))
-        self.assertEqual('bar', self.read_file(p, config.build_dir, 'foo.html'))
+        self.create_file('x/foo/script.py', 'from stado import route\n'
+                                            'route("/foo.html", "bar")')
+        p = os.path.join(self.temp_path, 'x', 'foo')
+        self.command.run(os.path.join(p, 'script.py'))
+        self.assertEqual('bar', self.read_file('x/foo/' + config.build_dir
+                                               + '/foo.html'))

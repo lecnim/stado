@@ -60,6 +60,9 @@ class View(Command):
             raise CommandError('Command view is already running! It must be '
                                'stopped before running it again')
 
+        if host is None: host = config.host
+        if port is None: port = config.port
+
         # List of every tracked Site object.
         Site._tracker.enable()
         self.console.build(path)
@@ -103,6 +106,9 @@ class View(Command):
 
     def stop(self):
         """Stops development server."""
+
+        if self.is_stopped:
+            return False
 
         log.debug('Stopping development server...')
         for i in self.servers:

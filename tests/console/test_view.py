@@ -2,10 +2,11 @@
 
 import urllib.request
 from stado import config
-from tests.console import TestCommand
+from tests.console import TestCommandNew
+from stado.console import View
 
 
-class TestView(TestCommand):
+class TestView(TestCommandNew):
     """Command view
 
     Important!
@@ -15,7 +16,7 @@ class TestView(TestCommand):
 
     """
 
-    _command = 'view'
+    command_class = View
 
     def read_url(self, url, host, port):
         url = 'http://{}:{}/{}'.format(host, port, url)
@@ -23,63 +24,72 @@ class TestView(TestCommand):
 
     # View module.
 
-    def test_module(self):
-        """should serve module output files [stado.py view module.py]"""
+    def test_serve_module_output(self):
+        """should serve module output files"""
 
-        def test():
-            a = self.read_url('a.html', config.host, config.port)
-            self.console.stop_waiting()
+        # Prepare files.
+        self.create_file('script.py', 'from stado import route\n'
+                                      'route("/a.html", "a")')
 
-            self.assertEqual('a', a)
+        # Action.
+        self.command.run('script.py', stop_thread=False)
+        a = self.read_url('a.html', config.host, config.port)
+        self.command.stop()
 
-        self.console.before_waiting = test
-        self.command('script_a.py')
+        # Test.
+        self.assertEqual('a', a)
 
-    # View package.
+    def test_serve_package_output(self):
+        """should serve package output files"""
 
-    def test_package(self):
-        """should serve package output files [stado.py view package]"""
+        # Prepare files.
+        self.create_file('x/a.py', 'from stado import route\n'
+                                   'route("/a.html", "a")')
+        self.create_file('x/b.py', 'from stado import route\n'
+                                   'route("/b.html", "b")')
+        # Action.
+        self.command.run('x', stop_thread=False)
+        a = self.read_url('a.html', config.host, config.port)
+        b = self.read_url('b.html', config.host, config.port + 1)
+        self.command.stop()
 
-        def test():
-            a = self.read_url('a.html', config.host, config.port)
-            b = self.read_url('b.html', config.host, config.port + 1)
-            self.console.stop_waiting()
+        # Tests.
+        self.assertEqual('a', a)
+        self.assertEqual('b', b)
 
-            self.assertEqual('a', a)
-            self.assertEqual('b', b)
+        # No arguments:
 
-        self.console.before_waiting = test
-        self.command('y')
+        # Prepare files.
+        self.create_file('a.py', 'from stado import route\n'
+                                 'route("/a.html", "a")')
+        self.create_file('b.py', 'from stado import route\n'
+                                 'route("/b.html", "b")')
+        # Actions.
+        self.command.run(stop_thread=False)
+        a = self.read_url('a.html', config.host, config.port)
+        b = self.read_url('b.html', config.host, config.port + 1)
+        self.command.stop()
 
-    # View with no arguments.
-
-    def test(self):
-        """should serve current directory output files [stado.py view]"""
-
-        def test():
-            a = self.read_url('a.html', config.host, config.port)
-            b = self.read_url('b.html', config.host, config.port + 1)
-            self.console.stop_waiting()
-
-            self.assertEqual('a', a)
-            self.assertEqual('b', b)
-
-        self.console.before_waiting = test
-        self.command()
+        # Tests.
+        self.assertEqual('a', a)
+        self.assertEqual('b', b)
 
     #
 
     def test_host_and_port(self):
-        """--host --port: should run server on custom host and port."""
+        """can run server on custom host and port."""
 
-        def test():
-            a = self.read_url('a.html', host='127.0.0.2', port=3000)
-            self.console.stop_waiting()
+        # Prepare files.
+        self.create_file('script.py', 'from stado import route\n'
+                                      'route("/a.html", "a")')
+        # Actions.
+        self.command.run('script.py', host='127.0.0.2', port=3000,
+                         stop_thread=False)
+        a = self.read_url('a.html', host='127.0.0.2', port=3000)
+        self.command.stop()
 
-            self.assertEqual('a', a)
-
-        self.console.before_waiting = test
-        self.command('script_a.py --host 127.0.0.2 --port 3000')
+        # Tests.
+        self.assertEqual('a', a)
 
     #
 
@@ -91,15 +101,24 @@ class TestView(TestCommand):
         # b.py => 4001
         # z.py => 4002
 
-        def test():
-            a = self.read_url('foo.html', config.host, config.port)
-            b = self.read_url('foo.html', config.host, config.port + 1)
-            c = self.read_url('foo.html', config.host, config.port + 2)
-            self.console.stop_waiting()
+        self.create_file('a.py',
+                         'from stado import Site\n'
+                         'Site(output="a").route("/foo.html", "a")')
+        self.create_file('b.py',
+                         'from stado import Site\n'
+                         'Site(output="b").route("/foo.html", "b")')
+        self.create_file('z.py',
+                         'from stado import Site\n'
+                         'Site(output="z").route("/foo.html", "z")')
 
-            self.assertEqual('a', a)
-            self.assertEqual('b', b)
-            self.assertEqual('c', c)
+        # Actions.
+        self.command.run(stop_thread=False)
+        a = self.read_url('foo.html', config.host, config.port)
+        b = self.read_url('foo.html', config.host, config.port + 1)
+        c = self.read_url('foo.html', config.host, config.port + 2)
+        self.command.stop()
 
-        self.console.before_waiting = test
-        self.command('sort')
+        # Tests.
+        self.assertEqual('a', a)
+        self.assertEqual('b', b)
+        self.assertEqual('z', c)
