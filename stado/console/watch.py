@@ -1,4 +1,4 @@
-"""Command: watch"""
+"""Watch command."""
 
 import os
 import time
@@ -12,40 +12,27 @@ from ..libs import watchers
 
 
 class Watch(Build):
-    """Builds site and then watches for file changes and rebuilds it."""
+    """Builds a site and then monitor changes."""
 
     name = 'watch'
-
-    # usage = 'watch [site] [options]\n    watch [options]'
-    # summary = 'Build the site or group of sites and watch for changes.'
-    # description = ''
-    # options = Build.options
+    usage = '{cmd} [path] [options]'
+    summary = 'Build the site or group of sites and watch for changes.'
 
     #
 
-    def __init__(self, build_cmd=None):
+    def __init__(self):
         super().__init__()
 
-        # Default build command.
-        if build_cmd is None: build_cmd = Build()
-        self.build_cmd = build_cmd
-
         # Yes, this object is watching for changes in files.
-        # self.file_monitor = FileMonitor()
         self.file_monitor = watchers.Manager()
         # This function is run if watcher detected changes.
         self.update_function = self._on_src_modified
-
-        # self._is_stopped = True
         self._is_running = False
 
-    def install_in_parser(self, parser):
-        """Add arguments to command line parser."""
+    # I Hate ARGPARSE:
 
-        sub_parser = parser.add_parser(self.name, add_help=False)
-        sub_parser.add_argument('path', default=None, nargs='?')
-        sub_parser.set_defaults(function=self.run)
-        return sub_parser
+    def _parser_add_arguments(self, parser):
+        parser.add_argument('path', default=None, nargs='?', help='path')
 
     #
 
@@ -118,7 +105,7 @@ class Watch(Build):
     # Command controls
     #
 
-    def stop(self):
+    def cancel(self):
         """Stops watching. It waits until a watch thread is dead."""
 
         if not self.is_running:
