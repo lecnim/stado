@@ -1,4 +1,4 @@
-"""Command: edit"""
+"""Edit command."""
 
 import os
 import time
@@ -11,11 +11,11 @@ from .view import View
 
 
 class Edit(Watch, View):
+    """Build a site, monitor changes, starts development server."""
 
     name = 'edit'
-
-    def __init__(self, build_cmd=None, watch_cmd=None, view_cmd=None):
-        super().__init__()
+    usage = '{cmd} [path] [options]'
+    summary = 'Build the site, watch for changes and run development server.'
 
     def run(self, path=None, host=None, port=None, stop_thread=True):
         """Command-line interface will execute this method if user type 'edit'
@@ -46,44 +46,46 @@ class Edit(Watch, View):
 
         return True
 
-    def pause_watcher(self):
+    def pause_watch(self):
+        """Pauses the file monitor."""
         Watch.pause(self)
 
-    def stop(self):
-        """Stops command (stops development server and watcher)."""
-        View.stop(self)
-        Watch.stop(self)
+    def cancel(self):
+        """Stops command - stops development server and watcher."""
+        View.cancel(self)
+        Watch.cancel(self)
 
     def _on_script_created(self, item):
         """A new python script was created."""
-        records = Watch._on_script_created(self, item)
 
+        records = Watch._on_script_created(self, item)
         self._start_servers(records)
 
     def _on_script_deleted(self, item):
         """A python script was deleted."""
 
         Watch._on_script_deleted(self, item)
-
         dead = [i for i in self.servers if i.script_path == item.path]
         for i in dead:
             self._stop_server(i)
 
     def _on_src_modified(self, script_path):
+        """A python script was modified."""
 
-
+        # Pause development servers - prevents threads concurrency.
         View.pause(self)
         ok, data = Watch._on_src_modified(self, script_path)
         View.resume(self)
 
+        # ok: True
+        # data: Site records.
         if ok and data:
             self._stop_servers(data)
             self._start_servers(data)
 
         if not ok:
-
             exception, tb = data
-
+            # An exception occurred, set servers to error mode.
             for i in self.servers:
                 if i.script_path == script_path:
                     i.set_exception(tb)
