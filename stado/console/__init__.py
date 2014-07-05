@@ -96,7 +96,7 @@ class Console:
         view.event.subscribe(self.on_event)
 
         edit = Edit(build, watch, view)
-        # edit.event.subscribe(self.on_event)
+        edit.event.subscribe(self.on_event)
 
         self.commands = {
             Build.name: build,
@@ -240,7 +240,7 @@ class Console:
         log.debug('view')
         self.commands['view'].stop()
         # log.debug('edit')
-        # self.commands['edit'].stop()
+        self.commands['edit'].stop()
 
 
     def after_rebuild(self):

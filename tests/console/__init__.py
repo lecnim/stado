@@ -36,6 +36,10 @@ class TestCommandNew(unittest.TestCase):
     # Shortcuts
     #
 
+    def read_url(self, url, host, port):
+        url = 'http://{}:{}/{}'.format(host, port, url)
+        return urllib.request.urlopen(url).read().decode('UTF-8')
+
     def read_file(self, path):
         """Returns data from given path. Path must be relative to current
         temp path."""

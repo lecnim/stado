@@ -18,10 +18,6 @@ class TestView(TestCommandNew):
 
     command_class = View
 
-    def read_url(self, url, host, port):
-        url = 'http://{}:{}/{}'.format(host, port, url)
-        return urllib.request.urlopen(url).read().decode('UTF-8')
-
     #
     # Integration tests.
     #
@@ -53,11 +49,13 @@ class TestView(TestCommandNew):
         self.command.run('x', stop_thread=False)
         a = self.read_url('a.html', config.host, config.port)
         b = self.read_url('b.html', config.host, config.port + 1)
+        servers = len(self.command.servers)
         self.command.stop()
 
         # Tests.
         self.assertEqual('a', a)
         self.assertEqual('b', b)
+        self.assertEqual(2, servers)
 
         # No arguments:
 
@@ -70,11 +68,13 @@ class TestView(TestCommandNew):
         self.command.run(stop_thread=False)
         a = self.read_url('a.html', config.host, config.port)
         b = self.read_url('b.html', config.host, config.port + 1)
+        servers = len(self.command.servers)
         self.command.stop()
 
         # Tests.
         self.assertEqual('a', a)
         self.assertEqual('b', b)
+        self.assertEqual(2, servers)
 
     def test_run_host_and_port(self):
         """can run server on custom host and port."""
@@ -135,7 +135,8 @@ class TestView(TestCommandNew):
                                       'route("/a.html", "a")')
 
         def on_event(event):
-            if event.cmd.name == 'view' and event.type == 'on_run':
+            if event.cmd.name == self.command_class.name \
+               and event.type == 'on_wait':
                 a = self.read_url('a.html', config.host, config.port)
                 console.stop()
                 self.assertEqual('a', a)

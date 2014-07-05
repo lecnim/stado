@@ -58,53 +58,78 @@ class View(Command):
 
     #
 
-    def build(self, path):
-        return self.build_cmd.build_path(path)
-
     @property
     def is_stopped(self):
         """Checks if command has stop running."""
-        return True if self.are_servers_stopped() else False
+        return True if self._are_servers_stopped() else False
 
     def run(self, path=None, host=None, port=None, stop_thread=True):
         """Command-line interface will execute this method if user type 'view'
         command."""
 
-        if not self.are_servers_stopped():
+        if not self._are_servers_stopped():
             raise CommandError('Command view is already running! It must be '
                                'stopped before running it again')
+
+        # List of every tracked Site object.
+        site_records = self._build(path)
+
+        # Start new thread for each server.
+        self._start_servers(site_records, host, port)
+
+        # Event 'on_run' should be send at the end of method,
+        # before waiting loop.
+        if stop_thread:
+            self.event(Event(self, 'on_wait'))
+
+            while not self._are_servers_stopped() and stop_thread is True:
+                time.sleep(config.wait_interval)
+        return True
+
+    #
+    # Command controls
+    #
+
+    def pause(self):
+        for i in self.servers:
+            i.stop()
+
+    def resume(self):
+        for i in self.servers:
+            i.restart()
+
+    def stop(self):
+        """Stops a development server."""
+
+        if self.is_stopped:
+            return False
+
+        log.debug('Stopping development server...')
+        for i in self.servers:
+            i.stop()
+        self.servers.clear()
+        log.debug('Done!')
+
+    #
+
+    def _build(self, path):
+        """Shortcut for a build method of the Build command."""
+        return self.build_cmd.build_path(path)
+
+    def _start_servers(self, site_records, host, port):
+        """Starts a development server for each site records."""
 
         if host is None: host = config.host
         if port is None: port = config.port
 
-        # List of every tracked Site object.
-        records = self.build(path)
-
         # Start new thread for each server.
-        for i in records:
-            self.start_server(i['output'], host, port)
+        for i in site_records:
+            self._start_server(i['output'], host, port)
             port += 1
 
-        # Event 'on_run' should be send at the end of method,
-        # before waiting loop.
-        self.event(Event(self, 'on_run'))
-
-        while not self.are_servers_stopped() and stop_thread is True:
-            time.sleep(config.wait_interval)
-
-        return True
-
-    #
-
-    def start_server(self, path, host=None, port=None):
-        """Starts development server and serve files from path on given host
+    def _start_server(self, path, host, port):
+        """Starts a development server and serve files from path on a given host
         and port."""
-
-        # Default host and port.
-        if host is None:
-            host = config.host
-        if port is None:
-            port = config.port
 
         log.debug('Starting development server...')
         log.debug('  Path: ' + path)
@@ -117,18 +142,8 @@ class View(Command):
 
         log.info('You can view site at: http://{}:{}'.format(host, port))
 
-    def stop(self):
-        """Stops development server."""
 
-        if self.is_stopped:
-            return False
-
-        log.debug('Stopping development server...')
-        for i in self.servers:
-            i.stop()
-        log.debug('Done!')
-
-    def are_servers_stopped(self):
+    def _are_servers_stopped(self):
         """Returns True if all servers are shutdown."""
 
         for i in self.servers:

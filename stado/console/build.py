@@ -100,7 +100,6 @@ class Build(Command):
                     build_site(i)
 
         # TODO: It always should return True?
-        self.event(Event(self, 'on_run'))
         return True
 
     def build_path(self, path):

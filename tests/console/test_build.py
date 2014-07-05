@@ -102,15 +102,7 @@ class TestBuild(TestCommandNew):
         self.create_file('script.py',
                          'from stado import route\nroute("/a.html", "a")')
 
-        ok = False
-        def on_event(event):
-            nonlocal ok
-            if event.cmd.name == 'build' and event.type == 'on_run':
-                ok = True
-
         console = Console()
-        console.events.subscribe(on_event)
         console(self.command_class.name)
 
         self.assertEqual('a', self.read_file(config.build_dir + '/a.html'))
-        self.assertTrue(ok, msg='events do not work!')

@@ -41,9 +41,11 @@ class TestWatch(TestCommandNew):
         with self.run_command(path='script.py'):
             self.modify_file('a.html')
             self.command.check()
+            w = len(self.command.file_monitor.watchers)
 
         # Tests:
         self.assertEqual('UPDATE', self.read_file(config.build_dir + '/a.html'))
+        self.assertEqual(2, w)
 
 
         # $ stado.py watch package
@@ -58,11 +60,12 @@ class TestWatch(TestCommandNew):
         with self.run_command(path='x'):
             self.modify_file('x/foo.html')
             self.command.check()
+            w = len(self.command.file_monitor.watchers)
 
         self.assertEqual('UPDATE',
                          self.read_file('x/' + config.build_dir + '/foo.html'))
         self.assertEqual('UPDATE', self.read_file('x/output_b/foo.html'))
-
+        self.assertEqual(3, w)
 
         # $ stado.py watch
 
@@ -71,9 +74,11 @@ class TestWatch(TestCommandNew):
         with self.run_command(path=None):
             self.modify_file('a.html', data='HELLO')
             self.command.check()
+            w = len(self.command.file_monitor.watchers)
 
         # Tests:
         self.assertEqual('HELLO', self.read_file(config.build_dir + '/a.html'))
+        self.assertEqual(2, w)
 
     #
     # Creating new files.
@@ -92,10 +97,11 @@ class TestWatch(TestCommandNew):
         with self.run_command(path='script.py'):
             self.create_file('new.html', 'NEW')
             self.command.check()
+            w = len(self.command.file_monitor.watchers)
 
         # Tests:
         self.assertEqual('NEW', self.read_file(config.build_dir + '/new.html'))
-
+        self.assertEqual(2, w)
 
         # $ stado.py watch package
 
@@ -105,9 +111,11 @@ class TestWatch(TestCommandNew):
         with self.run_command(path='x'):
             self.create_file('x/new.html', 'NEW')
             self.command.check()
+            w = len(self.command.file_monitor.watchers)
 
         self.assertEqual('NEW',
                          self.read_file('x/' + config.build_dir + '/new.html'))
+        self.assertEqual(2, w)
 
         # $ stado.py watch
 
@@ -117,9 +125,11 @@ class TestWatch(TestCommandNew):
         with self.run_command(path=None):
             self.create_file('another.html', 'FOOBAR')
             self.command.check()
+            w = len(self.command.file_monitor.watchers)
 
         self.assertEqual('FOOBAR',
                          self.read_file(config.build_dir + '/another.html'))
+        self.assertEqual(2, w)
 
     #
     # Removing files.
@@ -242,6 +252,25 @@ class TestWatch(TestCommandNew):
         self.assertTrue(os.path.exists(b))
         self.assertTrue(os.path.exists(c))
 
+    def test_modify_script_with_custom_source(self):
+
+        self.create_file('script.py',
+                         'from stado import Site\n'
+                         'Site("src").build("hello.html")')
+        self.create_file('src/hello.html', 'hello')
+        self.create_file('src/another.html', 'another')
+
+        with self.run_command('script.py'):
+            self.modify_file('script.py',
+                             'from stado import Site\n'
+                             'Site("src").build("another.html")')
+            self.command.check()
+
+        hello = os.path.join('src', config.build_dir, 'hello.html')
+        another = os.path.join('src', config.build_dir, 'another.html')
+        self.assertTrue(os.path.exists(hello))
+        self.assertTrue(os.path.exists(another))
+
     #
     # Adding new python scripts.
     #
@@ -305,13 +334,13 @@ class TestWatch(TestCommandNew):
             self.remove_dir(config.build_dir)
             self.remove_file('a.py')
             self.command.check()
-
-            # self.assertEqual(1, len(self.command.file_monitor.watchers))
+            w = len(self.command.file_monitor.watchers)
 
         a = os.path.join(config.build_dir, 'a.html')
         b = os.path.join(config.build_dir, 'b.html')
         self.assertFalse(os.path.exists(a))
         self.assertTrue(os.path.exists(b))
+        self.assertEqual(2, w)
 
     # TODO: Removing module which is currently run.
 
@@ -354,7 +383,7 @@ class TestWatch(TestCommandNew):
         with self.run_command(path='script.py'):
 
             # Only one watcher, package watcher is not used in this situation.
-            self.assertEqual(1, len(self.command.file_monitor.watchers))
+            self.assertEqual(2, len(self.command.file_monitor.watchers))
 
             w = list(self.command.file_monitor.watchers)[0]
             self.assertEqual(self.temp_path, w.path)
@@ -372,7 +401,8 @@ class TestWatch(TestCommandNew):
                          'from stado import route\nroute("/a.html", "a")')
 
         def on_event(event):
-            if event.cmd.name == 'watch' and event.type == 'on_run':
+            if event.cmd.name == self.command_class.name \
+               and event.type == 'on_wait':
                 console.stop()
 
         console = Console()
