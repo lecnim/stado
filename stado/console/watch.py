@@ -4,12 +4,11 @@ import os
 import time
 import traceback
 
-from . import Command, CommandError, Event
+from . import CommandError, Event
 from .build import Build
 from .. import config
 from .. import log
 from ..libs import watchers
-
 
 
 class Watch(Build):
@@ -35,9 +34,10 @@ class Watch(Build):
         # self.file_monitor = FileMonitor()
         self.file_monitor = watchers.Manager()
         # This function is run if watcher detected changes.
-        self.update_function = self._on_rebuild
+        self.update_function = self._on_src_modified
 
-        self._is_stopped = True
+        # self._is_stopped = True
+        self._is_running = False
 
     def install_in_parser(self, parser):
         """Add arguments to command line parser."""
@@ -50,19 +50,14 @@ class Watch(Build):
     #
 
     @property
-    def is_stopped(self):
-        """Checks if command has stop running."""
-
-        # return True if self._is_stopped and not self.file_monitor.is_alive else False
+    def is_running(self):
+        """Returns True if command is running."""
 
         if self.file_monitor.is_alive:
-            return False
-        if not self._is_stopped:
-            return False
-        return True
-        #
-        # return False if not self._is_stopped \
-        #                 or self.file_monitor.is_alive else True
+            return True
+        if self._is_running:
+            return True
+        return False
 
     def run(self, path=None, stop_thread=True):
         """Command-line interface will execute this method if user type 'watch'
@@ -75,7 +70,7 @@ class Watch(Build):
             raise CommandError('Command watch is already running! It must be '
                                'stopped before running it again')
 
-        self._is_stopped = False
+        self._is_running = True
 
         # Track every new created Site object.
         # List of every tracked Site object.
@@ -86,7 +81,6 @@ class Watch(Build):
             sites = self.dump_tracker()
 
         path = os.path.abspath(path) if path else os.path.abspath('.')
-
         self._run_watcher(path, sites)
 
         if stop_thread:
@@ -113,7 +107,6 @@ class Watch(Build):
 
         # Watch source dirs of Site instances.
         self._watch_sources(site_records)
-
         self._log()
 
         # Monitoring.
@@ -128,35 +121,34 @@ class Watch(Build):
     def stop(self):
         """Stops watching. It waits until a watch thread is dead."""
 
-        # if self.is_stopped:
-        #     raise CommandError('Watch: command already stopped!')
+        if not self.is_running:
+            raise CommandError('Watch: command already stopped!')
 
         log.debug('Stopping files watching...')
         self.file_monitor.stop()
         self.file_monitor.clear()
 
-        self._is_stopped = True
+        self._is_running = False
         log.debug('Done!')
 
     def pause(self):
         """Stops a file monitor."""
 
-        if self.is_stopped:
+        if not self.is_running:
             raise CommandError(
                 'Watch: cannot pause an already stopped command!')
         self.file_monitor.stop()
 
     def resume(self):
-        """Starts a file monitor again."""
+        """Un-pause a file monitor."""
 
-        if self._is_stopped:
+        if not self._is_running:
             raise CommandError(
                 'Watch: cannot resume an already stopped command!')
         self.file_monitor.start()
 
     def check(self):
         """Runs a file monitor check. Used during unittests!"""
-        print('check')
         self.file_monitor.check()
 
     # Private!
@@ -170,24 +162,23 @@ class Watch(Build):
                 log.debug('  Script: {}'.format(i.args[0]))
                 log.debug('    source: {}'.format(i.path))
 
-    # def _build(self, path):
-    #     """Shortcut for build method in Build commad."""
-    #     return self.build_cmd.build_path(path)
-
     def _watch_scripts(self, path):
         """Creates a watcher that monitor python script files."""
 
-        # Monitor every change in python scripts in directory.
+        # Monitor an every change of python scripts in directory.
         if os.path.isdir(path):
-            w = watchers.Watcher(path, recursive=False,
-                                 filter=lambda x: x.endswith('.py'))
+
+            def only_python(x):
+                """Ignores all non-python files."""
+                if os.path.isfile(x) and x.endswith('.py'):
+                    return True
+                return False
+            w = watchers.Watcher(path, recursive=False, filter=only_python)
+
         # Monitor changes in given python script.
         else:
-            def f(x):
-                print(x, path)
-                return x == path
             w = watchers.Watcher(os.path.dirname(path), recursive=False,
-                                 filter=f)
+                                 filter=lambda x: x == path)
 
         # Monkey path Watcher events!
         w.on_created = self._on_script_created
@@ -229,7 +220,6 @@ class Watch(Build):
             if path in output_paths \
                or [i for i in output_paths if path.startswith(i + '/')] \
                or path == script_path:
-                print('FALSE', path)
                 return False
             return True
 
@@ -239,8 +229,8 @@ class Watch(Build):
         w.script_path = script_path
         self.file_monitor.add(w)
 
-    def _unwatch_script(self, *script_paths):
-        """Removes all watchers that are watching a script."""
+    def _unwatch_sources(self, *script_paths):
+        """Removes all watchers that are watching a script source."""
 
         dead = [i for i in self.file_monitor.watchers
                 if i.script_path in script_paths]
@@ -260,62 +250,47 @@ class Watch(Build):
     def _on_script_created(self, item):
         """A new python script was created."""
 
-        if item.is_file:
-            log.debug('Script created: ' + item.path)
-            try:
-                records = self.build_path(item.path)
-            except:
-                traceback.print_exc()
-                records = self.dump_tracker()
-            self._watch_sources(records)
-            return records
+        log.debug('Script created: ' + item.path)
+        try:
+            records = self.build_path(item.path)
+        except:
+            traceback.print_exc()
+            records = self.dump_tracker()
+        self._watch_sources(records)
+        return records
 
     def _on_script_deleted(self, item):
         """A python script was deleted."""
-
-        if item.is_file:
-            log.debug('Script deleted: ' + item.path)
-            self._unwatch_script(item.path)
+        log.debug('Script deleted: ' + item.path)
+        self._unwatch_sources(item.path)
 
     def _on_script_modified(self, item):
         """A python script was modified."""
-
-        if item.is_file:
-            log.debug('Script modified: ' + item.path)
-            return self._on_rebuild(item.path)
+        log.debug('Script modified: ' + item.path)
+        return self._on_src_modified(item.path)
 
     # Watching sources.
 
-    def _on_rebuild(self, script_path):
-        """This method is run by file monitor each time when files in source
-        directory of site were modified. If argument trigger_event is True,
-        event 'after_rebuild' will be executed at the end of this method."""
+    def _on_src_modified(self, script_path):
+        """Runs when source files of site were modified."""
 
         t = time.strftime('%H:%M:%S')
         log.info('{} - Rebuilding sites in: {}.'.format(t, script_path))
 
-        # Script not exists: remove all connected watchers.
+        # Script not exists, it was suddenly deleted.
         if not os.path.exists(script_path):
-            log.debug('Rebuild Script deleted: ' + script_path)
-            # self._unwatch_script(script_path)
-            return True, []
+            return True, None
 
         try:
             records = self.build_path(script_path)
-
-        # TODO: Better error message, now it is default python trackback.
         except Exception as e:
             traceback.print_exc()
-            # traceback.
             return False, (e, traceback.format_exc())
 
         else:
             # Remove observer needed to be updated.
-            self._unwatch_script(*[i['script'] for i in records])
-
+            self._unwatch_sources(*[i['script'] for i in records])
             # Add new updated watchers.
             self._watch_sources(records)
             self._log()
             return True, records
-
-            # True, site_records

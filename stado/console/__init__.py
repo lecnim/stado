@@ -190,6 +190,7 @@ class Console:
             try:
                 result = cmd(**args)
             except KeyboardInterrupt:
+                log.info('Exiting stado, goodbye!')
                 return True
             except StadoError as error:
                 msg = 'Oops! Error! Something went wrong:\n{}'
@@ -235,12 +236,13 @@ class Console:
     def stop(self):
         log.debug('Stopping all console services!')
 
-        if not self.commands['watch'].is_stopped:
+        if self.commands['watch'].is_running:
             self.commands['watch'].stop()
         log.debug('view')
         self.commands['view'].stop()
         # log.debug('edit')
-        self.commands['edit'].stop()
+        if self.commands['edit'].is_running:
+            self.commands['edit'].stop()
 
 
     def after_rebuild(self):

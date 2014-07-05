@@ -63,11 +63,15 @@ class View(Build):
                             help='Specify the host to listen on.')
 
     #
+    #
+    # @property
+    # def is_stopped(self):
+    #     """Checks if command has stop running."""
+    #     return True if self._are_servers_stopped() else False
 
     @property
-    def is_stopped(self):
-        """Checks if command has stop running."""
-        return True if self._are_servers_stopped() else False
+    def is_running(self):
+        return False if self._are_servers_stopped() else True
 
     def run(self, path=None, host=None, port=None, stop_thread=True):
         """Command-line interface will execute this method if user type 'view'
@@ -107,7 +111,7 @@ class View(Build):
     def stop(self):
         """Stops a development server."""
 
-        if self.is_stopped:
+        if not self.is_running:
             return False
 
         log.debug('Stopping development server...')
