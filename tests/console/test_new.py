@@ -1,13 +1,14 @@
 """Tests command: new"""
 
 import os
+import textwrap
 
-from stado.console.new import SCRIPT, INDEX
-from stado.console import Console, CommandError
-from tests.console import TestCommand
+from stado.console.new import FILES, New
+from stado.console import CommandError
+from tests.console import TestCommandNew
 
 
-class TestNew(TestCommand):
+class TestNew(TestCommandNew):
     """Command new <site>:
 
     Important!
@@ -17,29 +18,25 @@ class TestNew(TestCommand):
 
     """
 
+    command_class = New
+
     def test_returned_value(self):
         """should return True if building successful."""
 
-        self.assertTrue(Console().__call__('new test'))
-
+        self.assertTrue(self.command.run('new_site'))
 
     def test(self):
         """should correctly creates new site files."""
 
-        Console().__call__('new test')
+        self.command.run('test')
 
-        self.assertTrue(os.path.exists(os.path.join(self.temp_path, 'test')))
-
-
-        with open(os.path.join(self.temp_path, 'test', 'site.py')) as file:
-            self.assertEqual(SCRIPT, file.read())
-
-        with open(os.path.join(self.temp_path, 'test', 'index.html')) as file:
-            self.assertEqual(INDEX, file.read())
-
+        self.assertTrue(os.path.exists('test'))
+        for file_name, data in FILES.items():
+            self.assertEqual(textwrap.dedent(data),
+                             self.read_file('test/' + file_name))
 
     def test_site_exists(self):
         """should raise error when creating site which already exits."""
 
-        self.assertTrue(Console().__call__('new a'))
-        self.assertRaises(CommandError, Console().commands['new'].run, 'a')
+        self.create_file('new_site/hello')
+        self.assertRaises(CommandError, self.command.run, 'new_site')
