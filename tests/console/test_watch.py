@@ -366,6 +366,50 @@ class TestWatch(TestCommandNew):
         self.assertTrue(os.path.exists(b))
 
     #
+    # Exceptions.
+    #
+
+    def test_exception_in_modified_script(self):
+        """should still work if a modified file raise an exception"""
+
+        # Script file is modified and exception occurred. Watcher should
+        # wait until user repair error.
+
+        self.create_file('a.py', 'from stado import route\n'
+                                 'route("/a.html", "a")')
+
+        with self.run_command():
+            self.modify_file('a.py', 'raise ValueError("test")')
+            self.command.check()
+
+            self.assertEqual(2, len(self.command.file_monitor.watchers))
+
+            # Use repair an error - the exception is gone.
+
+            self.modify_file('a.py', 'from stado import route\n'
+                                     'route("/c.html", "c")')
+            self.command.check()
+            self.assertEqual('c', self.read_file(config.build_dir + '/c.html'))
+
+    def test_run_script_exception(self):
+        """should still work if run raise an exception from the script file"""
+
+        # Command is run but one of script files raise an exception.
+        # It should wait unit error is repaired.
+
+        self.create_file('script.py', 'from stado import route\n'
+                                      'route("/a.html", "a")\n'
+                                      'raise ValueError("test...")')
+
+        with self.run_command():
+            self.modify_file('script.py', 'from stado import route\n'
+                                          'route("/b.html", "b")\n')
+            self.assertEqual(2, len(self.command.file_monitor.watchers))
+            self.command.check()
+            self.assertEqual('b', self.read_file(config.build_dir + '/b.html'))
+            self.assertEqual(2, len(self.command.file_monitor.watchers))
+
+    #
     # Other.
     #
 

@@ -163,8 +163,28 @@ class TestEditWatch(TestWatch):
 
         self.assertEqual(0, s)
 
+    def test_serve_exception_script(self):
+        """serve an error page if command raised an exception from script file"""
+
+        # Command is run but one of script files raise an exception.
+
+        self.create_file('script.py', 'from stado import route\n'
+                                      'route("/a.html", "a")\n'
+                                      'raise ValueError("test...")')
+
+        with self.run_command():
+            self.modify_file('script.py', 'from stado import route\n'
+                                          'route("/b.html", "b")\n')
+            self.assertEqual(1, len(self.command.servers))
+            self.command.check()
+
+            self.assertEqual('b',
+                             self.read_url('b.html', config.host, config.port))
+            self.assertEqual(1, len(self.command.servers))
+            self.assertEqual(2, len(self.command.file_monitor.watchers))
+
     def test_serve_exception_from_modified_script(self):
-        """should serve an error page if the script file raised an exception"""
+        """serve an error page if the modified script file raised an exception"""
 
         # Script file is modified and exception occurred, so server should
         # serve error page and waits for user to repair situation.
@@ -198,25 +218,25 @@ class TestEditWatch(TestWatch):
                              self.read_url('c.html', config.host, config.port))
 
     def test_serve_exception_from_created_script(self):
-        """should serve an error page if a new script file raised an exception"""
+        """serve an error page if a new script file raised an exception"""
 
         # New script file is created and it raise the exception, so a server
         # should response with an error page.
 
-        self.create_file('script.py', 'from stado import route\n'
-                                      'route("/a.html", "a")\n'
-                                      'raise ValueError("test...")')
+        self.create_file('a.py', 'from stado import route\n'
+                                 'route("/a.html", "a")\n')
 
         with self.run_command():
-            self.modify_file('script.py', 'from stado import route\n'
-                                          'route("/b.html", "b")\n')
-            self.assertEqual(1, len(self.command.servers))
+            self.create_file('b.py', 'raise ValueError("test")')
             self.command.check()
+            self.assertEqual(1, len(self.command.servers))
 
+            self.modify_file('b.py', 'from stado import route\n'
+                                     'route("/b.html", "b")\n')
+            self.command.check()
+            self.assertEqual(2, len(self.command.servers))
             self.assertEqual('b',
                              self.read_url('b.html', config.host, config.port))
-            self.assertEqual(1, len(self.command.servers))
-            self.assertEqual(2, len(self.command.file_monitor.watchers))
 
 
 # Prevent running test from this classes.

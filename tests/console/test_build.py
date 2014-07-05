@@ -91,6 +91,8 @@ class TestBuild(TestCommandNew):
         self.assertEqual('bar', self.read_file('x/foo/' + config.build_dir
                                                + '/foo.html'))
 
+    # TODO: Exceptions
+
     #
     # Console.
     #

@@ -79,7 +79,12 @@ class Watch(Build):
 
         # Track every new created Site object.
         # List of every tracked Site object.
-        sites = self.build_path(path)
+        try:
+            sites = self.build_path(path)
+        except:
+            traceback.print_exc()
+            sites = self.dump_tracker()
+
         path = os.path.abspath(path) if path else os.path.abspath('.')
 
         self._run_watcher(path, sites)
@@ -257,7 +262,11 @@ class Watch(Build):
 
         if item.is_file:
             log.debug('Script created: ' + item.path)
-            records = self.build_path(item.path)
+            try:
+                records = self.build_path(item.path)
+            except:
+                traceback.print_exc()
+                records = self.dump_tracker()
             self._watch_sources(records)
             return records
 
