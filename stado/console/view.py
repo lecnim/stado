@@ -16,7 +16,7 @@ from .. import log
 socketserver.TCPServer.allow_reuse_address = True
 
 
-class View(Command):
+class View(Build):
     """Build and serve site using development server."""
 
     name = 'view'
@@ -33,6 +33,10 @@ class View(Command):
 
         # List of all currently running development servers.
         self.servers = []
+
+        self.port = config.port
+
+        self.used_ports = set()
 
     # I hate argparser...
 
@@ -72,7 +76,7 @@ class View(Command):
                                'stopped before running it again')
 
         # List of every tracked Site object.
-        site_records = self._build(path)
+        site_records = self.build_path(path)
 
         # Start new thread for each server.
         self._start_servers(site_records, host, port)
@@ -109,15 +113,24 @@ class View(Command):
             i.stop()
         # Python 3.2 do not support list.clear()
         del self.servers[:]
+        self.used_ports.clear()
         log.debug('Done!')
 
     #
 
-    def _build(self, path):
-        """Shortcut for a build method of the Build command."""
-        return self.build_cmd.build_path(path)
+    def get_free_port(self, min=None):
 
-    def _start_servers(self, site_records, host, port):
+        i = config.port if min is None else min
+
+        while i in self.used_ports:
+            i += 1
+        return i
+
+    # def _build(self, path):
+    #     """Shortcut for a build method of the Build command."""
+    #     return self.build_cmd.build_path(path)
+
+    def _start_servers(self, site_records, host=None, port=None):
         """Starts a development server for each site records."""
 
         if host is None: host = config.host
@@ -125,20 +138,26 @@ class View(Command):
 
         # Start new thread for each server.
         for i in site_records:
-            self._start_server(i['output'], host, port)
-            port += 1
+            port = self.get_free_port(port)
+            self._start_server(i['script'], i['output'], host, port)
+            # port += 1
 
-    def _start_server(self, path, host, port):
+    def _start_server(self, script_path, output_path, host=None, port=None):
         """Starts a development server and serve files from path on a given host
         and port."""
 
+        # if host is None: host = config.host
+        # if port is None: port = self.port
+
         log.debug('Starting development server...')
-        log.debug('  Path: ' + path)
+        log.debug('  Path: ' + output_path)
 
         server = DevelopmentServer()
         self.servers.append(server)
+        self.used_ports.add(port)
 
-        server.path = path
+        server.path = output_path
+        server.script_path = script_path
         server.start(host, port)
 
         log.info('You can view site at: http://{}:{}'.format(host, port))

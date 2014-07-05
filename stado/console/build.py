@@ -104,5 +104,38 @@ class Build(Command):
 
     def build_path(self, path):
         Site._tracker.enable()
-        self.run(path)
+
+        # Command run without arguments.
+        # Run all python scripts in current working directory.
+        if path is None:
+
+            log.info('Searching python scripts...')
+
+            files = [i for i in os.listdir('.') if
+                     os.path.isfile(i) and i.endswith('.py')]
+
+            # Build sites in alphabetical order, it is important when
+            # development server is assigning ports.
+            for i in sorted(files):
+                build_site(i)
+
+        else:
+            # Path is pointing to python file.
+            if os.path.isfile(path):
+                build_site(path)
+            # Path is pointing to directory, run all python scripts inside.
+            else:
+
+                log.info('Searching python scripts...')
+
+                files = []
+                for i in os.listdir(path):
+                    fp = os.path.join(path, i)
+                    if os.path.isfile(fp) and fp.endswith('.py'):
+                        files.append(fp)
+
+                for i in sorted(files):
+                    build_site(i)
+
+        # TODO: It always should return True?
         return Site._tracker.dump(skip_unused=True)

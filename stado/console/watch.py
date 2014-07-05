@@ -12,7 +12,7 @@ from ..libs import watchers
 
 
 
-class Watch(Command):
+class Watch(Build):
     """Builds site and then watches for file changes and rebuilds it."""
 
     name = 'watch'
@@ -79,7 +79,7 @@ class Watch(Command):
 
         # Track every new created Site object.
         # List of every tracked Site object.
-        sites = self._build(path)
+        sites = self.build_path(path)
         path = os.path.abspath(path) if path else os.path.abspath('.')
 
         self._run_watcher(path, sites)
@@ -115,7 +115,6 @@ class Watch(Command):
         # New thread with file watcher is started here. This new thread will
         # run update() method if content of source directory was modified.
         self.file_monitor.start()
-        print()
 
     #
     # Command controls
@@ -152,6 +151,7 @@ class Watch(Command):
 
     def check(self):
         """Runs a file monitor check. Used during unittests!"""
+        print('check')
         self.file_monitor.check()
 
     # Private!
@@ -165,9 +165,9 @@ class Watch(Command):
                 log.debug('  Script: {}'.format(i.args[0]))
                 log.debug('    source: {}'.format(i.path))
 
-    def _build(self, path):
-        """Shortcut for build method in Build commad."""
-        return self.build_cmd.build_path(path)
+    # def _build(self, path):
+    #     """Shortcut for build method in Build commad."""
+    #     return self.build_cmd.build_path(path)
 
     def _watch_scripts(self, path):
         """Creates a watcher that monitor python script files."""
@@ -250,13 +250,16 @@ class Watch(Command):
     # a main thread is waiting in a wait loop in run() method.
     #
 
+    # Watching scripts.
+
     def _on_script_created(self, item):
         """A new python script was created."""
 
         if item.is_file:
             log.debug('Script created: ' + item.path)
-            records = self._build(item.path)
+            records = self.build_path(item.path)
             self._watch_sources(records)
+            return records
 
     def _on_script_deleted(self, item):
         """A python script was deleted."""
@@ -271,6 +274,8 @@ class Watch(Command):
         if item.is_file:
             log.debug('Script modified: ' + item.path)
             self._on_rebuild(item.path)
+
+    # Watching sources.
 
     def _on_rebuild(self, script_path):
         """This method is run by file monitor each time when files in source
@@ -287,7 +292,7 @@ class Watch(Command):
             return False
 
         try:
-            records = self._build(script_path)
+            records = self.build_path(script_path)
 
         # TODO: Better error message, now it is default python trackback.
         except Exception:

@@ -25,7 +25,9 @@ class TestEditWatch(TestWatch):
           finally stops command."""
 
         self.command.run(*args, stop_thread=False, **kwargs)
-        self.command.watch_cmd.pause()
+        # self.command.watch_cmd.pause()
+        self.command.pause_watcher()
+        # self.command.stop()
         yield
         self.command.stop()
 
@@ -65,16 +67,18 @@ class TestEditWatch(TestWatch):
 
     def test_start_server_for_new_site(self):
 
-       self.create_file('a.py',
-                        'from stado import route\nroute("/a.html", "a")')
+        self.create_file('a.py',
+                         'from stado import route\nroute("/a.html", "a")')
 
-       with self.run_command():
-           self.create_file('b.py',
-                            'from stado import route\nroute("/b.html", "b")')
-           self.command.check()
-           s = len(self.command.servers)
+        with self.run_command():
+            self.create_file('b.py',
+                             'from stado import route\nroute("/b.html", "b")')
+            self.command.check()
+            s = len(self.command.servers)
+            b = self.read_url('b.html', config.host, config.port + 1)
 
-       self.assertEqual(2, s)
+        self.assertEqual(2, s)
+        self.assertEqual('b', b)
 
 
 
