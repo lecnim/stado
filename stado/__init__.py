@@ -11,11 +11,22 @@ __version__ = '1.0.0a'
 version = __version__
 
 
+# Minimum supported python: 3.2
+if sys.hexversion < 0x030200F0:
+    raise ImportError('Python < 3.2 not supported!')
+
 # Constants
 
 # True if stado package is in zip file.
-IS_ZIP_PACKAGE = True if isinstance(__loader__, zipimport.zipimporter) \
-    else False
+if sys.hexversion < 0x030300F0:
+    if __file__.endswith(os.path.join('stado.py', 'stado', '__init__.py')):
+        IS_ZIP_PACKAGE = True
+    else:
+        IS_ZIP_PACKAGE = False
+else:
+    IS_ZIP_PACKAGE = True if isinstance(__loader__, zipimport.zipimporter) \
+        else False
+
 # Absolute path pointing to stado package.
 PATH = os.path.split(os.path.dirname(__file__))[0] if IS_ZIP_PACKAGE \
     else os.path.dirname(__file__)

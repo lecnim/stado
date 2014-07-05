@@ -107,7 +107,8 @@ class View(Command):
         log.debug('Stopping development server...')
         for i in self.servers:
             i.stop()
-        self.servers.clear()
+        # Python 3.2 do not support list.clear()
+        del self.servers[:]
         log.debug('Done!')
 
     #
