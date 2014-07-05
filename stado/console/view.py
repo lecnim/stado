@@ -162,6 +162,13 @@ class View(Build):
 
         log.info('You can view site at: http://{}:{}'.format(host, port))
 
+    # def _stop_server(self):
+
+    def _stop_server(self, server):
+
+        self.used_ports.remove(server.port)
+        server.stop()
+        self.servers.remove(server)
 
     def _are_servers_stopped(self):
         """Returns True if all servers are shutdown."""

@@ -73,8 +73,10 @@ class Edit(Watch, View):
 
         Watch._on_script_deleted(self, item)
 
-        if item.is_file:
-            pass
+        dead = [i for i in self.servers if i.script_path == item.path]
+
+        for i in dead:
+            self._stop_server(i)
 
 
     #
