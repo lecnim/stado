@@ -3,6 +3,7 @@
 import os
 import time
 import threading
+import traceback
 
 from . import Command, Event, CommandError
 from .. import config, Site, log
@@ -29,7 +30,16 @@ class Edit(Watch, View):
 
         self._is_stopped = False
 
-        site_records = self.build_path(path)
+        try:
+            site_records = self.build_path(path)
+        except Exception:
+            site_records = self.dump_tracker()
+            traceback.print_exc()
+            # site_records = []
+
+        #
+        #
+        # site_records = self.build_path(path)
         path = os.path.abspath(path) if path else os.path.abspath('.')
         self._run_watcher(path, site_records)
         self._start_servers(site_records, host, port)
@@ -77,6 +87,36 @@ class Edit(Watch, View):
 
         for i in dead:
             self._stop_server(i)
+
+    # def _on_script_modified(self, item):
+    #     records = Watch._on_script_modified(self, item)
+    #
+
+    def _on_rebuild(self, script_path):
+
+        # View.pause(self)
+        # TODO: Pause servers
+
+        ok, data = Watch._on_rebuild(self, script_path)
+        if ok:
+            # print(data)
+            self._stop_servers(data)
+            self._start_servers(data)
+
+        if not ok:
+
+            exception, tb = data
+
+            for i in self.servers:
+                if i.script_path == script_path:
+                    i.set_exception(tb)
+
+        # dead = [i for i in self.servers if i.script_path == item.path]
+
+        # for i in records:
+            # self._st
+        # View.
+
 
 
     #

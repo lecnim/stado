@@ -102,6 +102,9 @@ class Build(Command):
         # TODO: It always should return True?
         return True
 
+    def dump_tracker(self):
+        return Site._tracker.dump(skip_unused=True)
+
     def build_path(self, path):
         Site._tracker.enable()
 

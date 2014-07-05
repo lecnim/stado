@@ -273,7 +273,7 @@ class Watch(Build):
 
         if item.is_file:
             log.debug('Script modified: ' + item.path)
-            self._on_rebuild(item.path)
+            return self._on_rebuild(item.path)
 
     # Watching sources.
 
@@ -287,17 +287,18 @@ class Watch(Build):
 
         # Script not exists: remove all connected watchers.
         if not os.path.exists(script_path):
-            log.debug('Script deleted: ' + script_path)
-            self._unwatch_script(script_path)
-            return False
+            log.debug('Rebuild Script deleted: ' + script_path)
+            # self._unwatch_script(script_path)
+            return True, []
 
         try:
             records = self.build_path(script_path)
 
         # TODO: Better error message, now it is default python trackback.
-        except Exception:
+        except Exception as e:
             traceback.print_exc()
-            return False
+            # traceback.
+            return False, (e, traceback.format_exc())
 
         else:
             # Remove observer needed to be updated.
@@ -306,4 +307,6 @@ class Watch(Build):
             # Add new updated watchers.
             self._watch_sources(records)
             self._log()
-            return True
+            return True, records
+
+            # True, site_records

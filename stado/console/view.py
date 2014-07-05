@@ -1,6 +1,8 @@
 """Command: view"""
 
 import os
+import io
+import sys
 import time
 import threading
 import socketserver
@@ -142,6 +144,17 @@ class View(Build):
             self._start_server(i['script'], i['output'], host, port)
             # port += 1
 
+    def _stop_servers(self, site_records):
+
+        dead = set()
+        for i in site_records:
+            for s in self.servers:
+                if i['script'] == s.script_path:
+                    dead.add(s)
+
+        for i in dead:
+            self._stop_server(i)
+
     def _start_server(self, script_path, output_path, host=None, port=None):
         """Starts a development server and serve files from path on a given host
         and port."""
@@ -183,6 +196,24 @@ class HTTPRequestHandler(SimpleHTTPRequestHandler):
     """From python standard library, but added server root path option."""
 
     _root_path = os.getcwd()
+    _exception = None
+
+    error_message_format = """\
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+        <title>Error response</title>
+    </head>
+    <body>
+        <h1>Error response</h1>
+        <p>Error code: %(code)d</p>
+        <pre>Message: %(message)s.</pre>
+        <pre>Error code explanation: %(code)s - %(explain)s.</pre>
+    </body>
+</html>
+"""
 
     def translate_path(self, path):
         """Translate a /-separated PATH to the local filename syntax.
@@ -211,6 +242,21 @@ class HTTPRequestHandler(SimpleHTTPRequestHandler):
             path += '/'
         return path
 
+    def do_GET(self):
+        """Serve a GET request."""
+        if self._exception:
+            self.send_error(500, self._exception)
+        else:
+            SimpleHTTPRequestHandler.do_GET(self)
+
+    def do_HEAD(self):
+        """Serve a HEAD request."""
+        if self._exception:
+            self.send_error(500, self._exception)
+        else:
+            SimpleHTTPRequestHandler.do_HEAD(self)
+
+
 
 class DevelopmentServer:
     """Development server using python build-in server."""
@@ -226,11 +272,24 @@ class DevelopmentServer:
         self.host = None
         self.port = None
 
+        self.exception = None
+
     @property
     def is_stopped(self):
         if self._stopped is True and not self.thread.is_alive():
             return True
         return False
+
+    def set_exception(self, msg):
+        self.exception = msg
+
+        if self.server:
+            self.server.RequestHandlerClass._exception = self.exception
+
+    def clear_exception(self):
+        self.exception = None
+        if self.server:
+            self.server.RequestHandlerClass._exception = None
 
     def restart(self):
         """Restarts development server."""
@@ -242,10 +301,13 @@ class DevelopmentServer:
         # Server objects.
         Handler = type('HTTPRequestHandler' + str(self.port),
                        (HTTPRequestHandler,),
-                       {'_root_path': self.path})
+                       {'_root_path': self.path,
+                        '_exception': self.exception})
+
 
         # Handler = http.server.SimpleHTTPRequestHandler
         self.server = socketserver.TCPServer((self.host, self.port), Handler)
+
 
         # Start a thread with the server.
         self.thread = threading.Thread(
