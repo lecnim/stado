@@ -27,6 +27,30 @@ class Command:
     def __init__(self):
         self.event = EventHandler()
 
+
+    def install_parser(self, parser):
+        """Add sub-parser with arguments to parser."""
+
+        sub_parser = parser.add_parser(
+            self.name,
+            usage=self.usage.format(**{'cmd': self.name}),
+            description=self.summary)
+        sub_parser.set_defaults(function=self.run)
+
+        self._parser_add_arguments(sub_parser)
+        self._parser_add_options(sub_parser)
+
+        return sub_parser
+
+    def _parser_add_arguments(self, parser):
+        pass
+
+    def _parser_add_options(self, parser):
+        pass
+
+
+
+
     def install(self, parser):
         """Overwritten by inheriting class."""
         return parser
@@ -86,26 +110,30 @@ class Console:
         self.events = EventHandler()
 
         # Available commands.
-
-        build = Build()
-        build.event.subscribe(self.on_event)
-        watch = Watch(build)
-        watch.event.subscribe(self.on_event)
-
-        view = View(build)
-        view.event.subscribe(self.on_event)
-
-        edit = Edit(build, watch, view)
-        edit.event.subscribe(self.on_event)
+        #
+        # build = Build()
+        # build.event.subscribe(self.on_event)
+        # watch = Watch(build)
+        # watch.event.subscribe(self.on_event)
+        #
+        # view = View(build)
+        # view.event.subscribe(self.on_event)
+        #
+        # edit = Edit(build, watch, view)
+        # edit.event.subscribe(self.on_event)
 
         self.commands = {
-            Build.name: build,
-            Watch.name: watch,
-            View.name: view,
-            Edit.name: edit,
+            Build.name: Build(),
+            Watch.name: Watch(),
+            View.name: View(),
+            Edit.name: Edit(),
             Help.name: Help(),
             New.name: New(),
         }
+
+        for i in self.commands.values():
+            i.event.subscribe(self.on_event)
+
 
         # Create command line parser.
 
@@ -117,7 +145,7 @@ class Console:
         for i in self.commands.values():
             # parser = subparsers.add_parser(i.name, add_help=False)
             # parser.add_argument('-d', '--debug', action="store_true")
-            i.install_in_parser(subparsers)
+            i.install_parser(subparsers)
 
     def __getitem__(self, item):
         return self.commands[item]
@@ -226,23 +254,23 @@ class Console:
         log.debug('watch')
 
         if not self.commands['watch'].is_stopped:
-            self.commands['watch'].stop()
+            self.commands['watch'].cancel()
         log.debug('view')
-        self.commands['view'].stop()
+        self.commands['view'].cancel()
         log.debug('edit')
-        self.commands['edit'].stop()
+        self.commands['edit'].cancel()
 
 
     def stop(self):
         log.debug('Stopping all console services!')
 
         if self.commands['watch'].is_running:
-            self.commands['watch'].stop()
+            self.commands['watch'].cancel()
         log.debug('view')
-        self.commands['view'].stop()
+        self.commands['view'].cancel()
         # log.debug('edit')
         if self.commands['edit'].is_running:
-            self.commands['edit'].stop()
+            self.commands['edit'].cancel()
 
 
     def after_rebuild(self):

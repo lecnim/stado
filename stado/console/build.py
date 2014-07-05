@@ -45,6 +45,8 @@ class Build(Command):
     """Run python module or package to build sites."""
 
     name = 'build'
+    usage = '{cmd} [path] [options]'
+    summary = "Build the site or group of sites in output directory."
 
     # usage = "build [site] [options]\n    build [options]"
     # summary = "Build the site or group of sites in output directory."
@@ -53,15 +55,18 @@ class Build(Command):
 
     #
 
-    def install_in_parser(self, parser):
-        """Add arguments to command line parser."""
-
-        sub_parser = parser.add_parser(self.name, add_help=False)
-
-        sub_parser.add_argument('path', default=None, nargs='?')
-        sub_parser.set_defaults(function=self.run)
-
-        return sub_parser
+    def _parser_add_arguments(self, parser):
+        parser.add_argument('path', default=None, nargs='?')
+    #
+    # def install_in_parser(self, parser):
+    #     """Add arguments to command line parser."""
+    #
+    #     sub_parser = parser.add_parser(self.name, add_help=False)
+    #
+    #
+    #     sub_parser.set_defaults(function=self.run)
+    #
+    #     return sub_parser
 
     def run(self, path=None):
         """Command-line interface will execute this method if user type 'build'

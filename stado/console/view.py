@@ -22,6 +22,8 @@ class View(Build):
     """Build and serve site using development server."""
 
     name = 'view'
+    usage = '{cmd} [path] [options]'
+    summary = 'Build the site and start the development web server.'
 
     def __init__(self, build_cmd=None):
         """
@@ -30,31 +32,30 @@ class View(Build):
         """
         super().__init__()
 
-        if build_cmd is None: build_cmd = Build()
-        self.build_cmd = build_cmd
 
         # List of all currently running development servers.
         self.servers = []
-
-        self.port = config.port
-
+        # self.port = config.port
         self.used_ports = set()
 
     # I hate argparser...
 
-    def install_in_parser(self, parser):
-        """Add sub-parser with arguments to parser."""
+    # def install_in_parser(self, parser):
+    #     """Add sub-parser with arguments to parser."""
+    #
+    #     sub_parser = parser.add_parser(
+    #         self.name,
+    #         usage='{} [path] [options]'.format(self.name),
+    #         description='Build the site and start the development web server.')
+    #     sub_parser.set_defaults(function=self.run)
+    #     sub_parser.add_argument('path', default=None, nargs='?', help='path')
+    #     self._install_options(sub_parser)
+    #     return sub_parser
+    #
+    def _parser_add_arguments(self, parser):
+        parser.add_argument('path', default=None, nargs='?', help='path')
 
-        sub_parser = parser.add_parser(
-            self.name,
-            usage='{} [path] [options]'.format(self.name),
-            description='Build the site and start the development web server.')
-        sub_parser.set_defaults(function=self.run)
-        sub_parser.add_argument('path', default=None, nargs='?', help='path')
-        self._install_options(sub_parser)
-        return sub_parser
-
-    def _install_options(self, parser):
+    def _parser_add_options(self, parser):
         """Install optional arguments in parser."""
 
         parser.add_argument('--port', '-p', type=int, default=config.port,
@@ -63,11 +64,6 @@ class View(Build):
                             help='Specify the host to listen on.')
 
     #
-    #
-    # @property
-    # def is_stopped(self):
-    #     """Checks if command has stop running."""
-    #     return True if self._are_servers_stopped() else False
 
     @property
     def is_running(self):
@@ -108,7 +104,7 @@ class View(Build):
         for i in self.servers:
             i.restart()
 
-    def stop(self):
+    def cancel(self):
         """Stops a development server."""
 
         if not self.is_running:

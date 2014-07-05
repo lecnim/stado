@@ -32,7 +32,7 @@ class TestView(TestCommandNew):
         # Action.
         self.command.run('script.py', stop_thread=False)
         a = self.read_url('a.html', config.host, config.port)
-        self.command.stop()
+        self.command.cancel()
 
         # Test.
         self.assertEqual('a', a)
@@ -50,7 +50,7 @@ class TestView(TestCommandNew):
         a = self.read_url('a.html', config.host, config.port)
         b = self.read_url('b.html', config.host, config.port + 1)
         servers = len(self.command.servers)
-        self.command.stop()
+        self.command.cancel()
 
         # Tests.
         self.assertEqual('a', a)
@@ -69,7 +69,7 @@ class TestView(TestCommandNew):
         a = self.read_url('a.html', config.host, config.port)
         b = self.read_url('b.html', config.host, config.port + 1)
         servers = len(self.command.servers)
-        self.command.stop()
+        self.command.cancel()
 
         # Tests.
         self.assertEqual('a', a)
@@ -86,7 +86,7 @@ class TestView(TestCommandNew):
         self.command.run('script.py', host='127.0.0.2', port=3000,
                          stop_thread=False)
         a = self.read_url('a.html', host='127.0.0.2', port=3000)
-        self.command.stop()
+        self.command.cancel()
 
         # Tests.
         self.assertEqual('a', a)
@@ -114,7 +114,7 @@ class TestView(TestCommandNew):
         a = self.read_url('foo.html', config.host, config.port)
         b = self.read_url('foo.html', config.host, config.port + 1)
         c = self.read_url('foo.html', config.host, config.port + 2)
-        self.command.stop()
+        self.command.cancel()
 
         # Tests.
         self.assertEqual('a', a)

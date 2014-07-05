@@ -26,9 +26,9 @@ class TestEditWatch(TestWatch):
           finally stops it."""
 
         self.command.run(*args, stop_thread=False, **kwargs)
-        self.command.pause_watcher()
+        self.command.pause_watch()
         yield
-        self.command.stop()
+        self.command.cancel()
 
     #
     # Integration tests.

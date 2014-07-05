@@ -2,7 +2,7 @@
 
 import os
 
-from stado.console.new import script, index
+from stado.console.new import SCRIPT, INDEX
 from stado.console import Console, CommandError
 from tests.console import TestCommand
 
@@ -32,10 +32,10 @@ class TestNew(TestCommand):
 
 
         with open(os.path.join(self.temp_path, 'test', 'site.py')) as file:
-            self.assertEqual(script, file.read())
+            self.assertEqual(SCRIPT, file.read())
 
         with open(os.path.join(self.temp_path, 'test', 'index.html')) as file:
-            self.assertEqual(index, file.read())
+            self.assertEqual(INDEX, file.read())
 
 
     def test_site_exists(self):

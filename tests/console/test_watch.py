@@ -21,7 +21,7 @@ class TestWatch(TestCommandNew):
         self.command.run(*args, stop_thread=False, **kwargs)
         self.command.pause()
         yield
-        self.command.stop()
+        self.command.cancel()
 
     #
     # Modifying site source files.
