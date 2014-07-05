@@ -4,7 +4,7 @@ import os
 import textwrap
 
 from stado.console.new import FILES, New
-from stado.console import CommandError
+from stado.console import CommandError, Console
 from tests.console import TestCommandNew
 
 
@@ -19,6 +19,10 @@ class TestNew(TestCommandNew):
     """
 
     command_class = New
+
+    #
+    # Integration tests.
+    #
 
     def test_returned_value(self):
         """should return True if building successful."""
@@ -40,3 +44,15 @@ class TestNew(TestCommandNew):
 
         self.create_file('new_site/hello')
         self.assertRaises(CommandError, self.command.run, 'new_site')
+
+    #
+    # Console integration.
+    #
+
+    def test_console(self):
+        """should work with console"""
+
+        console = Console()
+        console(self.command_class.name + ' new_site')
+
+        self.assertTrue(os.path.exists('new_site'))
