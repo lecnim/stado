@@ -2,6 +2,25 @@ import unittest
 from os import path
 from stado import utils
 
+
+class TestUtils(unittest.TestCase):
+    """
+    A utils module
+    """
+    def test_is_subpath(self):
+        """is_subpath()"""
+
+        self.assertTrue(utils.is_subpath('/foo/bar', '/foo'))
+        self.assertTrue(utils.is_subpath('foo/bar', 'foo'))
+        self.assertTrue(utils.is_subpath('/foo', '/foo'))
+        self.assertTrue(utils.is_subpath('/foo/', '/foo'))
+        self.assertTrue(utils.is_subpath('/foo', '/foo/'))
+        self.assertTrue(utils.is_subpath('/foo/', '/foo/'))
+
+        self.assertFalse(utils.is_subpath('bar', 'foo/bar'))
+        self.assertFalse(utils.is_subpath('/foo', 'foo'))
+
+
 class TestRelativePath(unittest.TestCase):
     """
     A utils.relative_path() function

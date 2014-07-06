@@ -17,8 +17,15 @@ class Timer:
         return round(time.clock() - self.time, 2)
 
 def is_subpath(a, b):
+    """Returns True if a is sub-path of b. Examples:
+
+    >>> is_subpath('/foo/bar', '/foo')
+    True
+
+    """
     a = os.path.abspath(a)
-    return True if a.startswith(os.path.abspath(b)+'/') else False
+    return True if a.startswith(os.path.abspath(b)) else False
+
 
 def copytree(source, destination):
     """Same as shutil.copytree(), but can copy to already existing directory."""
