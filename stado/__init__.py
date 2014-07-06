@@ -4,7 +4,6 @@ import logging
 import zipimport
 import inspect
 
-from . import libs
 from . import config
 
 __version__ = '1.0.0a'
@@ -66,18 +65,13 @@ def default_site(path):
     site = Site(os.path.dirname(path))
     site._is_default = True
     site._script_path = path
-    # TODO: Maybe another tracker update here?
+    site._tracker.update(site)
 
     module = sys.modules[__name__]
 
-    # # Set module functions shortcuts to site methods.
-    # for function in site.controllers:
-    #     setattr(module, function.__name__, function)
-
+    # Shortcuts to controllers.
     for i in inspect.getmembers(site, predicate=inspect.ismethod):
-
         name, func = i
-
         if hasattr(func, 'is_controller'):
             setattr(module, func.__name__, func)
 
@@ -86,28 +80,24 @@ def clear_default_site():
     global site
     module = sys.modules[__name__]
 
-    # Remove module functions to site methods shortcuts.
-    # for function in site.controllers:
-    #     setattr(module, function.__name__, None)
-
+    # Remove controllers shortcuts.
     for i in inspect.getmembers(site, predicate=inspect.ismethod):
         name, func = i
-        if hasattr(func, 'is_controller'): setattr(module, func.__name__, None)
+        if hasattr(func, 'is_controller'):
+            delattr(module, func.__name__)
 
     site = None
 
 
-#
+# User shortcuts.
 
 from .core.site import Site
 from .core.item import Item, FileItem
-from .console import Console
 
-# Shortcuts for site.py
-Stado = Site
 
 # Run stado. Get arguments and pass them to console.
+from .console import Console
+
 if __name__ == "__main__":
     console = Console()
-
     sys.exit(0) if console() else sys.exit(1)

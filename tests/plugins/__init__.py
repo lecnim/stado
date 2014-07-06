@@ -4,11 +4,10 @@ import tempfile
 import os
 import inspect
 
-from stado import Stado
+from stado import Site
 
 
 class TestPlugin(unittest.TestCase):
-
     @property
     def path(self):
         return os.path.dirname(inspect.getfile(self.__class__))
@@ -17,11 +16,10 @@ class TestPlugin(unittest.TestCase):
         self.cwd = os.getcwd()
         self.temp_path = tempfile.mkdtemp()
 
-        self.app = Stado(os.path.join(self.path, 'data'),
-                         output=self.temp_path)
+        self.app = Site(os.path.join(self.path, 'data'),
+                        output=self.temp_path)
 
         self.site = self.app
-
 
         os.chdir(self.temp_path)
 
