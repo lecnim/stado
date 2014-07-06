@@ -33,6 +33,10 @@ class SiteItem:
         self.context = {}
         self._helpers = []
 
+    def __repr__(self):
+        return "{}(source_path={!r}, output_path={!r})".format(
+            self.__class__.__name__, self.source_path, self.output_path)
+
     # File reading optimisation.
 
     @property
@@ -156,8 +160,13 @@ class FileItem(SiteItem):
     def __init__(self, url, source_path):
         super().__init__(source_path, utils.relative_path(url.strip('/')))
 
+
 class Item(SiteItem):
 
     def __init__(self, url, source=''):
         super().__init__(None, utils.relative_path(url.strip('/')))
         self.source = source
+
+    def __repr__(self):
+        return "{}(output_path={!r})".format(
+            self.__class__.__name__, self.output_path)

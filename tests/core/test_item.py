@@ -1,7 +1,3 @@
-import os
-import tempfile
-import shutil
-
 from tests import TestStado
 from stado.core.item import SiteItem, FileItem, Item
 

@@ -8,9 +8,8 @@ from .. import IS_ZIP_PACKAGE, PATH
 
 
 class Plugin:
-    def __init__(self, site=None):
-        super().__init__()
-        self.site = site
+    def __repr__(self):
+        return "{}".format(self.__class__.__name__)
 
     def install(self, site):
         pass

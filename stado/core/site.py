@@ -135,6 +135,10 @@ class Site:
 
         Site._tracker.update(self)
 
+    def __repr__(self):
+        return "{}(path={!r}, output={!r})".format(
+            self.__class__.__name__, self.path, self.output)
+
     @property
     def path(self):
         return self._path

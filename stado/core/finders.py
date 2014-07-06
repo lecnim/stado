@@ -14,6 +14,9 @@ class ItemFinder:
         """Inherited class overwrites this."""
         pass
 
+    def __repr__(self):
+        return "{}".format(self.__class__.__name__)
+
 
 class FileFinder(ItemFinder):
     """

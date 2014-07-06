@@ -13,6 +13,9 @@ class ItemLoader:
         """Inherited class overrides this method."""
         pass
 
+    def __repr__(self):
+        return "{}(path={!r})".format(self.__class__.__name__, self.root)
+
 
 # Filesystem content loader.
 
