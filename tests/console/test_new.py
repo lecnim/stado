@@ -6,10 +6,10 @@ import textwrap
 from stado.console import Console
 from stado.console.cmds.new import FILES, New
 from stado.console.errors import CommandError
-from tests.console import TestCommandNew
+from tests.console import TestCommand
 
 
-class TestNew(TestCommandNew):
+class TestNew(TestCommand):
     """Command new <site>:
 
     Important!

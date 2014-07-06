@@ -1,119 +1,181 @@
 import os
 import types
-import unittest
-import shutil
-import tempfile
 
+from stado import config
 from stado.core.site import Site
 from stado.core.item import SiteItem, FileItem, Item
 from stado.plugins import Plugin
+from tests import TestStado
 
 
-class TestSite(unittest.TestCase):
+class BaseTest(TestStado):
     """Base class for testing Site. Sites output is temporary directory."""
 
     def setUp(self):
-        self.temp_path = tempfile.mkdtemp()
-        self.data_path = os.path.join(os.path.dirname(__file__), 'data')
-        self.site = Site(self.data_path, self.temp_path)
-
-    def tearDown(self):
-        shutil.rmtree(self.temp_path)
-
-    def compare_output(self, path, expected_source):
-        path = os.path.join(self.site.output, path)
-        self.assertTrue(os.path.exists(path))
-        with open(path) as page:
-            self.assertEqual(expected_source, page.read())
+        TestStado.setUp(self)
+        self.site = Site(self.temp_path)
 
 
-class TestBuild(TestSite):
+class TestSite(BaseTest):
+    """Base class for testing Site. Sites output is temporary directory."""
+
+    def setUp(self):
+        TestStado.setUp(self)
+        self.site = Site(self.temp_path)
+
+    #
+
+    def test_init(self):
+
+        s = Site(self.temp_path, output='built')
+
+        # Check properties:
+
+        # source
+        self.assertEqual(self.temp_path, s.path)
+        # output
+        self.assertEqual(os.path.abspath('built'), s.output)
+        # ignore_paths
+        self.assertEqual([os.path.abspath('built')], s.ignore_paths)
+
+
+class TestBuild(BaseTest):
     """
     Site build() method
     """
 
-    # TODO: UTF-8
+    def test_utf8(self):
+        """support utf8"""
 
-    # exceptions
+        self.create_file('test.utf8', 'ąężółć')
+        self.site.build('test.utf8')
+        self.assertEqual('ąężółć', self.read_file('test.utf8'))
 
     def test_absolute_path(self):
         """should raise exception if path is absolute"""
         self.assertRaises(ValueError, self.site.build, '/blog/post.html')
 
-    # path argument
+    def test_path_not_found(self):
+        """should raise exception if path is not found"""
+        self.assertRaises(ValueError, self.site.build('not/found'))
 
     def test_all(self):
-        """should build all site files by default"""
+        """should build all site files if called without arguments"""
+
+        self.create_file('a.html')
+        self.create_file('a.txt')
+        self.create_file('foo/bar')
 
         self.site.build()
-        f = []
-        for i in os.walk(self.temp_path):
-            f.extend(i[2])
-        self.assertEqual(8, len(f))
 
-    # TODO: Do not build output / script
+        self.assertIn(config.build_dir, os.listdir('.'))
+        self.assertCountEqual(['a.html', 'a.txt', 'foo'],
+                              os.listdir(config.build_dir))
+
+        # Do not include output directory.
+        self.site.build()
+
+        self.assertCountEqual(['a.html', 'a.txt', 'foo'],
+                              os.listdir(config.build_dir))
+
+        # Do not include parent script file.
+
+        self.create_file('script.py')
+        s = Site(self.temp_path, output='built')
+        s._script_path = os.path.abspath('script.py')
+
+        s.build()
+        self.assertNotIn('script.py', os.listdir('built'))
+
+    def test_build_parent_script(self):
+        """can build parent python module"""
+
+        self.create_file('script.py')
+        self.site._script_path = os.path.abspath('script.py')
+        self.site.build('script.py')
+        self.assertEqual(['script.py'], os.listdir(config.build_dir))
+
+    def test_build_file_in_output(self):
+        """should raise exception if user want to build output file"""
+
+        self.create_file('foo')
+        self.site.build('foo')
+        self.assertRaises(ValueError, self.site.build, config.build_dir + '/foo')
 
     def test_path(self):
         """should accept string as a path argument"""
 
-        self.site.build('index.html')
-        self.compare_output('index.html', 'index')
+        self.create_file('foo.html', 'bar')
+        self.site.build('foo.html')
+        self.assertEqual('bar', self.read_file(config.build_dir + '/foo.html'))
 
     def test_item(self):
         """should accept item object as a path argument"""
 
         # default
 
-        page = self.site.load('index.html')
+        self.create_file('foo.html', 'bar')
+
+        page = self.site.load('foo.html')
         self.site.build(page)
-        self.compare_output('index.html', 'index')
+        self.assertEqual('bar', self.read_file(config.build_dir + '/foo.html'))
 
         # FileItem
 
-        i = FileItem('/about.html', os.path.join(self.data_path, 'about.html'))
+        self.create_file('cat.html', 'meow')
+
+        i = FileItem('/dog.html', os.path.abspath('cat.html'))
         self.site.build(i)
-        self.compare_output('about.html', 'about')
+        self.assertEqual('meow', self.read_file(config.build_dir + '/dog.html'))
 
         # Item
 
-        i = Item('/foo', 'hello world')
+        i = Item('/foo', 'bar')
         self.site.build(i)
-        self.compare_output('foo', 'hello world')
+        self.assertEqual('bar', self.read_file(config.build_dir + '/foo'))
 
     def test_calling_function(self):
         """should accept function in plugins list"""
+
+        self.create_file('foo.html', 'bar')
 
         def uppercase(item):
             item.source = item.source.upper()
             return item
 
-        self.site.build('index.html', uppercase)
-        self.compare_output('index.html', 'INDEX')
+        self.site.build('foo.html', uppercase)
+        self.assertEqual('BAR', self.read_file(config.build_dir + '/foo.html'))
 
     def test_calling_class(self):
         """should accept class in plugins list"""
 
+        self.create_file('foo.html', 'bar')
+
         class Hello(Plugin):
             def apply(self, site, item):
                 item.source = 'hello'
 
-        self.site.build('index.html', Hello)
-        self.compare_output('index.html', 'hello')
+        self.site.build('foo.html', Hello)
+        self.assertEqual('hello', self.read_file(config.build_dir + '/foo.html'))
 
     def test_calling_instance(self):
-        """should accept plugin instance in plugins list"""
+        """should accept a plugin instance in the plugins list"""
+
+        self.create_file('foo.html', 'bar')
 
         class Hello(Plugin):
             def apply(self, site, item):
                 item.source = 'hello'
 
-        self.site.build('index.html', Hello())
-        self.compare_output('index.html', 'hello')
+        self.site.build('foo.html', Hello())
+        self.assertEqual('hello', self.read_file(config.build_dir + '/foo.html'))
 
     # context
 
     def test_context_restore(self):
-        """should restore items context after building it."""
+        """should restore an items context after building it"""
+
+        self.create_file('index.html', 'index')
 
         i = self.site.load('index.html')
         i.context['foo'] = 'hello world'
@@ -126,44 +188,51 @@ class TestBuild(TestSite):
     def test_not_overwrite(self):
         """should not overwrite already built items if overwrite=False"""
 
+        self.create_file('foo.html', 'bar')
+
         def hello(item):
-            item.source = 'overwritten'
+            item.source = 'OVER'
 
-        self.site.build('index.html', hello)
-        self.site.build('index.html', overwrite=False)
-        self.compare_output('index.html', 'overwritten')
+        self.site.build('foo.html', hello)
+        self.site.build('foo.html', overwrite=False)
+        self.assertEqual('OVER', self.read_file(config.build_dir + '/foo.html'))
 
-        page = self.site.load('index.html')
+        page = self.site.load('foo.html')
         self.site.build(page, overwrite=False)
-        self.compare_output('index.html', 'overwritten')
-
+        self.assertEqual('OVER', self.read_file(config.build_dir + '/foo.html'))
+        
     def test_overwrite(self):
         """should overwrite already built items if overwrite=True"""
 
+        self.create_file('foo.html', 'index')
+
         def hello(item):
-            item.source = 'overwritten'
+            item.source = 'OVER'
 
-        self.site.build('index.html')
-        self.site.build('index.html', hello, overwrite=True)
-        self.compare_output('index.html', 'overwritten')
+        self.site.build('foo.html')
+        self.site.build('foo.html', hello, overwrite=True)
+        self.assertEqual('OVER', self.read_file(config.build_dir + '/foo.html'))
 
 
-class TestRegister(TestSite):
+class TestRegister(BaseTest):
     """
     Site register() method
     """
 
     def test(self):
 
+        self.create_file('index.html', 'index')
+
         def badger(item):
             item.source = 'badger!'
 
         self.site.register('**/*.html', badger)
         self.site.build('index.html')
-        self.compare_output('index.html', 'badger!')
+        self.assertEqual('badger!',
+                         self.read_file(config.build_dir + '/index.html'))
 
 
-class TestRoute(TestSite):
+class TestRoute(BaseTest):
     """
     Site route() method
     """
@@ -181,28 +250,30 @@ class TestRoute(TestSite):
     def test(self):
         """should create correct file with correct content"""
 
-        self.site.route('/example.html', 'hello')
-        self.compare_output('example.html', 'hello')
+        self.site.route('/foo.html', 'bar')
+        self.assertEqual('bar', self.read_file(config.build_dir + '/foo.html'))
 
     def test_function(self):
         """should use function as a argument"""
 
         def hello():
-            return 'hello'
+            return 'bar'
 
-        self.site.route('/example.html', hello)
-        self.compare_output('example.html', 'hello')
+        self.site.route('/foo.html', hello)
+        self.assertEqual('bar', self.read_file(config.build_dir + '/foo.html'))
 
     def test_index(self):
         """should add index.html to url without extension: / => /index.html"""
 
-        self.site.route('/', 'hello')
-        self.compare_output('index.html', 'hello')
-        self.site.route('/another', 'wow')
-        self.compare_output('another/index.html', 'wow')
+        self.site.route('/', 'bar')
+        self.assertEqual('bar',
+                         self.read_file(config.build_dir + '/index.html'))
+        self.site.route('/wow', 'wow')
+        self.assertEqual('wow',
+                         self.read_file(config.build_dir + '/wow/index.html'))
 
 
-class TestLoad(TestSite):
+class TestLoad(BaseTest):
     """
     Site load() method
     """
@@ -210,6 +281,7 @@ class TestLoad(TestSite):
     def test_load_file(self):
         """should return one item if no wildcards used"""
 
+        self.create_file('index.html')
         item = self.site.load('index.html')
         self.assertIsInstance(item, SiteItem)
 
@@ -226,6 +298,7 @@ class TestLoad(TestSite):
 
     def test_directory(self):
         """should raise exception if path is directory"""
+        self.create_dir('blog')
         self.assertRaises(ValueError, self.site.load, 'blog')
 
     def test_file_not_found(self):
@@ -236,28 +309,34 @@ class TestLoad(TestSite):
 
     def test_item_output_path(self):
         """should set correct item output path (relative)"""
+        self.create_file('index.html')
         item = self.site.load('index.html')
         self.assertEqual('index.html', item.output_path)
 
     def test_item_source_path(self):
         """should set correct item source path (absolute)"""
+        self.create_file('index.html')
         item = self.site.load('index.html')
-        self.assertEqual(os.path.join(self.data_path, 'index.html'),
-                         item.source_path)
+        self.assertEqual(os.path.abspath('index.html'), item.source_path)
 
     def test_item_source(self):
         """should set correct item source"""
-        item = self.site.load('index.html')
-        self.assertEqual('index', item.source)
+        self.create_file('foo.html', 'bar')
+        item = self.site.load('foo.html')
+        self.assertEqual('bar', item.source)
 
 
-class TestFind(TestSite):
+class TestFind(BaseTest):
     """
     Site find() method
     """
 
     def test(self):
         """should yield items"""
+
+        self.create_file('index.html', 'index')
+        self.create_file('about.html', 'about')
+        self.create_file('foo/bar.html', 'foobar')
 
         self.assertIsInstance(self.site.find('*'), types.GeneratorType)
         sources = [i.source for i in self.site.find('*.html')]
@@ -266,6 +345,12 @@ class TestFind(TestSite):
     def test_results(self):
         """should yield correct amount of items"""
 
+        self.create_file('a.html')
+        self.create_file('b.html')
+        self.create_file('img.jpg')
+        self.create_file('blog/a.html')
+        self.create_file('blog/b.html')
+
         items = [i for i in self.site.find('*.html')]
         self.assertEqual(2, len(items))
 
@@ -273,7 +358,7 @@ class TestFind(TestSite):
         self.assertEqual(1, len(items))
 
         items = [i for i in self.site.find('blog')]
-        self.assertEqual(3, len(items))
+        self.assertEqual(2, len(items))
 
     # exceptions
 
@@ -286,6 +371,10 @@ class TestFind(TestSite):
     def test_excluded_file(self):
         """should ignore files correctly"""
 
+        # TODO: clean this mess!
+
+        self.create_file('blog/old/ignore.html')
+
         self.site.ignore_paths = ['**/ignore.html']
         items = [i for i in self.site.find('blog/old/ignore.html')]
         self.assertEqual(0, len(items))
@@ -297,12 +386,24 @@ class TestFind(TestSite):
     def test_excluded_directories(self):
         """should ignore directories correctly"""
 
+        self.create_file('blog/foo.html', 'bar')
+
+        # Relative path ignored.
         self.site.ignore_paths = ['blog']
-        items = [i for i in self.site.find('blog/*')]
-        self.assertEqual(0, len(items))
+
+        self.assertEqual(0, len([i for i in self.site.find('blog/*')]))
+        self.assertEqual(0, len([i for i in self.site.find('blog/**')]))
+        self.assertEqual(0, len([i for i in self.site.find('**/*.html')]))
+
+        # Absolute path ignored.
+        self.site.ignore_paths = [os.path.abspath('blog')]
+
+        self.assertEqual(0, len([i for i in self.site.find('blog/*')]))
+        self.assertEqual(0, len([i for i in self.site.find('blog/**')]))
+        self.assertEqual(0, len([i for i in self.site.find('**/*.html')]))
 
 
-class TestHelper(TestSite):
+class TestHelper(BaseTest):
     """
     Site helper() method
     """
@@ -327,7 +428,7 @@ class TestHelper(TestSite):
 
         i = Item('/foo', '{{ hello }}')
         self.site.build(i, 'mustache', context={'a': 1})
-        self.compare_output('foo', 'hello world')
+        self.assertEqual('hello world', self.read_file(config.build_dir + '/foo'))
 
     def test_context_overwrite(self):
         """should not overwrite custom context argument in build"""
@@ -338,7 +439,7 @@ class TestHelper(TestSite):
 
         i = Item('/foo', '{{ hello }}')
         self.site.build(i, 'mustache', context={'hello': 'bar'})
-        self.compare_output('foo', 'bar')
+        self.assertEqual('bar', self.read_file(config.build_dir + '/foo'))
 
     # Test types.
 
@@ -351,7 +452,7 @@ class TestHelper(TestSite):
 
         i = Item('/foo', '{{ hello }}')
         self.site.build(i, 'mustache')
-        self.compare_output('foo', 'hello world')
+        self.assertEqual('hello world', self.read_file(config.build_dir + '/foo'))
 
     def test_list(self):
         """should works correctly if list returned"""
@@ -362,7 +463,7 @@ class TestHelper(TestSite):
 
         i = Item('/foo', '{{# test }}{{.}}{{/ test }}')
         self.site.build(i, 'mustache')
-        self.compare_output('foo', '123')
+        self.assertEqual('123', self.read_file(config.build_dir + '/foo'))
 
     def test_list_of_dict(self):
         """should works correctly if list of dict returned"""
@@ -373,7 +474,7 @@ class TestHelper(TestSite):
 
         i = Item('/foo', '{{# test }}{{a}}{{/ test }}')
         self.site.build(i, 'mustache')
-        self.compare_output('foo', '123')
+        self.assertEqual('123', self.read_file(config.build_dir + '/foo'))
 
     def test_dict(self):
         """should works correctly if dict returned"""
@@ -384,7 +485,7 @@ class TestHelper(TestSite):
 
         i = Item('/foo', '{{ test.key }}')
         self.site.build(i, 'mustache')
-        self.compare_output('foo', 'value')
+        self.assertEqual('value', self.read_file(config.build_dir + '/foo'))
 
     # Other tests.
 
@@ -399,4 +500,6 @@ class TestHelper(TestSite):
             return 'helpers rulezz'
 
         self.site.build(i, 'mustache')
-        self.compare_output('foo', 'bar')
+        self.assertEqual('bar', self.read_file(config.build_dir + '/foo'))
+
+del BaseTest

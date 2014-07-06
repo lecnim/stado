@@ -2,11 +2,11 @@
 
 
 from stado import config
-from tests.console import TestCommandNew
+from tests.console import TestCommand
 from stado.console import View, Console, CommandError
 
 
-class TestView(TestCommandNew):
+class TestView(TestCommand):
     """Command view
 
     Important!

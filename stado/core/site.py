@@ -7,7 +7,7 @@ from .loaders import FileLoader
 from .. import plugins
 from .. import config as CONFIG
 from .. import log
-from ..utils import relative_path
+from ..utils import relative_path, is_subpath
 from ..libs import glob2 as glob
 
 
@@ -123,7 +123,7 @@ class Site:
             self._output = os.path.join(self.path, CONFIG.build_dir)
 
         # Paths pointing to files or directories which will be ignored.
-        self.ignore_paths = []
+        self.ignore_paths = [self._output]
         self.loader = loader(self.path)
 
         self.built_items = []
@@ -205,11 +205,16 @@ class Site:
     def find(self, path):
         """Yields items created using files in path."""
 
+        if path == '**/*':
+            ignored = [self.output, self._script_path]
+        else:
+            ignored = []
+
         path = relative_path(path)
 
         # Use absolute paths! Also ignored paths are absolute!
         path = os.path.join(self.path, path)
-        ignored = [os.path.join(self.path, i) for i in self.ignore_paths]
+        ignored.extend([os.path.join(self.path, i) for i in self.ignore_paths])
 
         for item in self.loader.load(path, excluded=ignored):
             yield item
@@ -273,6 +278,10 @@ class Site:
 
         # String - path to file/files/directory.
         if isinstance(path, str):
+
+            if is_subpath(path, self.output):
+                raise ValueError('Cannot build item from output directory!')
+
             for item in self.find(path):
                 build_item(item, plugins)
 

@@ -3,14 +3,14 @@
 import os
 
 from stado import config
-from tests.console import TestCommandNew
+from tests.console import TestCommand
 from stado.console import Console
 from stado.console.errors import CommandError
 from stado.console.cmds.build import Build
 import stado
 
 
-class TestBuild(TestCommandNew):
+class TestBuild(TestCommand):
     """Command build
 
     Important!

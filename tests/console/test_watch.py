@@ -6,10 +6,10 @@ from contextlib import contextmanager
 from stado import config
 from stado.console import Console
 from stado.console.cmds.watch import Watch
-from tests.console import TestCommandNew
+from tests.console import TestCommand
 
 
-class TestWatch(TestCommandNew):
+class TestWatch(TestCommand):
     """A watch command"""
 
     command_class = Watch

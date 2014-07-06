@@ -16,6 +16,9 @@ class Timer:
         """Returns how much time has passed since this object creation."""
         return round(time.clock() - self.time, 2)
 
+def is_subpath(a, b):
+    a = os.path.abspath(a)
+    return True if a.startswith(os.path.abspath(b)+'/') else False
 
 def copytree(source, destination):
     """Same as shutil.copytree(), but can copy to already existing directory."""
