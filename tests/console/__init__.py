@@ -6,6 +6,7 @@ import urllib
 from stado.console import Console
 from stado import config
 
+
 class TestCommandNew(unittest.TestCase):
 
     """A watch command"""
