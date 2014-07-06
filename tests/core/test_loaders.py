@@ -26,14 +26,14 @@ class TestFileLoader(TestInCurrentDirectory):
 
         items = [i for i in FileLoader().load('data')]
         generated_outputs = [i.output_path for i in items]
-        outputs = [os.path.join('index.html'),
-                   os.path.join('about.html'),
-                   os.path.join('image.jpg'),
-                   os.path.join('blog', 'post.md'),
-                   os.path.join('blog', 'post.html'),
-                   os.path.join('blog', 'old', 'ignore.html'),
-                   os.path.join('blog2', 'post.html'),
-                   os.path.join('blog2', 'post.mustache')]
+        outputs = [os.path.join('data', 'index.html'),
+                   os.path.join('data', 'about.html'),
+                   os.path.join('data', 'image.jpg'),
+                   os.path.join('data', 'blog', 'post.md'),
+                   os.path.join('data', 'blog', 'post.html'),
+                   os.path.join('data', 'blog', 'old', 'ignore.html'),
+                   os.path.join('data', 'blog2', 'post.html'),
+                   os.path.join('data', 'blog2', 'post.mustache')]
 
         self.assertCountEqual(outputs, generated_outputs)
 

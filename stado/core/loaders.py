@@ -5,6 +5,10 @@ from .finders import FileFinder
 
 
 class ItemLoader:
+
+    def __init__(self, path='.'):
+        self.root = path
+
     def load(self, path, excluded=()):
         """Inherited class overrides this method."""
         pass
@@ -23,5 +27,6 @@ class FileLoader(ItemLoader):
         """Yields items created from files in given path."""
 
         for source_path in self.finder.find(path, excluded):
-            output_path = os.path.relpath(source_path, path)
+            output_path = os.path.relpath(source_path, self.root)
+            # output_path = os.path.relpath(source_path, path)
             yield SiteItem(source_path, output_path)

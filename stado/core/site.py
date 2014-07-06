@@ -11,16 +11,14 @@ from ..utils import relative_path
 from ..libs import glob2 as glob
 
 
-
-
 class InstanceTracker:
+    """Tracks each new Site instance."""
 
     def __init__(self):
 
         self.enabled = False
         self.records = {}
         self.order = []
-
 
     def __getitem__(self, item):
         return self.records[item]
@@ -36,6 +34,7 @@ class InstanceTracker:
         self.enabled = False
 
     def update(self, instance):
+        """Updates the record about the instance."""
 
         if not self.enabled:
             return False
@@ -53,9 +52,8 @@ class InstanceTracker:
             'is_used': instance.is_used
         })
 
-
-
     def dump(self, skip_unused=False):
+        """Returns a list with a info about each Site instance."""
 
         if not self.enabled:
             raise Exception('Cannot dump() if tracker is disabled! '
@@ -71,91 +69,52 @@ class InstanceTracker:
         return x
 
 
-
-
 def controller(function):
-
-
+    """Decorator used to change method to controller."""
 
     function.is_controller = True
 
     @wraps(function)
     def wrapper(*args, **kwargs):
-
+        # First argument of each method in Site is always self.
         site = args[0]
 
-        if not function in site.controllers:
-            site._used_controllers.add(function)
-            site.__class__._tracker.update(site)
+        # if not function in site.controllers:
+        site._used_controllers.add(function)
+        site.__class__._tracker.update(site)
 
         return function(*args, **kwargs)
     return wrapper
 
 
-
 class Site:
     """
-    This is site. Use run() method to build it.
-
-    Site building:
-    - Loads items using Loaders objects and saves this items in Cache object.
-    - Renders item from cache using item renderers objects.
-    - Write item to file system using item deployer object.
-
+    This is site.
     """
 
     _tracker = InstanceTracker()
 
-    # @classmethod
-    # def get_instances(cls):
-    #     dead = set()
-    #     for ref in cls._instances:
-    #         obj = ref()
-    #         if obj is not None:
-    #             yield obj
-    #         else:
-    #             dead.add(ref)
-    #     cls._instances -= dead
-    #
-    #
-    # _all = set()
-
-    def __init__(self, path=None, output=None, loader=FileLoader()):
+    def __init__(self, path=None, output=None, loader=FileLoader):
         """
-        Arguments:
-            path: Items will be created using files in this path. Default path is
-                same as path to python module file using this class.
-            output:
-                Site will be build in this location.
+        Args:
+            path: Items will be created using files in this path.
+                Default path is same as a python file where instance was created.
+            output: Site will be build in this location.
             loaders: List of ItemLoader classes used to create Items objects.
         """
 
-
+        # Is default site.
         self._is_default = False
         self._used_controllers = set()
 
+        # Path to file where instance was created.
         self._script_path = inspect.stack()[1][1]
 
-        # self._instances.add(weakref.ref(self))
-        # self._all.add(self)
-
-        # # Set path to file path from where Site is used.
+        # Path to site source directory.
         if path is None:
-            path = os.path.split(inspect.stack()[1][1])[0]
+            self._path = os.path.dirname(self._script_path)
         else:
-            path = os.path.abspath(path)
-
-        # print(path, inspect.stack()[1][1])
-
-        # if path is None:
-        #     path = os.path.dirname(os.path.abspath(__file__))
-        #     print('>', path)
-        # else:
-        #     print(path)
-
-        # Absolute path to site source directory.
-        self.path = os.path.normpath(path)
-
+            self._path = os.path.abspath(path)
 
         # Absolute path to site output directory.
         if output:
@@ -164,8 +123,8 @@ class Site:
             self._output = os.path.join(self.path, CONFIG.build_dir)
 
         # Paths pointing to files or directories which will be ignored.
-        self.excluded_paths = []
-        self.loader = loader
+        self.ignore_paths = []
+        self.loader = loader(self.path)
 
         self.built_items = []
         self.helpers = {}
@@ -174,22 +133,14 @@ class Site:
         # Loads plugins from stado.plugins package.
         self.plugins = plugins.PluginsManager(self)
 
-        # This methods are used in default site.
-        self.controllers = set()
-
-        #
-        # for i in inspect.getmembers(self, predicate=inspect.ismethod):
-        #     name, func = i
-        #     if hasattr(func, 'is_controller'): print(i)
-
-
-
         Site._tracker.update(self)
 
     @property
+    def path(self):
+        return self._path
+
+    @property
     def output(self):
-        if CONFIG.output:
-            return CONFIG.output
         return self._output
 
     @property
@@ -256,15 +207,11 @@ class Site:
 
         path = relative_path(path)
 
-        # Use absolute paths! Also excluded paths are absolute!
+        # Use absolute paths! Also ignored paths are absolute!
         path = os.path.join(self.path, path)
+        ignored = [os.path.join(self.path, i) for i in self.ignore_paths]
 
-        excluded = [os.path.join(self.path, i) for i in self.excluded_paths]
-
-        for item in self.loader.load(path, excluded=excluded):
-            item.output_path = os.path.relpath(item.source_path, self.path)
-            # FIXME: correct default output path
-            item._default_output = item.output_path
+        for item in self.loader.load(path, excluded=ignored):
             yield item
 
     # register
@@ -340,6 +287,8 @@ class Site:
         if not item.output_path in self.built_items:
             self.built_items.append(item.output_path)
         item.deploy(self.output)
+
+    # apply
 
     @controller
     def apply(self, item, *plugins_list):

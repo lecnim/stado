@@ -32,6 +32,8 @@ class TestBuild(TestSite):
     Site build() method
     """
 
+    # TODO: UTF-8
+
     # exceptions
 
     def test_absolute_path(self):
@@ -48,6 +50,8 @@ class TestBuild(TestSite):
         for i in os.walk(self.temp_path):
             f.extend(i[2])
         self.assertEqual(8, len(f))
+
+    # TODO: Do not build output / script
 
     def test_path(self):
         """should accept string as a path argument"""
@@ -282,14 +286,18 @@ class TestFind(TestSite):
     def test_excluded_file(self):
         """should ignore files correctly"""
 
-        self.site.excluded_paths = ['**/ignore.html']
+        self.site.ignore_paths = ['**/ignore.html']
         items = [i for i in self.site.find('blog/old/ignore.html')]
         self.assertEqual(0, len(items))
+
+        self.site.ignore_paths = []
+        items = [i for i in self.site.find('blog/old/ignore.html')]
+        self.assertEqual(1, len(items))
 
     def test_excluded_directories(self):
         """should ignore directories correctly"""
 
-        self.site.excluded_paths = ['blog']
+        self.site.ignore_paths = ['blog']
         items = [i for i in self.site.find('blog/*')]
         self.assertEqual(0, len(items))
 
