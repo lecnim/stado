@@ -2,60 +2,52 @@ import os
 
 from stado.core.loaders import FileLoader
 from stado.core.item import SiteItem
-from tests import TestInCurrentDirectory
+from tests import TestStado
 
 
-class TestFileLoader(TestInCurrentDirectory):
+class TestFileLoader(TestStado):
     """
     A FileLoader
-
-    This test case change current working directory to __file__ location.
     """
 
     def test_returned_type(self):
-        """should return correct item type"""
+        """should yield correct item type"""
+
+        self.create_file('data/a.file')
 
         loader = FileLoader()
         contents = [i for i in loader.load('data')]
 
-        self.assertEqual(8, len(contents))
+        self.assertEqual(1, len(contents))
         self.assertIsInstance(contents[0], SiteItem)
 
-    def test_item_output_path(self):
-        """should generated correct item output path"""
+    def test_yield_items(self):
+        """should yield correct items"""
+
+        self.create_file('data/a.file', 'a')
+        self.create_file('data/b.file', 'b')
+        self.create_file('data/b/a.file' , 'ba')
+
+        # output_paths
 
         items = [i for i in FileLoader().load('data')]
         generated_outputs = [i.output_path for i in items]
-        outputs = [os.path.join('data', 'index.html'),
-                   os.path.join('data', 'about.html'),
-                   os.path.join('data', 'image.jpg'),
-                   os.path.join('data', 'blog', 'post.md'),
-                   os.path.join('data', 'blog', 'post.html'),
-                   os.path.join('data', 'blog', 'old', 'ignore.html'),
-                   os.path.join('data', 'blog2', 'post.html'),
-                   os.path.join('data', 'blog2', 'post.mustache')]
+        outputs = [os.path.join('data', 'a.file'),
+                   os.path.join('data', 'b.file'),
+                   os.path.join('data', 'b', 'a.file')]
 
         self.assertCountEqual(outputs, generated_outputs)
 
-    def test_item_source_path(self):
-        """should generated correct item source path"""
+        # source_paths
 
-        items = [i for i in FileLoader().load('data')]
         generated_sources = [i.source_path for i in items]
-        sources = [os.path.join('data', 'index.html'),
-                   os.path.join('data', 'about.html'),
-                   os.path.join('data', 'image.jpg'),
-                   os.path.join('data', 'blog', 'post.md'),
-                   os.path.join('data', 'blog', 'post.html'),
-                   os.path.join('data', 'blog', 'old', 'ignore.html'),
-                   os.path.join('data', 'blog2', 'post.html'),
-                   os.path.join('data', 'blog2', 'post.mustache')]
+        sources = [os.path.join('data', 'a.file'),
+                   os.path.join('data', 'b.file'),
+                   os.path.join('data', 'b', 'a.file')]
 
         self.assertCountEqual(sources, generated_sources)
 
-    def test_item_source(self):
-        """should generated correct item source"""
+        # sources
 
-        items = [i for i in FileLoader().load('data/*.html')]
         sources = [i.source for i in items]
-        self.assertCountEqual(['index', 'about'], sources)
+        self.assertCountEqual(['a', 'b', 'ba'], sources)

@@ -279,7 +279,7 @@ class Site:
         # String - path to file/files/directory.
         if isinstance(path, str):
 
-            if is_subpath(path, self.output):
+            if is_subpath(os.path.join(self.path, path), self.output):
                 raise ValueError('Cannot build item from output directory!')
 
             for item in self.find(path):

@@ -1,8 +1,8 @@
 from stado.core.finders import FileFinder
-from tests import TestInCurrentDirectory
+from tests import TestStado
 
 
-class TestFileFinder(TestInCurrentDirectory):
+class TestFileFinder(TestStado):
     """A FileFinder
 
     This test case change current working directory to __file__ location.
@@ -13,41 +13,57 @@ class TestFileFinder(TestInCurrentDirectory):
     def test_asterisk(self):
         """can use wildcard *"""
 
+        self.create_file('data/a.html')
+        self.create_file('data/b.html')
+        self.create_file('data/foo/bar.html')
+
         files = [i for i in FileFinder().find('data/*.html')]
 
         self.assertEqual(2, len(files))
-        self.assertCountEqual(['data/index.html', 'data/about.html'], files)
+        self.assertCountEqual(['data/a.html', 'data/b.html'], files)
 
     def test_double_asterisk(self):
         """can use wildcard **"""
 
+        self.create_file('data/a.html')
+        self.create_file('data/b.html')
+        self.create_file('data/foo/bar.html')
+        self.create_file('data/foo2/bar.html')
+
         files = [i for i in FileFinder().find('data/**/*.html')]
 
-        self.assertEqual(5, len(files))
-        self.assertIn('data/blog/post.html', files)
-        self.assertIn('data/blog2/post.html', files)
+        self.assertEqual(4, len(files))
+        self.assertIn('data/a.html', files)
+        self.assertIn('data/b.html', files)
+        self.assertIn('data/foo/bar.html', files)
+        self.assertIn('data/foo2/bar.html', files)
 
         # Directories prefix:
 
-        files = [i for i in FileFinder().find('data/b**/*.html')]
+        files = [i for i in FileFinder().find('data/f**/*.html')]
 
         self.assertEqual(2, len(files))
-        self.assertCountEqual(['data/blog/post.html',
-                               'data/blog2/post.html'],
+        self.assertCountEqual(['data/foo/bar.html', 'data/foo2/bar.html'],
                               files)
 
     def test_question(self):
         """can use wildcard: ?"""
 
-        files = [i for i in FileFinder().find('data/?????.html')]
+        self.create_file('data/a.html')
+        self.create_file('data/b.html')
+        self.create_file('data/ab.html')
+
+        files = [i for i in FileFinder().find('data/?.html')]
 
         self.assertEqual(2, len(files))
-        self.assertCountEqual(['data/index.html', 'data/about.html'], files)
+        self.assertCountEqual(['data/a.html', 'data/b.html'], files)
 
     # Files and dirs
 
     def test_file(self):
         """should accept path pointing to file"""
+
+        self.create_file('data/index.html')
 
         files = [i for i in FileFinder().find('data/index.html')]
         self.assertIn('data/index.html', files)
@@ -55,29 +71,40 @@ class TestFileFinder(TestInCurrentDirectory):
     def test_dir(self):
         """should accept path pointing to directory"""
 
-        files = [i for i in FileFinder().find('data/blog2')]
+        self.create_file('data/a.html')
+        self.create_file('data/b.html')
+
+        files = [i for i in FileFinder().find('data')]
         self.assertEqual(2, len(files))
+        self.assertCountEqual(['data/a.html', 'data/b.html'], files)
 
     # Excluding
 
     def test_excluded_dirs(self):
         """should correctly exclude directories."""
 
-        files = [i for i in FileFinder().find('data/**',
-                                              excluded_paths=['data/blog*'])]
-        self.assertEqual(3, len(files))
+        self.create_file('data/a.html')
+        self.create_file('data/foo/a.html')
+        self.create_file('data/foobar/a.html')
+        self.create_file('data/foo/bar/a.html')
 
         files = [i for i in FileFinder().find('data/**',
-                                              excluded_paths=['data/blog'])]
-        self.assertEqual(5, len(files))
+                                              excluded_paths=['data/foo*'])]
+        self.assertEqual(1, len(files))
 
+        files = [i for i in FileFinder().find('data/**',
+                                              excluded_paths=['data/foo'])]
+        self.assertEqual(2, len(files))
 
     def test_excluded_files(self):
         """should correctly exclude files"""
 
+        self.create_file('data/a.html')
+        self.create_file('data/foo/a.html')
+
         finder = FileFinder()
         files = [i for i in finder.find('data/**',
-                                        excluded_paths=['data/index.html'])]
+                                        excluded_paths=['data/a.html'])]
 
-        self.assertEqual(7, len(files))
-        self.assertNotIn('data/index.html', files)
+        self.assertEqual(1, len(files))
+        self.assertNotIn('data/a.html', files)

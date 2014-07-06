@@ -2,22 +2,25 @@ import os
 import tempfile
 import shutil
 
-from tests import TestInCurrentDirectory
+from tests import TestStado
 from stado.core.item import SiteItem, FileItem, Item
 
 
-class TestFileItem(TestInCurrentDirectory):
+class TestFileItem(TestStado):
     """FileItem class"""
 
     def test_attributes(self):
         """should create object with correct attributes"""
 
+        self.create_file('data/index.html', 'index')
+
         i = FileItem('/foo', 'data/index.html')
         self.assertEqual('index', i.source)
         self.assertEqual('foo', i.output_path)
+        self.assertEqual('foo', i._default_output)
 
 
-class TestItem(TestInCurrentDirectory):
+class TestItem(TestStado):
     """Item class"""
 
     def test_attributes(self):
@@ -35,7 +38,7 @@ class TestItem(TestInCurrentDirectory):
         self.assertFalse(i.match('*'))
 
 
-class TestSiteItem(TestInCurrentDirectory):
+class TestSiteItem(TestStado):
     """
     SiteItem class
     """
@@ -45,37 +48,26 @@ class TestSiteItem(TestInCurrentDirectory):
     def test_deploy_modified(self):
         """should write modified item source to output file"""
 
-        t = tempfile.mkdtemp()
-
         item = SiteItem('data/index.html', 'foo')
         item.source = 'hello world'
-        item.deploy(t)
-        with open(os.path.join(t, 'foo')) as file:
-            self.assertEqual('hello world', file.read())
+        item.deploy('temp')
 
-        shutil.rmtree(t)
+        self.assertEqual('hello world', self.read_file('temp/foo'))
 
     def test_deploy_unmodified(self):
         """should copy source file to output directory if source not modified"""
 
-        t = tempfile.mkdtemp()
+        self.create_file('data/index.html', 'index')
+        SiteItem('data/index.html', 'foo').deploy('temp')
+        self.assertEqual('index', self.read_file('temp/foo'))
 
-        SiteItem('data/index.html', 'foo').deploy(t)
-        with open(os.path.join(t, 'foo')) as file:
-            self.assertEqual('index', file.read())
-
-        shutil.rmtree(t)
 
     def test_deploy_missing_directory(self):
         """should create missing directories before writing to output"""
 
-        t = tempfile.mkdtemp()
-
-        SiteItem('data/index.html', 'a/b/c/foo').deploy(t)
-        with open(os.path.join(t, 'a', 'b', 'c', 'foo')) as file:
-            self.assertEqual('index', file.read())
-
-        shutil.rmtree(t)
+        self.create_file('data/index.html', 'index')
+        SiteItem('data/index.html', 'a/b/c/foo').deploy('temp')
+        self.assertEqual('index', self.read_file('temp/a/b/c/foo'))
 
     # match()
 
