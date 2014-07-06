@@ -1,7 +1,7 @@
 """Command: help"""
 
 from . import Command
-from .. import version
+from ... import version
 
 
 class Help(Command):

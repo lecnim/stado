@@ -1,8 +1,6 @@
-"""Command: view"""
+"""View command."""
 
 import os
-import io
-import sys
 import time
 import threading
 import socketserver
@@ -10,13 +8,31 @@ import urllib
 import posixpath
 from http.server import SimpleHTTPRequestHandler
 
-from . import Command, CommandError, Event
+from ..errors import CommandError
+from ..events import Event
 from .build import Build
 from .. import config
 from .. import log
 
+
 socketserver.TCPServer.allow_reuse_address = True
 
+ERROR_PAGE = """\
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+        <title>Error response</title>
+    </head>
+    <body>
+        <h1>Error response</h1>
+        <p>Error code: %(code)d</p>
+        <pre>Message: %(message)s.</pre>
+        <pre>Error code explanation: %(code)s - %(explain)s.</pre>
+    </body>
+</html>
+"""
 
 class View(Build):
     """Build and serve site using development server."""
@@ -25,13 +41,8 @@ class View(Build):
     usage = '{cmd} [path] [options]'
     summary = 'Build the site and start the development web server.'
 
-    def __init__(self, build_cmd=None):
-        """
-        Args:
-            build_cmd: Build class instance. If None, new one is created.
-        """
+    def __init__(self):
         super().__init__()
-
 
         # List of all currently running development servers.
         self.servers = []
@@ -40,27 +51,16 @@ class View(Build):
 
     # I hate argparser...
 
-    # def install_in_parser(self, parser):
-    #     """Add sub-parser with arguments to parser."""
-    #
-    #     sub_parser = parser.add_parser(
-    #         self.name,
-    #         usage='{} [path] [options]'.format(self.name),
-    #         description='Build the site and start the development web server.')
-    #     sub_parser.set_defaults(function=self.run)
-    #     sub_parser.add_argument('path', default=None, nargs='?', help='path')
-    #     self._install_options(sub_parser)
-    #     return sub_parser
-    #
     def _parser_add_arguments(self, parser):
+        """Installs positional arguments in parser."""
         parser.add_argument('path', default=None, nargs='?', help='path')
 
     def _parser_add_options(self, parser):
-        """Install optional arguments in parser."""
+        """Installs optional arguments in parser."""
 
         parser.add_argument('--port', '-p', type=int, default=config.port,
                             help='Specify the port to listen on.')
-        parser.add_argument('--host', '-hh', default=config.host,
+        parser.add_argument('--host', '-s', default=config.host,
                             help='Specify the host to listen on.')
 
     #
@@ -78,7 +78,7 @@ class View(Build):
                                'stopped before running it again')
 
         # List of every tracked Site object.
-        site_records = self.build_path(path)
+        site_records = self._build_path(path)
 
         # Start new thread for each server.
         self._start_servers(site_records, host, port)
@@ -97,10 +97,12 @@ class View(Build):
     #
 
     def pause(self):
+        """Stops all servers."""
         for i in self.servers:
             i.stop()
 
     def resume(self):
+        """Restarts all servers."""
         for i in self.servers:
             i.restart()
 
@@ -108,19 +110,19 @@ class View(Build):
         """Stops a development server."""
 
         if not self.is_running:
-            return False
+            raise CommandError('View: command already stopped!')
 
-        log.debug('Stopping development server...')
+        log.debug('Stopping server service...')
         for i in self.servers:
             i.stop()
         # Python 3.2 do not support list.clear()
         del self.servers[:]
         self.used_ports.clear()
-        log.debug('Done!')
 
     #
 
-    def get_free_port(self, min=None):
+    def _get_free_port(self, min=None):
+        """Returns lowest free port."""
 
         i = config.port if min is None else min
 
@@ -128,23 +130,30 @@ class View(Build):
             i += 1
         return i
 
-    # def _build(self, path):
-    #     """Shortcut for a build method of the Build command."""
-    #     return self.build_cmd.build_path(path)
-
     def _start_servers(self, site_records, host=None, port=None):
         """Starts a development server for each site records."""
+
+        log.info('')
 
         if host is None: host = config.host
         if port is None: port = config.port
 
+        last = None
+
         # Start new thread for each server.
         for i in site_records:
-            port = self.get_free_port(port)
+
+            # Logging.
+            if i['script'] != last:
+                filename = os.path.split(i['script'])[1]
+                log.info('You can view {} sites at:'.format(filename))
+                last = i['script']
+
+            port = self._get_free_port(port)
             self._start_server(i['script'], i['output'], host, port)
-            # port += 1
 
     def _stop_servers(self, site_records):
+        """Stops development servers using site records."""
 
         dead = set()
         for i in site_records:
@@ -152,18 +161,20 @@ class View(Build):
                 if i['script'] == s.script_path:
                     dead.add(s)
 
+        lowest_port = min([x.port for x in dead]) if dead else self._get_free_port()
+
         for i in dead:
             self._stop_server(i)
+
+        return lowest_port
 
     def _start_server(self, script_path, output_path, host=None, port=None):
         """Starts a development server and serve files from path on a given host
         and port."""
 
-        # if host is None: host = config.host
-        # if port is None: port = self.port
-
-        log.debug('Starting development server...')
-        log.debug('  Path: ' + output_path)
+        log.info('* http://{}:{}'.format(host, port))
+        # log.debug('Starting development server...')
+        log.debug('  path: ' + output_path)
 
         server = DevelopmentServer()
         self.servers.append(server)
@@ -173,11 +184,8 @@ class View(Build):
         server.script_path = script_path
         server.start(host, port)
 
-        log.info('You can view site at: http://{}:{}'.format(host, port))
-
-    # def _stop_server(self):
-
     def _stop_server(self, server):
+        log.debug('Stopping development server: ' + server.address)
 
         self.used_ports.remove(server.port)
         server.stop()
@@ -193,27 +201,12 @@ class View(Build):
 
 
 class HTTPRequestHandler(SimpleHTTPRequestHandler):
-    """From python standard library, but added server root path option."""
+    """From python standard library, but added server root path option and
+    custom error handling."""
 
     _root_path = os.getcwd()
-    _exception = None
-
-    error_message_format = """\
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-        "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-        <title>Error response</title>
-    </head>
-    <body>
-        <h1>Error response</h1>
-        <p>Error code: %(code)d</p>
-        <pre>Message: %(message)s.</pre>
-        <pre>Error code explanation: %(code)s - %(explain)s.</pre>
-    </body>
-</html>
-"""
+    _error_msg = None
+    error_message_format = ERROR_PAGE
 
     def translate_path(self, path):
         """Translate a /-separated PATH to the local filename syntax.
@@ -244,22 +237,21 @@ class HTTPRequestHandler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         """Serve a GET request."""
-        if self._exception:
-            self.send_error(500, self._exception)
+        if self._error_msg:
+            self.send_error(500, self._error_msg)
         else:
             SimpleHTTPRequestHandler.do_GET(self)
 
     def do_HEAD(self):
         """Serve a HEAD request."""
-        if self._exception:
-            self.send_error(500, self._exception)
+        if self._error_msg:
+            self.send_error(500, self._error_msg)
         else:
             SimpleHTTPRequestHandler.do_HEAD(self)
 
 
-
 class DevelopmentServer:
-    """Development server using python build-in server."""
+    """Development server using the python build-in server."""
 
     def __init__(self):
 
@@ -272,7 +264,11 @@ class DevelopmentServer:
         self.host = None
         self.port = None
 
-        self.exception = None
+        self.error = None
+
+    @property
+    def address(self):
+        return 'http://{}:{}'.format(self.host, self.port)
 
     @property
     def is_stopped(self):
@@ -280,16 +276,18 @@ class DevelopmentServer:
             return True
         return False
 
-    def set_exception(self, msg):
-        self.exception = msg
-
+    def set_error(self, msg):
+        """Set the server to an error mode. On any request it will serve only
+        error page with a text based on the msg argument."""
+        self.error = msg
         if self.server:
-            self.server.RequestHandlerClass._exception = self.exception
+            self.server.RequestHandlerClass._error_msg = self.error
 
-    def clear_exception(self):
-        self.exception = None
+    def clear_error(self):
+        """Set the server to normal mode."""
+        self.error = None
         if self.server:
-            self.server.RequestHandlerClass._exception = None
+            self.server.RequestHandlerClass._error_msg = None
 
     def restart(self):
         """Restarts development server."""
@@ -302,12 +300,11 @@ class DevelopmentServer:
         Handler = type('HTTPRequestHandler' + str(self.port),
                        (HTTPRequestHandler,),
                        {'_root_path': self.path,
-                        '_exception': self.exception})
+                        '_error_msg': self.error})
 
 
         # Handler = http.server.SimpleHTTPRequestHandler
         self.server = socketserver.TCPServer((self.host, self.port), Handler)
-
 
         # Start a thread with the server.
         self.thread = threading.Thread(

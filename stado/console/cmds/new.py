@@ -2,7 +2,8 @@
 
 import os
 import textwrap
-from . import Command, CommandError
+from . import Command
+from ..errors import CommandError
 from .. import log
 
 

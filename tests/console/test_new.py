@@ -3,8 +3,9 @@
 import os
 import textwrap
 
-from stado.console.new import FILES, New
-from stado.console import CommandError, Console
+from stado.console import Console
+from stado.console.cmds.new import FILES, New
+from stado.console.errors import CommandError
 from tests.console import TestCommandNew
 
 

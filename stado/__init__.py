@@ -33,6 +33,13 @@ PATH = os.path.split(os.path.dirname(__file__))[0] if IS_ZIP_PACKAGE \
 
 
 # Custom logger using python logging module.
+
+class Formatter(logging.Formatter):
+    def format(self, record):
+        if record.levelname == 'DEBUG':
+            return '  ' + logging.Formatter.format(self, record)
+        return logging.Formatter.format(self, record)
+
 def get_logger():
     """Returns stado logger."""
 
@@ -41,8 +48,7 @@ def get_logger():
 
     # Log into console.
     ch = logging.StreamHandler()
-    formatter = logging.Formatter('%(message)s')
-    ch.setFormatter(formatter)
+    ch.setFormatter(Formatter())
     ch.setLevel('DEBUG')
     logger.addHandler(ch)
     return logger

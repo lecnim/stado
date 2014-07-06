@@ -2,9 +2,10 @@
 
 import os
 from contextlib import contextmanager
+
 from stado import config
 from stado.console import Console
-from stado.console.watch import Watch
+from stado.console.cmds.watch import Watch
 from tests.console import TestCommandNew
 
 
@@ -22,6 +23,13 @@ class TestWatch(TestCommandNew):
         self.command.pause()
         yield
         self.command.cancel()
+
+    #
+
+    def test_check_interval(self):
+        config.watch_interval = 4
+        x = Watch()
+        self.assertEqual(4, x.file_monitor.check_interval)
 
     #
     # Modifying site source files.
@@ -69,7 +77,8 @@ class TestWatch(TestCommandNew):
 
         # $ stado.py watch
 
-        # TODO: Add another python script to check if every script is executed.
+        self.create_file('another.py', 'from stado import route\n'
+                                       'route("/b.html", "WORLD")')
 
         with self.run_command(path=None):
             self.modify_file('a.html', data='HELLO')
@@ -78,7 +87,8 @@ class TestWatch(TestCommandNew):
 
         # Tests:
         self.assertEqual('HELLO', self.read_file(config.build_dir + '/a.html'))
-        self.assertEqual(2, w)
+        self.assertEqual('WORLD', self.read_file(config.build_dir + '/b.html'))
+        self.assertEqual(3, w)
 
     #
     # Creating new files.

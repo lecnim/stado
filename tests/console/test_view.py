@@ -1,9 +1,9 @@
 """Tests command: view"""
 
-import urllib.request
+
 from stado import config
 from tests.console import TestCommandNew
-from stado.console import View, Console
+from stado.console import View, Console, CommandError
 
 
 class TestView(TestCommandNew):
@@ -26,16 +26,19 @@ class TestView(TestCommandNew):
         """should serve module output files"""
 
         # Prepare files.
-        self.create_file('script.py', 'from stado import route\n'
-                                      'route("/a.html", "a")')
+        self.create_file('script.py', 'from stado import route, Site\n'
+                                      'route("/a.html", "a")\n'
+                                      'Site(output="ready").route("/a.html", "b")')
 
         # Action.
         self.command.run('script.py', stop_thread=False)
         a = self.read_url('a.html', config.host, config.port)
+        b = self.read_url('a.html', config.host, config.port + 1)
         self.command.cancel()
 
         # Test.
         self.assertEqual('a', a)
+        self.assertEqual('b', b)
 
     def test_serve_package_output(self):
         """should serve package output files"""
@@ -121,7 +124,15 @@ class TestView(TestCommandNew):
         self.assertEqual('b', b)
         self.assertEqual('z', c)
 
-    # TODO: Same port or same host as a argument in run!
+    def test_running_twice(self):
+
+        self.create_file('a.py',
+                         'from stado import Site\n'
+                         'Site(output="a").route("/foo.html", "a")')
+
+        self.command.run(stop_thread=False)
+        self.assertRaises(CommandError, self.command.run)
+        self.command.cancel()
 
     #
     # Console.

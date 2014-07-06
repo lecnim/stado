@@ -3,10 +3,11 @@
 import os
 import urllib
 from contextlib import contextmanager
+
 from stado import config
 from tests.console.test_view import TestView
 from tests.console.test_watch import TestWatch
-from stado.console.edit import Edit
+from stado.console.cmds.edit import Edit
 
 
 class TestEditView(TestView):
@@ -237,6 +238,37 @@ class TestEditWatch(TestWatch):
             self.assertEqual(2, len(self.command.servers))
             self.assertEqual('b',
                              self.read_url('b.html', config.host, config.port))
+
+    def test_port_order(self):
+        """should keep a correct port order if one script is removed"""
+
+        # Sites from two scripts are served on ports:
+        # a.py => 4000
+        # b.py => 4001
+        # Script a.py is removed, and b.py is rebuild. b.py should not change
+        # port:
+        # a.py => Killed
+        # b.py => 4001
+
+        self.create_file('a/file')
+        self.create_file('b/file')
+        self.create_file('a.py', 'from stado import Site\n'
+                                 'Site("a").route("/a.html", "a")\n')
+        self.create_file('b.py', 'from stado import Site\n'
+                                 'Site("b").route("/b.html", "b")\n')
+
+        with self.run_command():
+            self.assertEqual('a',
+                             self.read_url('a.html', config.host, config.port))
+            self.assertEqual('b',
+                             self.read_url('b.html', config.host, config.port + 1))
+
+            self.remove_file('a.py')
+            self.command.check()
+            self.create_file('b/new.file')
+            self.command.check()
+            self.assertEqual('b',
+                             self.read_url('b.html', config.host, config.port + 1))
 
 
 # Prevent running test from this classes.

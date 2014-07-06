@@ -4,10 +4,11 @@ import os
 import runpy
 import errno
 
-from . import Command, CommandError
+from . import Command
+from ..errors import CommandError
 from .. import log
-from .. import utils
-from .. import default_site, clear_default_site, Site
+from ... import utils
+from ... import default_site, clear_default_site, Site
 
 
 class Build(Command):

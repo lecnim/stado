@@ -4,10 +4,13 @@ import os
 import time
 import traceback
 
-from . import Event, CommandError
-from .. import config, log
+from ..errors import CommandError
 from .watch import Watch
 from .view import View
+from ..events import Event
+
+from .. import config
+
 
 
 class Edit(Watch, View):
@@ -29,14 +32,14 @@ class Edit(Watch, View):
         self._is_running = True
 
         try:
-            site_records = self.build_path(path)
+            site_records = self._build_path(path)
         except Exception:
-            site_records = self.dump_tracker()
+            site_records = self._dump_tracker()
             traceback.print_exc()
 
         path = os.path.abspath(path) if path else os.path.abspath('.')
-        self._run_watcher(path, site_records)
         self._start_servers(site_records, host, port)
+        self._run_watcher(path, site_records)
 
         if stop_thread:
             self.event(Event(self, 'on_wait'))
@@ -80,12 +83,12 @@ class Edit(Watch, View):
         # ok: True
         # data: Site records.
         if ok and data:
-            self._stop_servers(data)
-            self._start_servers(data)
+            port = self._stop_servers(data)
+            self._start_servers(data, port=port)
 
         if not ok:
             exception, tb = data
             # An exception occurred, set servers to error mode.
             for i in self.servers:
                 if i.script_path == script_path:
-                    i.set_exception(tb)
+                    i.set_error(tb)

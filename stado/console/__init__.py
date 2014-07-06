@@ -1,126 +1,22 @@
-import os
 import sys
 import argparse
-import traceback
 
-from ..errors import StadoError
 from .. import log, config
-from ..libs.events import EventHandler
+from ..console.events import EventHandler, Event
 
-
-class Event:
-    def __init__(self, cmd, type, **kwargs):
-        self.cmd = cmd
-        self.type = type
-        self.kwargs = kwargs
-
-class CommandError(StadoError):
-    """Raises when command generates error."""
-    pass
-
-class Command:
-    """Base class for commands."""
-
-    name = ''
-    summary = ''
-
-    def __init__(self):
-        self.event = EventHandler()
-
-
-    def install_parser(self, parser):
-        """Add sub-parser with arguments to parser."""
-
-        sub_parser = parser.add_parser(
-            self.name,
-            usage=self.usage.format(**{'cmd': self.name}),
-            description=self.summary)
-        sub_parser.set_defaults(function=self.run)
-
-        self._parser_add_arguments(sub_parser)
-        self._parser_add_options(sub_parser)
-
-        return sub_parser
-
-    def _parser_add_arguments(self, parser):
-        pass
-
-    def _parser_add_options(self, parser):
-        pass
-
-
-
-
-    def install(self, parser):
-        """Overwritten by inheriting class."""
-        return parser
-
-    def run(self, *args, **kwargs):
-        """Overwritten by inheriting class."""
-        pass
-
-
-    @staticmethod
-    def is_site(path):
-        """Returns True if given path is pointing to site directory."""
-
-        if os.path.isdir(path) and 'site.py' in os.listdir(path):
-            return True
-        return False
-
-    def is_python_script(self, path):
-
-        if os.path.isfile(path) and path.endswith('.py'):
-            return True
-
-        return False
-
-
-    # def event(self, name):
-    #     """Execute event method in Console object."""
-    #
-    #     method = getattr(self.console, name)
-    #
-    #     if isinstance(method, (list, tuple)):
-    #         if len(method) == 2:
-    #             method[0](*method[1])
-    #         else:
-    #             method[0](*method[1], **method[2])
-    #     else:
-    #         method()
-
-
-
-# Commands modules.
-
-from .build import Build
-from .watch import Watch
-from .view import View
-from .edit import Edit
-from .help import Help
-from .new import New
-
+from .errors import CommandError
+from .cmds.build import Build
+from .cmds.watch import Watch
+from .cmds.view import View
+from .cmds.edit import Edit
+from .cmds.help import Help
+from .cmds.new import New
 
 
 class Console:
 
     def __init__(self):
-
-
         self.events = EventHandler()
-
-        # Available commands.
-        #
-        # build = Build()
-        # build.event.subscribe(self.on_event)
-        # watch = Watch(build)
-        # watch.event.subscribe(self.on_event)
-        #
-        # view = View(build)
-        # view.event.subscribe(self.on_event)
-        #
-        # edit = Edit(build, watch, view)
-        # edit.event.subscribe(self.on_event)
 
         self.commands = {
             Build.name: Build(),
@@ -131,9 +27,9 @@ class Console:
             New.name: New(),
         }
 
+        # Every event in each command will run the on_event() method.
         for i in self.commands.values():
             i.event.subscribe(self.on_event)
-
 
         # Create command line parser.
 
@@ -143,42 +39,13 @@ class Console:
         # Add subparsers from commands.
 
         for i in self.commands.values():
-            # parser = subparsers.add_parser(i.name, add_help=False)
-            # parser.add_argument('-d', '--debug', action="store_true")
             i.install_parser(subparsers)
 
     def __getitem__(self, item):
         return self.commands[item]
 
-
-    # Shortcuts to commands.
-
-    def build(self, *args, **kwargs):
-        self.commands['build'].run(*args, **kwargs)
-
-    def watch(self, *args, **kwargs):
-        self.commands['watch'].run(*args, **kwargs)
-
-    def view(self, *args, **kwargs):
-        self.commands['view'].run(*args, **kwargs)
-
-    def help(self, *args, **kwargs):
-        self.commands['help'].run(*args, **kwargs)
-
-    # on_view_start
-    # on_build_start
-    # on_edit_start
-    # on_watch_start
-
-    # Events:
-
-    # console.subscribe('on_start', callable, *args, **kwargs)
-    # console.event('on_start')
-
-    # on_start
-    # on_stop
-
     def on_event(self, event):
+        """Commands send an event."""
         self.events.notify(event)
         pass
 
@@ -189,12 +56,10 @@ class Console:
 
         # Show help message if no arguments.
 
-        # print('')
-
         # No arguments!
-        # if not len(sys.argv) > 1 and not arguments:
-        #     self.help()
-        #     return True
+        if not len(sys.argv) > 1 and not arguments:
+            self.parser.print_help()
+            return True
 
         # Arguments from sys.args or from method arguments.
         if not arguments:
@@ -209,7 +74,6 @@ class Console:
         if 'debug' in args and args.pop('debug'):
             log.setLevel('DEBUG')
 
-
         result = None
         if 'function' in args:
 
@@ -220,59 +84,22 @@ class Console:
             except KeyboardInterrupt:
                 log.info('Exiting stado, goodbye!')
                 return True
-            except StadoError as error:
+            except CommandError as e:
                 msg = 'Oops! Error! Something went wrong:\n{}'
-                log.error(msg.format(error))
-                raise
-                # traceback.print_exc()
+                log.error(msg.format(e))
                 return False
 
         log.setLevel(config.log_level)
         return result
-
-
-
-    # Other methods.
-
-    def set_interval(self, value):
-        """Sets watcher interval."""
-        self.commands['watch'].file_monitor.check_interval = value
-
-
-    # Events:
-
-    def on_rebuild(self, path):
-        pass
-
-    def before_waiting(self):
-        """Runs before waiting loop in command run() method."""
-        pass
-
-    def stop_waiting(self):
-        """Stops waiting loop in commands. For example stops development server."""
-        log.debug('Console stop all services!')
-        log.debug('watch')
-
-        if not self.commands['watch'].is_stopped:
-            self.commands['watch'].cancel()
-        log.debug('view')
-        self.commands['view'].cancel()
-        log.debug('edit')
-        self.commands['edit'].cancel()
-
 
     def stop(self):
         log.debug('Stopping all console services!')
 
         if self.commands['watch'].is_running:
             self.commands['watch'].cancel()
-        log.debug('view')
-        self.commands['view'].cancel()
-        # log.debug('edit')
+        if self.commands['view'].is_running:
+            self.commands['view'].cancel()
         if self.commands['edit'].is_running:
             self.commands['edit'].cancel()
 
-
-    def after_rebuild(self):
-        """Runs after site rebuild, usually by watcher."""
-        pass
+        log.debug('')

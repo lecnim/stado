@@ -1,10 +1,12 @@
 """Tests command: build"""
 
 import os
+
 from stado import config
 from tests.console import TestCommandNew
-from stado.console import Console, CommandError
-from stado.console.build import Build
+from stado.console import Console
+from stado.console.errors import CommandError
+from stado.console.cmds.build import Build
 import stado
 
 
@@ -145,5 +147,4 @@ class TestBuild(TestCommandNew):
 
         # Path not found.
 
-        self.assertRaises(CommandError,
-                          console, self.command_class.name + ' not/found')
+        self.assertFalse(console(self.command_class.name + ' not/found'))

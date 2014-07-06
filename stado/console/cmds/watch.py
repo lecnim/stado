@@ -4,11 +4,12 @@ import os
 import time
 import traceback
 
-from . import CommandError, Event
+from ..errors import CommandError
+from ..events import Event
 from .build import Build
 from .. import config
 from .. import log
-from ..libs import watchers
+from ...libs import watchers
 
 
 class Watch(Build):
@@ -24,7 +25,7 @@ class Watch(Build):
         super().__init__()
 
         # Yes, this object is watching for changes in files.
-        self.file_monitor = watchers.Manager()
+        self.file_monitor = watchers.Manager(check_interval=config.watch_interval)
         # This function is run if watcher detected changes.
         self.update_function = self._on_src_modified
         self._is_running = False
@@ -62,10 +63,10 @@ class Watch(Build):
         # Track every new created Site object.
         # List of every tracked Site object.
         try:
-            sites = self.build_path(path)
+            sites = self._build_path(path)
         except:
             traceback.print_exc()
-            sites = self.dump_tracker()
+            sites = self._dump_tracker()
 
         path = os.path.abspath(path) if path else os.path.abspath('.')
         self._run_watcher(path, sites)
@@ -111,12 +112,11 @@ class Watch(Build):
         if not self.is_running:
             raise CommandError('Watch: command already stopped!')
 
-        log.debug('Stopping files watching...')
+        log.debug('Stopping file watching service...')
         self.file_monitor.stop()
         self.file_monitor.clear()
 
         self._is_running = False
-        log.debug('Done!')
 
     def pause(self):
         """Stops a file monitor."""
@@ -143,11 +143,11 @@ class Watch(Build):
     def _log(self):
         """Log current watchers."""
 
-        log.info('Watching for changes...')
+        log.info('\nWatching for changes...')
         for i in self.file_monitor.watchers:
             if isinstance(i, watchers.SimpleWatcher):
-                log.debug('  Script: {}'.format(i.args[0]))
-                log.debug('    source: {}'.format(i.path))
+                log.debug('Script: {}'.format(i.args[0]))
+                log.debug('  source: {}'.format(i.path))
 
     def _watch_scripts(self, path):
         """Creates a watcher that monitor python script files."""
@@ -239,10 +239,10 @@ class Watch(Build):
 
         log.debug('Script created: ' + item.path)
         try:
-            records = self.build_path(item.path)
+            records = self._build_path(item.path)
         except:
             traceback.print_exc()
-            records = self.dump_tracker()
+            records = self._dump_tracker()
         self._watch_sources(records)
         return records
 
@@ -269,7 +269,7 @@ class Watch(Build):
             return True, None
 
         try:
-            records = self.build_path(script_path)
+            records = self._build_path(script_path)
         except Exception as e:
             traceback.print_exc()
             return False, (e, traceback.format_exc())
