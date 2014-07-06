@@ -1,11 +1,9 @@
 import os
 import inspect
-import weakref
 
 from functools import wraps
 
 from .loaders import FileLoader
-from .events import Events
 from .. import plugins
 from .. import config as CONFIG
 from .. import log
@@ -95,7 +93,7 @@ def controller(function):
 
 
 
-class Site(Events):
+class Site:
     """
     This is site. Use run() method to build it.
 
@@ -131,8 +129,6 @@ class Site(Events):
                 Site will be build in this location.
             loaders: List of ItemLoader classes used to create Items objects.
         """
-
-        Events.__init__(self)
 
 
         self._is_default = False

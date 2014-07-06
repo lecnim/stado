@@ -101,5 +101,3 @@ class Console:
             self.commands['view'].cancel()
         if self.commands['edit'].is_running:
             self.commands['edit'].cancel()
-
-        log.debug('')

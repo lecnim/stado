@@ -4,12 +4,11 @@ import shutil
 import urllib.request
 
 from .. import utils
-from .events import Events
 from ..libs import glob2 as glob
 
 
 
-class SiteItem(Events):
+class SiteItem:
     """
     Represents thing used to create site. For example site source files.
     """
@@ -22,7 +21,6 @@ class SiteItem(Events):
             source: Source content is written to source_path file.
 
         """
-        Events.__init__(self)
 
         self.source_path = source_path
         self.output_path = output_path

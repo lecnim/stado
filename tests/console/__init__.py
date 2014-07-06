@@ -100,7 +100,6 @@ class TestCommandNew(unittest.TestCase):
         """BE CAREFUL! Removes directory recursively. Use '/' as a path
         separator, path must be relative to temp."""
 
-
         if os.path.isabs(path):
             raise ValueError('path must be relative!')
         p = os.path.join(self.temp_path, *path.split('/'))

@@ -2,10 +2,9 @@ import os
 
 from .item import SiteItem
 from .finders import FileFinder
-from .events import Events
 
 
-class ItemLoader(Events):
+class ItemLoader:
     def load(self, path, excluded=()):
         """Inherited class overrides this method."""
         pass

@@ -4,11 +4,10 @@ import inspect
 
 from .. import log
 from .. import utils
-from ..core.events import Events
 from .. import IS_ZIP_PACKAGE, PATH
 
 
-class Plugin(Events):
+class Plugin:
     def __init__(self, site=None):
         super().__init__()
         self.site = site
