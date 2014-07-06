@@ -3,7 +3,9 @@
 import os
 from stado import config
 from tests.console import TestCommandNew
-from stado.console import Build, Console
+from stado.console import Console, CommandError
+from stado.console.build import Build
+import stado
 
 
 class TestBuild(TestCommandNew):
@@ -17,6 +19,35 @@ class TestBuild(TestCommandNew):
     """
 
     command_class = Build
+
+    #
+    # Unit tests
+    #
+
+    def test_build_script(self):
+
+        cwd = os.getcwd()
+
+        # Passing directory instead of file.
+
+        self.create_file('dir/x.file')
+        self.assertRaises(ValueError, self.command._run_module, 'dir')
+        # Clear default site after error.
+        self.assertIsNone(stado.site)
+        self.assertEqual(cwd, os.getcwd())
+
+        # Path not found.
+
+        self.assertRaises(CommandError, self.command._run_module, 'not.found')
+        self.assertIsNone(stado.site)
+        self.assertEqual(cwd, os.getcwd())
+
+        # Exception in running module.
+
+        self.create_file('script.py', 'raise ValueError("test")')
+        self.assertRaises(ValueError, self.command._run_module, 'script.py')
+        self.assertIsNone(stado.site)
+        self.assertEqual(cwd, os.getcwd())
 
     #
 
@@ -72,7 +103,7 @@ class TestBuild(TestCommandNew):
                          msg='Should run scrips only from top directory!')
 
     def test_relative_path(self):
-        """should accepts relative path as an argument"""
+        """should accept relative path as an argument"""
 
         self.create_file('x/foo/script.py', 'from stado import route\n'
                                             'route("/foo.html", "bar")')
@@ -82,7 +113,7 @@ class TestBuild(TestCommandNew):
                                         + '/foo.html'))
 
     def test_absolute_path(self):
-        """should accepts absolute path a an argument"""
+        """should accept absolute path a an argument"""
 
         self.create_file('x/foo/script.py', 'from stado import route\n'
                                             'route("/foo.html", "bar")')
@@ -91,14 +122,17 @@ class TestBuild(TestCommandNew):
         self.assertEqual('bar', self.read_file('x/foo/' + config.build_dir
                                                + '/foo.html'))
 
-    # TODO: Exceptions
+    def test_not_found(self):
+        """should raise command error if script is not found"""
+
+        self.assertRaises(CommandError, self.command.run, 'not.found')
 
     #
     # Console.
     #
 
     def test_console(self):
-        """should works with console"""
+        """should work with console"""
 
         # Prepare files.
         self.create_file('script.py',
@@ -108,3 +142,8 @@ class TestBuild(TestCommandNew):
         console(self.command_class.name)
 
         self.assertEqual('a', self.read_file(config.build_dir + '/a.html'))
+
+        # Path not found.
+
+        self.assertRaises(CommandError,
+                          console, self.command_class.name + ' not/found')
