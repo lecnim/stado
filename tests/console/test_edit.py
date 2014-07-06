@@ -2,12 +2,14 @@
 
 import os
 import urllib
+import threading
 from contextlib import contextmanager
 
 from stado import config
 from tests.console.test_view import TestView
 from tests.console.test_watch import TestWatch
 from stado.console.cmds.edit import Edit
+from stado.console import Console
 
 
 class TestEditView(TestView):
@@ -269,6 +271,17 @@ class TestEditWatch(TestWatch):
             self.command.check()
             self.assertEqual('b',
                              self.read_url('b.html', config.host, config.port + 1))
+
+    #
+    # Console integration.
+    #
+
+    def test_console_run_empty_path(self):
+
+        console = Console()
+        threading.Timer(3, console.stop).start()
+
+        console(self.command_class.name)
 
 
 # Prevent running test from this classes.

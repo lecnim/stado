@@ -75,8 +75,8 @@ class Watch(Build):
             self.event(Event(self, 'on_wait'))
 
             # Wait here until a watcher thread is not dead!
-            while self.file_monitor.is_alive and stop_thread is True:
-                time.sleep(config.wait_interval)
+            while self.is_running:
+                self.file_monitor.check_thread.join()
 
         return True
 

@@ -25,7 +25,7 @@ class Edit(Watch, View):
         command."""
 
         # Prevent multiple watcher thread!
-        if self.is_running:
+        if self._is_running:
             raise CommandError('Command edit is already running! It must be '
                                'stopped before running it again')
 
@@ -44,8 +44,12 @@ class Edit(Watch, View):
         if stop_thread:
             self.event(Event(self, 'on_wait'))
 
-            while self.is_running:
-                time.sleep(config.wait_interval)
+            while self._is_running:
+
+                # Wait for file monitor thread dead and server threads are dead.
+                self.file_monitor.check_thread.join()
+                for i in self.servers:
+                    i.thread.join()
 
         return True
 
@@ -56,7 +60,9 @@ class Edit(Watch, View):
     def cancel(self):
         """Stops command - stops development server and watcher."""
         View.cancel(self)
+        self._is_running = True
         Watch.cancel(self)
+
 
     def _on_script_created(self, item):
         """A new python script was created."""

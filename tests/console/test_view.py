@@ -4,6 +4,7 @@
 from stado import config
 from tests.console import TestCommand
 from stado.console import View, Console, CommandError
+from stado.core.site import Site
 
 
 class TestView(TestCommand):
@@ -125,6 +126,7 @@ class TestView(TestCommand):
         self.assertEqual('z', c)
 
     def test_running_twice(self):
+        """should re-run correctly"""
 
         self.create_file('a.py',
                          'from stado import Site\n'
@@ -133,6 +135,18 @@ class TestView(TestCommand):
         self.command.run(stop_thread=False)
         self.assertRaises(CommandError, self.command.run)
         self.command.cancel()
+
+    def test_path_not_found(self):
+        """should raise an exception when a path is not found"""
+
+        self.assertRaises(CommandError, self.command.run,
+                          path='path/not/found',
+                          stop_thread=False)
+
+        # Should stop servers, clean etc...
+        self.assertFalse(self.command.is_running)
+        self.assertEqual(0, len(self.command.servers))
+        self.assertEqual(0, len(Site._tracker.records))
 
     #
     # Console.
@@ -155,3 +169,29 @@ class TestView(TestCommand):
         console = Console()
         console.events.subscribe(on_event)
         console(self.command_class.name + ' script.py')
+
+    def test_console_path_not_found(self):
+        """console should return False if path is not found"""
+
+        console = Console()
+        self.assertFalse(console(self.command_class.name + ' not_found.py'))
+
+    def test_console_empty_file_or_dir(self):
+        """should exit with a message if nothing to view"""
+
+        def on_event(event):
+            if event.cmd.name == self.command_class.name \
+               and event.type == 'on_wait':
+
+                self.assertFalse(True, msg='should not wait!')
+                console.stop()
+
+        console = Console()
+        console.events.subscribe(on_event)
+
+        # Empty directory.
+        console(self.command_class.name)
+
+        # Empty file.
+        self.create_file('empty.py', '')
+        console(self.command_class.name + ' empty.py')

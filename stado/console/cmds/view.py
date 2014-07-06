@@ -48,6 +48,7 @@ class View(Build):
         self.servers = []
         # self.port = config.port
         self.used_ports = set()
+        self._is_running = False
 
     # I hate argparser...
 
@@ -67,7 +68,13 @@ class View(Build):
 
     @property
     def is_running(self):
-        return False if self._are_servers_stopped() else True
+        if self._is_running:
+            return True
+        elif not self._are_servers_stopped():
+            return True
+        return False
+
+        # return False if self._are_servers_stopped() else True
 
     def run(self, path=None, host=None, port=None, stop_thread=True):
         """Command-line interface will execute this method if user type 'view'
@@ -77,8 +84,19 @@ class View(Build):
             raise CommandError('Command view is already running! It must be '
                                'stopped before running it again')
 
+        self._is_running = True
+
         # List of every tracked Site object.
-        site_records = self._build_path(path)
+        try:
+            site_records = self._build_path(path)
+        except:
+            self.cancel()
+            raise
+
+        # Nothing to do, Site instances were not found.
+        if not site_records:
+            self.cancel()
+            return True
 
         # Start new thread for each server.
         self._start_servers(site_records, host, port)
@@ -88,8 +106,11 @@ class View(Build):
         if stop_thread:
             self.event(Event(self, 'on_wait'))
 
-            while not self._are_servers_stopped() and stop_thread is True:
-                time.sleep(config.wait_interval)
+            # Wait until all server threads are dead.
+            while self.is_running:
+                for i in self.servers:
+                    i.thread.join()
+
         return True
 
     #
@@ -111,6 +132,8 @@ class View(Build):
 
         if not self.is_running:
             raise CommandError('View: command already stopped!')
+
+        self._is_running = False
 
         log.debug('Stopping server service...')
         for i in self.servers:
