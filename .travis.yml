@@ -5,6 +5,3 @@ python:
   - "3.4"
 # command to run tests
 script: python ./build.py -v
-
-install:
-  - pip install jinja2

@@ -199,14 +199,10 @@ def test():
     # Force to use python module from build directory instead of source
     # package.
 
-    # TODO: clean this
-    i = os.path.abspath(__file__)
-    i = os.path.split(i)[0]
-    i = os.path.split(i)[0]
-    i = os.path.join(i, 'build/stado.py')
-    sys.path.insert(0, i)
+    p = os.path.dirname(os.path.abspath(__file__))
+    p = os.path.join(os.path.split(p)[0], 'build/stado.py')
+    sys.path.insert(0, p)
 
-    # Shut up logging.
     import stado
 
     # Stop if zip package import failed
@@ -215,10 +211,28 @@ def test():
                       .format(output), color='red'))
         sys.exit(1)
 
+    # Shut up logging.
     stado.config.log_level = 'CRITICAL'
     stado.log.setLevel('CRITICAL')
 
     from scripts import flossytest
-    os.chdir('tests')
-    # sys.argv.append('-b')
-    flossytest.run()
+
+    # Quick test.
+    if '-q' in sys.argv or '--quick' in sys.argv:
+
+        loader = flossytest.TestLoader()
+        tests = flossytest.TestSuite()
+
+        for i in ['tests.core', 'tests.examples', 'tests.plugins']:
+            tests.addTest(loader.discover(i))
+
+        # v = 2: verbose mode
+        # v = 1: normal mode
+        # v = 0: quite mode
+        v = 2 if '-v' in sys.argv or '--verbose' in sys.argv else 1
+        runner = flossytest.runner.TextTestRunner(verbosity=v)
+        runner.run(tests)
+
+    else:
+        os.chdir('tests')
+        flossytest.run()
