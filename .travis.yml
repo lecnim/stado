@@ -3,6 +3,9 @@ python:
   - "3.2"
   - "3.3"
   - "3.4"
+  - "pypy"
 # command to run tests
-#script: python -m unittest discover
 script: python ./build.py -v
+
+install:
+  - pip install jinja2
