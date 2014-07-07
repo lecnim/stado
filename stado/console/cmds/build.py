@@ -75,6 +75,12 @@ class Build(Command):
         return Site._tracker.dump(skip_unused=True)
 
     def _run_modules(self, *paths):
+
+        # Python scripts not found!
+        if not paths:
+            log.info("Nothing to do here! What about creating a new site?")
+            return False
+
         timer = utils.Timer()
         for i in sorted(paths):
             self._run_module(i)

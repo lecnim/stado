@@ -2,6 +2,7 @@
 
 import os
 import time
+import errno
 import traceback
 
 from ..errors import CommandError
@@ -33,7 +34,10 @@ class Edit(Watch, View):
 
         try:
             site_records = self._build_path(path)
-        except Exception:
+        except CommandError:
+            self._is_running = False
+            raise
+        except:
             site_records = self._dump_tracker()
             traceback.print_exc()
 
@@ -47,9 +51,11 @@ class Edit(Watch, View):
             while self._is_running:
 
                 # Wait for file monitor thread dead and server threads are dead.
-                self.file_monitor.check_thread.join()
+                if self.file_monitor.check_thread.is_alive():
+                    self.file_monitor.check_thread.join()
                 for i in self.servers:
-                    i.thread.join()
+                    if i.thread.is_alive():
+                        i.thread.join()
 
         return True
 
@@ -60,6 +66,7 @@ class Edit(Watch, View):
     def cancel(self):
         """Stops command - stops development server and watcher."""
         View.cancel(self)
+        # Change to True so Watch thinks it is running and it can cancel()
         self._is_running = True
         Watch.cancel(self)
 

@@ -9,7 +9,14 @@ class TestCommand(TestStado):
 
     command_class = None
 
+    # For faster testing:
+    watch_interval = 0.01
+    server_poll_interval = 0.01
+
     def setUp(self):
         TestStado.setUp(self)
-        config.watch_interval = 0.1
+
+        config.watch_interval = self.watch_interval
+        config.server_poll_interval = self.server_poll_interval
+
         self.command = self.command_class()

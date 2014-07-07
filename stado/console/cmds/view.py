@@ -109,7 +109,8 @@ class View(Build):
             # Wait until all server threads are dead.
             while self.is_running:
                 for i in self.servers:
-                    i.thread.join()
+                    if i.thread.is_alive():
+                        i.thread.join()
 
         return True
 
@@ -155,6 +156,9 @@ class View(Build):
 
     def _start_servers(self, site_records, host=None, port=None):
         """Starts a development server for each site records."""
+
+        if not site_records:
+            return False
 
         log.info('')
 
@@ -332,7 +336,8 @@ class DevelopmentServer:
         # Start a thread with the server.
         self.thread = threading.Thread(
             name='Server({}:{})'.format(self.host, self.port),
-            target=self.server.serve_forever)
+            target=self.server.serve_forever,
+            args=(config.server_poll_interval,))
         # Exit the server thread when the main thread terminates.
         self.thread.daemon = True
         self.thread.start()

@@ -1,11 +1,13 @@
 """Tests command: watch"""
 
 import os
+import threading
 from contextlib import contextmanager
 
 from stado import config
-from stado.console import Console
+from stado.console import Console, CommandError
 from stado.console.cmds.watch import Watch
+from stado.core.site import Site
 from tests.console import TestCommand
 
 
@@ -379,6 +381,18 @@ class TestWatch(TestCommand):
     # Exceptions.
     #
 
+    def test_path_not_found(self):
+        """should raise an exception when a path is not found"""
+
+        self.assertRaises(CommandError, self.command.run,
+                          path='path/not/found',
+                          stop_thread=False)
+
+        # Should stop servers, clean etc...
+        self.assertFalse(self.command.is_running)
+        self.assertEqual(0, len(self.command.file_monitor.watchers))
+        self.assertEqual(0, len(Site._tracker.records))
+
     def test_exception_in_modified_script(self):
         """should still work if a modified file raise an exception"""
 
@@ -389,7 +403,8 @@ class TestWatch(TestCommand):
                                  'route("/a.html", "a")')
 
         with self.run_command():
-            self.modify_file('a.py', 'raise ValueError("test")')
+            self.modify_file('a.py', 'raise ValueError("do not worry'
+                                     ' - this is test")')
             self.command.check()
 
             self.assertEqual(2, len(self.command.file_monitor.watchers))
@@ -409,7 +424,8 @@ class TestWatch(TestCommand):
 
         self.create_file('script.py', 'from stado import route\n'
                                       'route("/a.html", "a")\n'
-                                      'raise ValueError("test...")')
+                                      'raise ValueError("do not worry'
+                                     ' - this is test")')
 
         with self.run_command():
             self.modify_file('script.py', 'from stado import route\n'
@@ -447,7 +463,7 @@ class TestWatch(TestCommand):
     # Console.
     #
 
-    def test_console(self):
+    def test_console_integration(self):
         """should works with console"""
 
         # Prepare files.
@@ -464,3 +480,35 @@ class TestWatch(TestCommand):
         console(self.command_class.name)
 
         self.assertEqual('a', self.read_file(config.build_dir + '/a.html'))
+
+    def test_console_path_not_found(self):
+        """console should return False if path is not found"""
+
+        console = Console()
+        self.assertFalse(console(self.command_class.name + ' not_found.py'))
+
+    def test_console_wait_on_empty_file_or_directory(self):
+        """should wait even if the path is empty directory or empty file"""
+
+        wait = False
+
+        def on_event(event):
+            if event.cmd.name == self.command_class.name \
+               and event.type == 'on_wait':
+
+                nonlocal wait
+                wait = True
+                threading.Timer(0.25, console.stop).start()
+
+        console = Console()
+        console.events.subscribe(on_event)
+
+        # Empty directory.
+        console(self.command_class.name)
+        self.assertTrue(wait)
+
+        # Empty file.
+        wait = False
+        self.create_file('empty.py', '')
+        console(self.command_class.name + ' empty.py')
+        self.assertTrue(wait)

@@ -64,6 +64,9 @@ class Watch(Build):
         # List of every tracked Site object.
         try:
             sites = self._build_path(path)
+        except CommandError:
+            self.cancel()
+            raise
         except:
             traceback.print_exc()
             sites = self._dump_tracker()
@@ -76,7 +79,8 @@ class Watch(Build):
 
             # Wait here until a watcher thread is not dead!
             while self.is_running:
-                self.file_monitor.check_thread.join()
+                if self.file_monitor.check_thread.is_alive():
+                    self.file_monitor.check_thread.join()
 
         return True
 

@@ -10,6 +10,8 @@ from stado.core.site import Site
 class TestView(TestCommand):
     """Command view
 
+    This tests are shared with TestEdit.
+
     Important!
     This test is done in temporary directory. Use self.temp_path to get path to
     it. During tests current working directory is self.temp_path. Previous
@@ -22,6 +24,17 @@ class TestView(TestCommand):
     #
     # Integration tests.
     #
+
+    def test_running_twice(self):
+        """should re-run correctly"""
+
+        self.create_file('a.py',
+                         'from stado import Site\n'
+                         'Site(output="a").route("/foo.html", "a")')
+
+        self.command.run(stop_thread=False)
+        self.assertRaises(CommandError, self.command.run)
+        self.command.cancel()
 
     def test_serve_module_output(self):
         """should serve module output files"""
@@ -125,17 +138,6 @@ class TestView(TestCommand):
         self.assertEqual('b', b)
         self.assertEqual('z', c)
 
-    def test_running_twice(self):
-        """should re-run correctly"""
-
-        self.create_file('a.py',
-                         'from stado import Site\n'
-                         'Site(output="a").route("/foo.html", "a")')
-
-        self.command.run(stop_thread=False)
-        self.assertRaises(CommandError, self.command.run)
-        self.command.cancel()
-
     def test_path_not_found(self):
         """should raise an exception when a path is not found"""
 
@@ -152,7 +154,13 @@ class TestView(TestCommand):
     # Console.
     #
 
-    def test_console(self):
+    def test_console_path_not_found(self):
+        """console should return False if path is not found"""
+
+        console = Console()
+        self.assertFalse(console(self.command_class.name + ' not_found.py'))
+
+    def test_console_integration(self):
         """should works with console"""
 
         # Prepare files.
@@ -162,6 +170,7 @@ class TestView(TestCommand):
         def on_event(event):
             if event.cmd.name == self.command_class.name \
                and event.type == 'on_wait':
+
                 a = self.read_url('a.html', config.host, config.port)
                 console.stop()
                 self.assertEqual('a', a)
@@ -170,13 +179,7 @@ class TestView(TestCommand):
         console.events.subscribe(on_event)
         console(self.command_class.name + ' script.py')
 
-    def test_console_path_not_found(self):
-        """console should return False if path is not found"""
-
-        console = Console()
-        self.assertFalse(console(self.command_class.name + ' not_found.py'))
-
-    def test_console_empty_file_or_dir(self):
+    def test_console_wait_on_empty_file_or_directory(self):
         """should exit with a message if nothing to view"""
 
         def on_event(event):

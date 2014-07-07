@@ -17,6 +17,36 @@ class TestEditView(TestView):
 
     command_class = Edit
 
+    #
+    # Console integration.
+    #
+
+    # This test is different than test in TestView.
+    def test_console_wait_on_empty_file_or_directory(self):
+        """should wait even if the path is empty directory or empty file"""
+
+        wait = False
+
+        def on_event(event):
+            if event.cmd.name == self.command_class.name \
+               and event.type == 'on_wait':
+                nonlocal wait
+                wait = True
+                threading.Timer(0.25, console.stop).start()
+
+        console = Console()
+        console.events.subscribe(on_event)
+
+        # Empty directory.
+        console(self.command_class.name)
+        self.assertTrue(wait)
+
+        # Empty file.
+        wait = False
+        self.create_file('empty.py', '')
+        console(self.command_class.name + ' empty.py')
+        self.assertTrue(wait)
+
 
 class TestEditWatch(TestWatch):
     """Command edit - testing a watcher with a development server"""
@@ -173,7 +203,8 @@ class TestEditWatch(TestWatch):
 
         self.create_file('script.py', 'from stado import route\n'
                                       'route("/a.html", "a")\n'
-                                      'raise ValueError("test...")')
+                                      'raise ValueError("do not worry'
+                                      ' - this is test")')
 
         with self.run_command():
             self.modify_file('script.py', 'from stado import route\n'
@@ -196,7 +227,8 @@ class TestEditWatch(TestWatch):
                                  'route("/a.html", "a")')
 
         with self.run_command():
-            self.modify_file('a.py', 'raise ValueError("test")')
+            self.modify_file('a.py', 'raise ValueError("do not worry'
+                                     ' - this is test")')
             self.command.check()
 
             # Requesting a file available in the output should also response
@@ -230,7 +262,8 @@ class TestEditWatch(TestWatch):
                                  'route("/a.html", "a")\n')
 
         with self.run_command():
-            self.create_file('b.py', 'raise ValueError("test")')
+            self.create_file('b.py', 'raise ValueError("do not worry'
+                                     ' - this is test")')
             self.command.check()
             self.assertEqual(1, len(self.command.servers))
 
@@ -275,13 +308,6 @@ class TestEditWatch(TestWatch):
     #
     # Console integration.
     #
-
-    def test_console_run_empty_path(self):
-
-        console = Console()
-        threading.Timer(3, console.stop).start()
-
-        console(self.command_class.name)
 
 
 # Prevent running test from this classes.
