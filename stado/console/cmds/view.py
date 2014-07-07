@@ -79,12 +79,12 @@ class View(Build):
     def run(self, path=None, host=None, port=None, stop_thread=True):
         """Command-line interface will execute this method if user type 'view'
         command."""
+        self.view_path(path, host, port, stop_thread)
 
-        if not self._are_servers_stopped():
-            raise CommandError('Command view is already running! It must be '
-                               'stopped before running it again')
 
-        self._is_running = True
+    def view_path(self, path=None, host=None, port=None, stop_thread=True):
+
+        self._run()
 
         # List of every tracked Site object.
         try:
@@ -104,55 +104,30 @@ class View(Build):
         # Event 'on_run' should be send at the end of method,
         # before waiting loop.
         if stop_thread:
-            self.event(Event(self, 'on_wait'))
+            self.join()
 
-            # Wait until all server threads are dead.
-            while self.is_running:
-                for i in self.servers:
-                    if i.thread.is_alive():
-                        i.thread.join()
+        return True
+
+    def view_site(self, site, host=None, port=None, stop_thread=True):
+
+        self._run()
+
+        self._start_servers([site.get_record()], host, port)
+
+        if stop_thread:
+            self.join()
 
         return True
 
     #
-    # Command controls
-    #
 
-    def pause(self):
-        """Stops all servers."""
-        for i in self.servers:
-            i.stop()
+    def _run(self):
 
-    def resume(self):
-        """Restarts all servers."""
-        for i in self.servers:
-            i.restart()
+        if self.is_running:
+            raise CommandError('Command view is already running! It must be '
+                               'stopped before running it again')
 
-    def cancel(self):
-        """Stops a development server."""
-
-        if not self.is_running:
-            raise CommandError('View: command already stopped!')
-
-        self._is_running = False
-
-        log.debug('Stopping server service...')
-        for i in self.servers:
-            i.stop()
-        # Python 3.2 do not support list.clear()
-        del self.servers[:]
-        self.used_ports.clear()
-
-    #
-
-    def _get_free_port(self, min=None):
-        """Returns lowest free port."""
-
-        i = config.port if min is None else min
-
-        while i in self.used_ports:
-            i += 1
-        return i
+        self._is_running = True
 
     def _start_servers(self, site_records, host=None, port=None):
         """Starts a development server for each site records."""
@@ -179,13 +154,37 @@ class View(Build):
             port = self._get_free_port(port)
             self._start_server(i.module_path, i.output_path, host, port)
 
+    def _get_free_port(self, min=None):
+        """Returns lowest free port."""
+
+        i = config.port if min is None else min
+
+        while i in self.used_ports:
+            i += 1
+        return i
+
+    def _start_server(self, module_path, output_path, host=None, port=None):
+        """Starts a development server and serve files from path on a given host
+        and port."""
+
+        log.info('* http://{}:{}'.format(host, port))
+        log.debug('  path: ' + output_path)
+
+        server = DevelopmentServer()
+        self.servers.append(server)
+        self.used_ports.add(port)
+
+        server.path = output_path
+        server.module_path = module_path
+        server.start(host, port)
+
     def _stop_servers(self, site_records):
         """Stops development servers using site records."""
 
         dead = set()
         for i in site_records:
             for s in self.servers:
-                if i.module_path == s.script_path:
+                if i.module_path == s.module_path:
                     dead.add(s)
 
         lowest_port = min([x.port for x in dead]) if dead else self._get_free_port()
@@ -194,22 +193,6 @@ class View(Build):
             self._stop_server(i)
 
         return lowest_port
-
-    def _start_server(self, script_path, output_path, host=None, port=None):
-        """Starts a development server and serve files from path on a given host
-        and port."""
-
-        log.info('* http://{}:{}'.format(host, port))
-        # log.debug('Starting development server...')
-        log.debug('  path: ' + output_path)
-
-        server = DevelopmentServer()
-        self.servers.append(server)
-        self.used_ports.add(port)
-
-        server.path = output_path
-        server.script_path = script_path
-        server.start(host, port)
 
     def _stop_server(self, server):
         log.debug('Stopping development server: ' + server.address)
@@ -225,6 +208,45 @@ class View(Build):
             if not i.is_stopped:
                 return False
         return True
+
+    #
+    # Command controls
+    #
+
+    def join(self):
+
+        self.event(Event(self, 'on_wait'))
+
+        # Wait until all server threads are dead.
+        while self.is_running:
+            for i in self.servers:
+                if i.thread.is_alive():
+                    i.thread.join()
+
+    def pause(self):
+        """Stops all servers."""
+        for i in self.servers:
+            i.stop()
+
+    def resume(self):
+        """Restarts all servers."""
+        for i in self.servers:
+            i.restart()
+
+    def cancel(self):
+        """Stops a development server."""
+
+        if not self.is_running:
+            raise CommandError('View: command already stopped!')
+
+        self._is_running = False
+
+        log.debug('Stopping server service...')
+        for i in self.servers:
+            i.stop()
+        # Python 3.2 do not support list.clear()
+        del self.servers[:]
+        self.used_ports.clear()
 
 
 class HTTPRequestHandler(SimpleHTTPRequestHandler):

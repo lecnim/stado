@@ -81,7 +81,7 @@ class Edit(Watch, View):
         """A python script was deleted."""
 
         Watch._on_module_deleted(self, item)
-        dead = [i for i in self.servers if i.script_path == item.path]
+        dead = [i for i in self.servers if i.module_path == item.path]
         for i in dead:
             self._stop_server(i)
 
@@ -103,5 +103,5 @@ class Edit(Watch, View):
             exception, tb = data
             # An exception occurred, set servers to error mode.
             for i in self.servers:
-                if i.script_path == script_path:
+                if i.module_path == script_path:
                     i.set_error(tb)

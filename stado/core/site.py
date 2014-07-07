@@ -128,11 +128,6 @@ class Site:
         # Loads plugins from stado.plugins package.
         self.plugins = plugins.PluginsManager(self)
 
-        # Commands.
-        self._watch = cmds.watch.Watch()
-        # self._edit = None
-        # self.edit = None
-
         Site._tracker.update(self)
 
     def __repr__(self):
@@ -160,11 +155,24 @@ class Site:
 
     def watch(self):
 
+        x = cmds.watch.Watch()
+
         try:
-            self._watch.watch_site(self)
+            x.watch_site(self)
         except KeyboardInterrupt:
-            self._watch.cancel()
+            x.cancel()
             pass
+
+    def view(self):
+
+        x = cmds.view.View()
+
+        try:
+            x.view_site(self)
+        except KeyboardInterrupt:
+            x.cancel()
+            pass
+
 
     # Controllers.
     # Stability: 2 - Unstable
