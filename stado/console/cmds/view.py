@@ -79,7 +79,7 @@ class View(Build):
     def run(self, path=None, host=None, port=None, stop_thread=True):
         """Command-line interface will execute this method if user type 'view'
         command."""
-        self.view_path(path, host, port, stop_thread)
+        return self.view_path(path, host, port, stop_thread)
 
 
     def view_path(self, path=None, host=None, port=None, stop_thread=True):

@@ -81,12 +81,23 @@ def controller(function):
         return function(*args, **kwargs)
     return wrapper
 
+def command(function):
+    """Decorator used to change method to command."""
+
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        if not Site._enable_cmds:
+            return False
+        return function(*args, **kwargs)
+    return wrapper
+
 
 class Site:
     """
     This is site.
     """
 
+    _enable_cmds = True
     _tracker = InstanceTracker()
 
     def __init__(self, path=None, output=None, loader=FileLoader):
@@ -153,24 +164,43 @@ class Site:
     # Commands.
     # Stability: 2 - Unstable
 
+    @command
     def watch(self):
 
+        Site._enable_cmds = False
         x = cmds.watch.Watch()
 
         try:
             x.watch_site(self)
         except KeyboardInterrupt:
             x.cancel()
+            Site._enable_cmds = True
             pass
 
+    @command
     def view(self):
 
+        Site._enable_cmds = False
         x = cmds.view.View()
 
         try:
             x.view_site(self)
         except KeyboardInterrupt:
             x.cancel()
+            Site._enable_cmds = True
+            pass
+
+    @command
+    def edit(self):
+
+        Site._enable_cmds = False
+        x = cmds.edit.Edit()
+
+        try:
+            x.edit_site(self)
+        except KeyboardInterrupt:
+            x.cancel()
+            Site._enable_cmds = True
             pass
 
 

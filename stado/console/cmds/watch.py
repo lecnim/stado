@@ -49,7 +49,7 @@ class Watch(Build):
 
     def run(self, path=None, stop_thread=True):
         """A console use this method to run the command."""
-        self.watch_path(path, stop_thread)
+        return self.watch_path(path, stop_thread)
 
     # Public.
 

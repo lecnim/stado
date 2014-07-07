@@ -25,12 +25,11 @@ class Edit(Watch, View):
         """Command-line interface will execute this method if user type 'edit'
         command."""
 
-        # Prevent multiple watcher thread!
-        if self._is_running:
-            raise CommandError('Command edit is already running! It must be '
-                               'stopped before running it again')
+        return self.edit_path(path, host, port ,stop_thread)
 
-        self._is_running = True
+    def edit_path(self, path=None, host=None, port=None, stop_thread=True):
+
+        self._run()
 
         try:
             site_records = self._build_path(path)
@@ -46,18 +45,44 @@ class Edit(Watch, View):
         self._start_watching(path, site_records)
 
         if stop_thread:
-            self.event(Event(self, 'on_wait'))
-
-            while self._is_running:
-
-                # Wait for file monitor thread dead and server threads are dead.
-                if self.file_monitor.check_thread.is_alive():
-                    self.file_monitor.check_thread.join()
-                for i in self.servers:
-                    if i.thread.is_alive():
-                        i.thread.join()
+            self.join()
 
         return True
+
+    def edit_site(self, site, host=None, port=None, stop_thread=True):
+
+        self._run()
+
+        r = site.get_record()
+        self._start_servers([r], host, port)
+        self._start_watching(site._script_path, [r])
+
+        if stop_thread:
+            self.join()
+
+        return True
+
+
+    def _run(self):
+
+        # Prevent multiple watcher thread!
+        if self._is_running:
+            raise CommandError('Command edit is already running! It must be '
+                               'stopped before running it again')
+
+        self._is_running = True
+
+    def join(self):
+        self.event(Event(self, 'on_wait'))
+
+        while self._is_running:
+
+            # Wait for file monitor thread dead and server threads are dead.
+            if self.file_monitor.check_thread.is_alive():
+                self.file_monitor.check_thread.join()
+            for i in self.servers:
+                if i.thread.is_alive():
+                    i.thread.join()
 
     def pause_watch(self):
         """Pauses the file monitor."""
