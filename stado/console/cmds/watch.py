@@ -30,6 +30,8 @@ class Watch(Build):
         self.update_function = self._on_src_modified
         self._is_running = False
 
+        self.src_watchers = set()
+
     # I Hate ARGPARSE:
 
     def _parser_add_arguments(self, parser):
@@ -41,64 +43,77 @@ class Watch(Build):
     def is_running(self):
         """Returns True if command is running."""
 
-        if self.file_monitor.is_alive:
-            return True
-        if self._is_running:
+        if self.file_monitor.is_alive or self._is_running:
             return True
         return False
 
     def run(self, path=None, stop_thread=True):
-        """Command-line interface will execute this method if user type 'watch'
-        command. Argument path is python script location,
-        for example: 'path/to/file.py'. If argument stop_thread is True,
-        current thread will be stopped in loop until file monitor is killed."""
+        """A console use this method to run the command."""
+        self.watch_path(path, stop_thread)
 
-        # Prevent multiple watcher thread!
-        if self.file_monitor.is_alive:
-            raise CommandError('Command watch is already running! It must be '
-                               'stopped before running it again')
+    # Public.
 
-        self._is_running = True
+    def watch_path(self, path, stop_thread=True):
 
-        # Track every new created Site object.
-        # List of every tracked Site object.
+        self._run()
+
         try:
-            sites = self._build_path(path)
+            site_records = self._build_path(path)
         except CommandError:
             self.cancel()
             raise
         except:
             traceback.print_exc()
-            sites = self._dump_tracker()
+            site_records = self._dump_tracker()
 
         path = os.path.abspath(path) if path else os.path.abspath('.')
-        self._run_watcher(path, sites)
+        self._start_watching(path, site_records)
 
         if stop_thread:
-            self.event(Event(self, 'on_wait'))
-
-            # Wait here until a watcher thread is not dead!
-            while self.is_running:
-                if self.file_monitor.check_thread.is_alive():
-                    self.file_monitor.check_thread.join()
+            self.join()
 
         return True
 
-    def _run_watcher(self, path, site_records):
+    def watch_site(self, site, stop_thread=True):
+
+        self._run()
+        self._start_watching(site._script_path, [site.get_record()])
+
+        if stop_thread:
+            self.join()
+
+        return True
+
+    #
+
+    def _run(self):
+
+        # Prevent multiple watcher threads!
+        if self.is_running:
+            raise CommandError('Command watch is already running! It must be '
+                               'stopped before running it again')
+        self._is_running = True
+
+    def _start_watching(self, path, site_records):
         """Creates watcher for each site. If path is pointing to package,
         creates package watcher too.
 
         Args:
             path: Path to a module file or a package directory.
-            site_records: Dict created by Site._tracker.
+            site_records: List of SiteRecords
 
         """
 
         # Monitor for new python scripts or deleted ones.
-        self._watch_scripts(path)
+        if os.path.isfile(path):
+            self._add_module_watcher(path)
+        else:
+            self._add_package_watcher(path)
 
         # Watch source dirs of Site instances.
-        self._watch_sources(site_records)
+        for i in site_records:
+            self._add_src_watcher(i.module_path, i.source_path, i.output_path)
+
         self._log()
 
         # Monitoring.
@@ -106,9 +121,93 @@ class Watch(Build):
         # run update() method if content of source directory was modified.
         self.file_monitor.start()
 
+
+    def _add_module_watcher(self, path):
+
+        w = watchers.Watcher(os.path.dirname(path),
+                             recursive=False,
+                             filter=lambda x: x == path)
+        self._bind_module_events(w)
+        self.file_monitor.add(w)
+
+    def _add_package_watcher(self, path):
+
+        def only_python(x):
+            """Ignores all non-python files."""
+            if os.path.isfile(x) and x.endswith('.py'):
+                return True
+            return False
+
+        w = watchers.Watcher(path, recursive=False, filter=only_python)
+        self._bind_module_events(w)
+        self.file_monitor.add(w)
+
+    def _bind_module_events(self, watcher):
+        watcher.on_created = self._on_module_created
+        watcher.on_deleted = self._on_module_deleted
+        watcher.on_modified = self._on_module_modified
+
+
+    def _add_src_watcher(self, module_path, source_path, output_path):
+        """Adds recursively all directories and files in a source_path to
+        a watcher, excluding a list of paths in an output_path argument.
+        After change in files, a watcher will run a python script located in
+        script_path.
+
+        Example arguments:
+            script_path: 'path/to/file.py'
+            source_path: 'path/to'
+            output_paths: ['path/to/output']
+
+        """
+
+        def filter(path):
+            """Ignore:
+            * All outputs.
+            * Parent python script file.
+            """
+            if path in output_path \
+               or [i for i in output_path if path.startswith(i + '/')] \
+               or path == module_path:
+                return False
+            return True
+
+        w = watchers.SimpleWatcher(source_path,
+                                   self.update_function, args=(module_path,),
+                                   filter=filter)
+        w.script_path = module_path
+        self.src_watchers.add(w)
+        self.file_monitor.add(w)
+
+    def _remove_src_watcher(self, module_path):
+
+        for i in self.src_watchers.copy():
+            if i.script_path == module_path:
+                self.file_monitor.remove(i)
+                self.src_watchers.remove(i)
+
+
+    def _log(self):
+        """Log current watchers."""
+
+        log.info('\nWatching for changes...')
+        for i in self.file_monitor.watchers:
+            if isinstance(i, watchers.SimpleWatcher):
+                log.debug('Script: {}'.format(i.args[0]))
+                log.debug('  source: {}'.format(i.path))
+
     #
     # Command controls
     #
+
+    def join(self):
+
+        self.event(Event(self, 'on_wait'))
+
+        # Wait here until a watcher thread is not dead!
+        while self.is_running:
+            if self.file_monitor.check_thread.is_alive():
+                self.file_monitor.check_thread.join()
 
     def cancel(self):
         """Stops watching. It waits until a watch thread is dead."""
@@ -119,6 +218,7 @@ class Watch(Build):
         log.debug('Stopping file watching service...')
         self.file_monitor.stop()
         self.file_monitor.clear()
+        self.src_watchers.clear()
 
         self._is_running = False
 
@@ -142,92 +242,6 @@ class Watch(Build):
         """Runs a file monitor check. Used during unittests!"""
         self.file_monitor.check()
 
-    # Private!
-
-    def _log(self):
-        """Log current watchers."""
-
-        log.info('\nWatching for changes...')
-        for i in self.file_monitor.watchers:
-            if isinstance(i, watchers.SimpleWatcher):
-                log.debug('Script: {}'.format(i.args[0]))
-                log.debug('  source: {}'.format(i.path))
-
-    def _watch_scripts(self, path):
-        """Creates a watcher that monitor python script files."""
-
-        # Monitor an every change of python scripts in directory.
-        if os.path.isdir(path):
-
-            def only_python(x):
-                """Ignores all non-python files."""
-                if os.path.isfile(x) and x.endswith('.py'):
-                    return True
-                return False
-            w = watchers.Watcher(path, recursive=False, filter=only_python)
-
-        # Monitor changes in given python script.
-        else:
-            w = watchers.Watcher(os.path.dirname(path), recursive=False,
-                                 filter=lambda x: x == path)
-
-        # Monkey path Watcher events!
-        w.on_created = self._on_script_created
-        w.on_deleted = self._on_script_deleted
-        w.on_modified = self._on_script_modified
-        # Watcher is not connected with any script file.
-        w.script_path = None
-        self.file_monitor.add(w)
-
-    def _watch_sources(self, site_records):
-        """Creates a watcher that monitors each source directory."""
-
-        # All output directories used by sites.
-        outputs = {i['output'] for i in site_records}
-
-        for site in site_records:
-            # source: Absolute path to site source directory.
-            # script: Absolute path to python script file.
-            self._watch_src(site['script'], site['source'], outputs)
-
-    def _watch_src(self, script_path, source_path, output_paths):
-        """Adds recursively all directories and files in a source_path to
-        a watcher, excluding a list of paths in an output_path argument.
-        After change in files, a watcher will run a python script located in
-        script_path.
-
-        Example arguments:
-            script_path: 'path/to/file.py'
-            source_path: 'path/to'
-            output_paths: ['path/to/output']
-
-        """
-
-        def filter(path):
-            """Ignore:
-            * All outputs.
-            * Parent python script file.
-            """
-            if path in output_paths \
-               or [i for i in output_paths if path.startswith(i + '/')] \
-               or path == script_path:
-                return False
-            return True
-
-        w = watchers.SimpleWatcher(source_path,
-                                   self.update_function, args=(script_path,),
-                                   filter=filter)
-        w.script_path = script_path
-        self.file_monitor.add(w)
-
-    def _unwatch_sources(self, *script_paths):
-        """Removes all watchers that are watching a script source."""
-
-        dead = [i for i in self.file_monitor.watchers
-                if i.script_path in script_paths]
-        for i in dead:
-            self.file_monitor.remove(i)
-
     #
     # Watcher thread events:
     #
@@ -238,26 +252,30 @@ class Watch(Build):
 
     # Watching scripts.
 
-    def _on_script_created(self, item):
+    def _on_module_created(self, item):
         """A new python script was created."""
 
-        log.debug('Script created: ' + item.path)
+        log.debug('Python module created: ' + item.path)
         try:
             records = self._build_path(item.path)
         except:
             traceback.print_exc()
             records = self._dump_tracker()
-        self._watch_sources(records)
+
+        for i in records:
+            self._add_src_watcher(i.module_path, i.source_path, i.output_path)
         return records
 
-    def _on_script_deleted(self, item):
+    def _on_module_deleted(self, item):
         """A python script was deleted."""
-        log.debug('Script deleted: ' + item.path)
-        self._unwatch_sources(item.path)
 
-    def _on_script_modified(self, item):
+        log.debug('Python module deleted: ' + item.path)
+        self._remove_src_watcher(item.path)
+
+    def _on_module_modified(self, item):
         """A python script was modified."""
-        log.debug('Script modified: ' + item.path)
+
+        log.debug('Python module modified: ' + item.path)
         return self._on_src_modified(item.path)
 
     # Watching sources.
@@ -280,8 +298,10 @@ class Watch(Build):
 
         else:
             # Remove observer needed to be updated.
-            self._unwatch_sources(*[i['script'] for i in records])
+            for i in [i.module_path for i in records]:
+                self._remove_src_watcher(i)
             # Add new updated watchers.
-            self._watch_sources(records)
+            for i in records:
+                self._add_src_watcher(i.module_path, i.source_path, i.output_path)
             self._log()
             return True, records

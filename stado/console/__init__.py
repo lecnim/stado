@@ -33,8 +33,20 @@ class Console:
 
         # Create command line parser.
 
-        self.parser = argparse.ArgumentParser()
-        subparsers = self.parser.add_subparsers()
+        # TODO: format argparser
+
+        self.parser = argparse.ArgumentParser(
+            description='Description',
+            usage='python stado.py [command] [options]',
+            epilog='Epilog',
+            prog='STADO',
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        )
+        subparsers = self.parser.add_subparsers(
+            title='commands',
+            description='description',
+            help='help',
+        )
 
         # Add subparsers from commands.
 

@@ -1,5 +1,6 @@
 import os
 import inspect
+from collections import namedtuple, OrderedDict
 
 from functools import wraps
 
@@ -9,6 +10,12 @@ from .. import config as CONFIG
 from .. import log
 from ..utils import relative_path, is_subpath
 from ..libs import glob2 as glob
+from ..console import cmds
+
+
+SiteRecord = namedtuple('SiteRecord',
+                        ['source_path', 'output_path', 'module_path',
+                         'is_default', 'is_used'])
 
 
 class InstanceTracker:
@@ -17,8 +24,7 @@ class InstanceTracker:
     def __init__(self):
 
         self.enabled = False
-        self.records = {}
-        self.order = []
+        self.records = OrderedDict()
 
     def __getitem__(self, item):
         return self.records[item]
@@ -39,18 +45,8 @@ class InstanceTracker:
         if not self.enabled:
             return False
 
-        # Not installed.
-        if not id(instance) in self.records.keys():
-            self.records[id(instance)] = {}
-            self.order.append(self.records[id(instance)])
+        self.records[id(instance)] = instance.get_record()
 
-        self.records[id(instance)].update({
-            'source': instance.path,
-            'output': instance.output,
-            'script': instance._script_path,
-            'is_default': instance._is_default,
-            'is_used': instance.is_used
-        })
 
     def dump(self, skip_unused=False):
         """Returns a list with a info about each Site instance."""
@@ -60,11 +56,10 @@ class InstanceTracker:
                             'Enable it first!')
 
         if skip_unused:
-            x = [i for i in self.order if i['is_used']]
+            x = [i for i in self.records.values() if i.is_used]
         else:
-            x = self.order
-        self.records = {}
-        self.order = []
+            x = self.records.values()
+        self.records = OrderedDict()
         self.disable()
         return x
 
@@ -133,6 +128,11 @@ class Site:
         # Loads plugins from stado.plugins package.
         self.plugins = plugins.PluginsManager(self)
 
+        # Commands.
+        self._watch = cmds.watch.Watch()
+        # self._edit = None
+        # self.edit = None
+
         Site._tracker.update(self)
 
     def __repr__(self):
@@ -151,7 +151,22 @@ class Site:
     def is_used(self):
         return True if self._used_controllers else False
 
-    # Controllers
+    def get_record(self):
+        return SiteRecord(self.path, self.output, self._script_path,
+                          self._is_default, self.is_used)
+
+    # Commands.
+    # Stability: 2 - Unstable
+
+    def watch(self):
+
+        try:
+            self._watch.watch_site(self)
+        except KeyboardInterrupt:
+            self._watch.cancel()
+            pass
+
+    # Controllers.
     # Stability: 2 - Unstable
 
     # route

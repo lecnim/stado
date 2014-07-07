@@ -43,7 +43,7 @@ class Edit(Watch, View):
 
         path = os.path.abspath(path) if path else os.path.abspath('.')
         self._start_servers(site_records, host, port)
-        self._run_watcher(path, site_records)
+        self._start_watching(path, site_records)
 
         if stop_thread:
             self.event(Event(self, 'on_wait'))
@@ -71,16 +71,16 @@ class Edit(Watch, View):
         Watch.cancel(self)
 
 
-    def _on_script_created(self, item):
+    def _on_module_created(self, item):
         """A new python script was created."""
 
-        records = Watch._on_script_created(self, item)
+        records = Watch._on_module_created(self, item)
         self._start_servers(records)
 
-    def _on_script_deleted(self, item):
+    def _on_module_deleted(self, item):
         """A python script was deleted."""
 
-        Watch._on_script_deleted(self, item)
+        Watch._on_module_deleted(self, item)
         dead = [i for i in self.servers if i.script_path == item.path]
         for i in dead:
             self._stop_server(i)

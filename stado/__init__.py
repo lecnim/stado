@@ -6,7 +6,7 @@ import inspect
 
 from . import config
 
-__version__ = '1.0.0a'
+__version__ = '1.0.0-alpha'
 version = __version__
 
 
@@ -90,13 +90,14 @@ def clear_default_site():
 
 
 # User shortcuts.
+# Run stado. Get arguments and pass them to console.
+from .console import Console
 
 from .core.site import Site
 from .core.item import Item, FileItem
 
 
-# Run stado. Get arguments and pass them to console.
-from .console import Console
+
 
 if __name__ == "__main__":
     console = Console()

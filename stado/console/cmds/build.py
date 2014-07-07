@@ -8,7 +8,8 @@ from . import Command
 from ..errors import CommandError
 from .. import log
 from ... import utils
-from ... import default_site, clear_default_site, Site
+from ...core.site import Site
+from ... import default_site, clear_default_site
 
 
 class Build(Command):

@@ -171,13 +171,13 @@ class View(Build):
         for i in site_records:
 
             # Logging.
-            if i['script'] != last:
-                filename = os.path.split(i['script'])[1]
+            if i.module_path != last:
+                filename = os.path.split(i.module_path)[1]
                 log.info('You can view {} sites at:'.format(filename))
-                last = i['script']
+                last = i.module_path
 
             port = self._get_free_port(port)
-            self._start_server(i['script'], i['output'], host, port)
+            self._start_server(i.module_path, i.output_path, host, port)
 
     def _stop_servers(self, site_records):
         """Stops development servers using site records."""
@@ -185,7 +185,7 @@ class View(Build):
         dead = set()
         for i in site_records:
             for s in self.servers:
-                if i['script'] == s.script_path:
+                if i.module_path == s.script_path:
                     dead.add(s)
 
         lowest_port = min([x.port for x in dead]) if dead else self._get_free_port()
