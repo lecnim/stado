@@ -1,4 +1,10 @@
-"""Tests creating html page from json source using layout file."""
+"""
+Building html page using json data and layout.
+----------------------------------------------
+
+All files that ends with 'md' or 'markdown' extension will
+be auto built to html.
+"""
 
 from tests.examples import TestExample
 

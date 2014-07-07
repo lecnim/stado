@@ -240,3 +240,108 @@ h1 {
 .vg { color: #008080 } /* Name.Variable.Global */
 .vi { color: #008080 } /* Name.Variable.Instance */
 .il { color: #009999 } /* Literal.Number.Integer.Long */
+
+
+/* generated with ``pygmentize -S default -f html -a pre.code`` */
+pre.code .hll { background-color: #ffffcc }
+pre.code  { background: #f8f8f8; }
+pre.code .c { color: #408080; font-style: italic } /* Comment */
+pre.code .err { border: 1px solid #FF0000 } /* Error */
+pre.code .k { color: #008000; font-weight: bold } /* Keyword */
+pre.code .o { color: #666666 } /* Operator */
+pre.code .cm { color: #408080; font-style: italic } /* Comment.Multiline */
+pre.code .cp { color: #BC7A00 } /* Comment.Preproc */
+pre.code .c1 { color: #408080; font-style: italic } /* Comment.Single */
+pre.code .cs { color: #408080; font-style: italic } /* Comment.Special */
+pre.code .gd { color: #A00000 } /* Generic.Deleted */
+pre.code .ge { font-style: italic } /* Generic.Emph */
+pre.code .gr { color: #FF0000 } /* Generic.Error */
+pre.code .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+pre.code .gi { color: #00A000 } /* Generic.Inserted */
+pre.code .go { color: #808080 } /* Generic.Output */
+pre.code .gp { color: #000080; font-weight: bold } /* Generic.Prompt */
+pre.code .gs { font-weight: bold } /* Generic.Strong */
+pre.code .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+pre.code .gt { color: #0040D0 } /* Generic.Traceback */
+pre.code .kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+pre.code .kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+pre.code .kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+pre.code .kp { color: #008000 } /* Keyword.Pseudo */
+pre.code .kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+pre.code .kt { color: #B00040 } /* Keyword.Type */
+pre.code .m { color: #666666 } /* Literal.Number */
+pre.code .s { color: #BA2121 } /* Literal.String */
+pre.code .na { color: #7D9029 } /* Name.Attribute */
+pre.code .nb { color: #008000 } /* Name.Builtin */
+pre.code .nc { color: #0000FF; font-weight: bold } /* Name.Class */
+pre.code .no { color: #880000 } /* Name.Constant */
+pre.code .nd { color: #AA22FF } /* Name.Decorator */
+pre.code .ni { color: #999999; font-weight: bold } /* Name.Entity */
+pre.code .ne { color: #D2413A; font-weight: bold } /* Name.Exception */
+pre.code .nf { color: #0000FF } /* Name.Function */
+pre.code .nl { color: #A0A000 } /* Name.Label */
+pre.code .nn { color: #0000FF; font-weight: bold } /* Name.Namespace */
+pre.code .nt { color: #008000; font-weight: bold } /* Name.Tag */
+pre.code .nv { color: #19177C } /* Name.Variable */
+pre.code .ow { color: #AA22FF; font-weight: bold } /* Operator.Word */
+pre.code .w { color: #bbbbbb } /* Text.Whitespace */
+pre.code .mf { color: #666666 } /* Literal.Number.Float */
+pre.code .mh { color: #666666 } /* Literal.Number.Hex */
+pre.code .mi { color: #666666 } /* Literal.Number.Integer */
+pre.code .mo { color: #666666 } /* Literal.Number.Oct */
+pre.code .sb { color: #BA2121 } /* Literal.String.Backtick */
+pre.code .sc { color: #BA2121 } /* Literal.String.Char */
+pre.code .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+pre.code .s2 { color: #BA2121 } /* Literal.String.Double */
+pre.code .se { color: #BB6622; font-weight: bold } /* Literal.String.Escape */
+pre.code .sh { color: #BA2121 } /* Literal.String.Heredoc */
+pre.code .si { color: #BB6688; font-weight: bold } /* Literal.String.Interpol */
+pre.code .sx { color: #008000 } /* Literal.String.Other */
+pre.code .sr { color: #BB6688 } /* Literal.String.Regex */
+pre.code .s1 { color: #BA2121 } /* Literal.String.Single */
+pre.code .ss { color: #19177C } /* Literal.String.Symbol */
+pre.code .bp { color: #008000 } /* Name.Builtin.Pseudo */
+pre.code .vc { color: #19177C } /* Name.Variable.Class */
+pre.code .vg { color: #19177C } /* Name.Variable.Global */
+pre.code .vi { color: #19177C } /* Name.Variable.Instance */
+pre.code .il { color: #666666 } /* Literal.Number.Integer.Long */
+
+
+.code                              { background: #f8f8f8; }
+.code .comment                     { color: #008800; font-style: italic }
+.code .error                       { border: 1px solid #FF0000 }
+.code .generic.deleted             { color: #A00000 }
+.code .generic.emph                { font-style: italic }
+.code .generic.error               { color: #FF0000 }
+.code .generic.heading             { color: #000080; font-weight: bold }
+.code .generic.inserted            { color: #00A000 }
+.code .generic.output              { color: #808080 }
+.code .generic.prompt              { color: #000080; font-weight: bold }
+.code .generic.strong              { font-weight: bold }
+.code .generic.subheading          { color: #800080; font-weight: bold }
+.code .generic.traceback           { color: #0040D0 }
+.code .keyword                     { color: #AA22FF; font-weight: bold }
+.code .keyword.pseudo              { font-weight: normal }
+.code .literal.number              { color: #666666 }
+.code .literal.string              { color: #BB4444 }
+.code .literal.string.doc          { color: #BB4444; font-style: italic }
+.code .literal.string.escape       { color: #BB6622; font-weight: bold }
+.code .literal.string.interpol     { color: #BB6688; font-weight: bold }
+.code .literal.string.other        { color: #008000 }
+.code .literal.string.regex        { color: #BB6688 }
+.code .literal.string.symbol       { color: #B8860B }
+.code .name.attribute              { color: #BB4444 }
+.code .name.builtin                { color: #AA22FF }
+.code .name.class                  { color: #0000FF }
+.code .name.constant               { color: #880000 }
+.code .name.decorator              { color: #AA22FF }
+.code .name.entity                 { color: #999999; font-weight: bold }
+.code .name.exception              { color: #D2413A; font-weight: bold }
+.code .name.function               { color: #00A000 }
+.code .name.label                  { color: #A0A000 }
+.code .name.namespace              { color: #0000FF; font-weight: bold }
+.code .name.tag                    { color: #008000; font-weight: bold }
+.code .name.variable               { color: #B8860B }
+.code .operator                    { color: #666666 }
+.code .operator.word               { color: #AA22FF; font-weight: bold }
+

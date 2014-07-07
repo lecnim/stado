@@ -1,0 +1,139 @@
+docs » quick start
+==================
+
+
+Installation
+------------
+
+Just download the `stado.py` file and place it in a empty directory.
+Stado require python, you can get it from [www.python.org](http://www
+.python.org). Supported python versions are `3.4`, `3.3` and `3.2`.
+
+
+
+Example directory structure
+---------------------------
+
+    #!python
+    stado.py              # Stado main file for executing commands.
+    project/              # Site directory.
+      site.py             # Python script which builds site.
+      index.html          # item - page
+      image.jpg           # item - asset
+
+
+
+Use the `stado.py` file to execute commands. For example `stado.py build` or
+`stado.py edit project`.
+
+`project` is the site directory. It contains all the site source files,
+which are used during building process. There can be multiple site directories.
+
+
+### File project/site.py ###
+
+    #!python
+    from stado import run, before
+
+    @before('index.html')
+    def hello():
+      return {'title': 'Hello World!'}
+
+    run()                   # start building site.
+
+
+`project/site.py` file is controlling the process of building the site using
+controllers objects like `@before`.
+
+In details:
+
+Here used stado objects are imported:
+
+    #!python
+    from stado import run, before
+
+A decorator `@before('index.html')` will execute a `hello()` method before
+rendering the `index.html` page. Variables from a returned dictionary are
+available during rendering by template engine.
+
+    #!python
+    @before('index.html')
+    def hello():
+      return {'title': 'Hello World!'}
+
+The site building process is started using this method.
+
+    #!python
+    run()
+
+### File index.html ###
+
+    #!HTML+jinja
+    {{ title }}
+
+`index.html` is a page file. Page files are rendered with the template engine
+during site building. Default template engine is Mustache. All `html` and `md`
+files are recognized as pages.
+
+### File image.jpg ###
+
+`image.jpg` is a asset file. Assets are **not** rendered by the template engine,
+they are only copied to an output directory.
+
+
+
+Running stado
+-------------
+
+    #!console
+    $ stado.py build
+    Searching sites...
+    Building site project...
+    Done! Site built in 0.01s
+
+If stado is run with build command it will try to build all available sites.
+You can choose which site to build by adding a site directory name to build
+command,
+for example:
+
+    #!console
+    $ stado.py build project
+    Building site project...
+    Done! Site built in 0.01s
+
+Also there is a development server available. It has a auto-rebuild on save
+feature. You can use it using `edit [site]` command. Take notice that you cannot
+edit group of sites, this command works only with single site.
+
+    #!console
+    $ stado.py edit project
+    Building site project...
+    Done! Site built in 0.01s
+    Watching for changes...
+    You can view site at: http://localhost:4000
+
+Now you can open web browser and visit `http://localhost:4000` to look at site.
+If you modify site source files, stado will auto-rebuild it and you will see
+changes immediately.
+
+
+
+Output
+------
+
+    #!python
+    project/
+      site.py
+      index.html
+      image.jpg
+      output/             # rendered site is here
+          index.html
+          image.jpg
+
+Stado builds the site into an `output` directory.
+
+The content of `output/index.html` is:
+
+    #!text
+    Hello World!
+

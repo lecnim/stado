@@ -1,4 +1,7 @@
-"""Tests auto building markdown files to html."""
+"""
+Generate markdown documents to html pages.
+------------------------------------------
+"""
 
 from tests.examples import TestExample
 
