@@ -1,5 +1,11 @@
 import os
+import sys
+import signal
 import inspect
+import threading
+import multiprocessing
+import time
+import traceback
 from collections import namedtuple, OrderedDict
 
 from functools import wraps
@@ -17,6 +23,21 @@ SiteRecord = namedtuple('SiteRecord',
                         ['source_path', 'output_path', 'module_path',
                          'is_default', 'is_used'])
 
+threads = []
+
+class StopExecution(BaseException):
+    pass
+
+class RunCommand(BaseException):
+    def __init__(self, cmd, target, args, kwargs, on_error):
+        self.cmd = cmd
+        self.target = target
+        self.args = args
+        self.kwargs = kwargs
+        self.on_error = on_error
+
+class StopCommand(BaseException):
+    pass
 
 class InstanceTracker:
     """Tracks each new Site instance."""
@@ -164,44 +185,328 @@ class Site:
     # Commands.
     # Stability: 2 - Unstable
 
+    def _cmd_loop(self, cmd, target, args, kwargs={}, on_error=None):
+
+        def re_run():
+            print('re_run')
+            thread = threading.current_thread()
+
+            try:
+                cmd._run_module(self._script_path)
+            except RunCommand as e:
+                print('rerun.run_command')
+                thread.signal = e
+            except BaseException as e:
+                print('exception')
+                thread.error = (e, traceback.print_exc())
+            else:
+                thread.signal = StopCommand()
+
+        def on_modify(self):
+            t = threading.Thread(target=re_run)
+            t.cmd = True
+            t.error = None
+            t.signal = None
+            t.start()
+            t.join()
+
+            if t.signal:
+                print('on_modify.got_signal')
+
+                nonlocal signal
+                signal = t.signal
+                cmd.cancel()
+
+                # raise t.signal
+
+            if t.error and on_error:
+                on_error(t.error[0], t.error[1])
+
+        signal = None
+        thread = threading.current_thread()
+
+        # Command is run first time.
+
+        if not hasattr(thread,  'cmd'):
+            print('first_run')
+
+            cmd._on_src_modified = on_modify
+
+            stop = False
+            try:
+                while not stop:
+
+                    target(*args, **kwargs)
+
+                    if isinstance(signal, RunCommand):
+                        print('loop.run_command')
+                        cmd = signal.cmd
+                        cmd._on_src_modified = on_modify
+                        on_error = signal.on_error
+
+                        target = signal.target
+                        args = signal.args
+                        kwargs = signal.kwargs
+                    else:
+                        stop = True
+                        sys.exit(0)
+            except KeyboardInterrupt:
+                cmd.cancel()
+                sys.exit(0)
+
+        else:
+            print('loop.rerun')
+            raise RunCommand(cmd, target, args, kwargs, on_error)
+
+
+    #
+    #
+    # def _base_cmd(self, command, method):
+    #
+    #     def re_run():
+    #         """
+    #         Re run module.
+    #         """
+    #
+    #         thread = threading.current_thread()
+    #
+    #         try:
+    #             cmd._run_module(self._script_path)
+    #         except StopExecution:
+    #             pass
+    #         # Do not stop previous command.
+    #         except:
+    #             thread.kill_signal = False
+    #             traceback.print_exc()
+    #
+    #         thread.re_run_event.set()
+    #
+    #     def on_modify(path):
+    #         """
+    #         Runs when module or src files were modified.
+    #         """
+    #
+    #         t = threading.Thread(target=re_run)
+    #         t.cmd = cmd
+    #         # If True current command will be canceled.
+    #         t.kill_signal = None
+    #         t.re_run_event = threading.Event()
+    #         t.loop_event = quit_event
+    #
+    #         t.start()
+    #         # Wait until next command is ready to go.
+    #         t.re_run_event.wait()
+    #
+    #         # Exception or next command is starting.
+    #         if t.kill_signal:
+    #             cmd.cancel()
+    #
+    #         # No command executed in re-run module.
+    #         if t.kill_signal is None:
+    #             cmd.cancel()
+    #             # Terminate script.
+    #             quit_event.set()
+    #
+    #     thread = threading.current_thread()
+    #
+    #     # Command is run first time.
+    #
+    #     if not hasattr(thread,  'cmd'):
+    #
+    #         # If set - command will terminated script.
+    #         quit_event = threading.Event()
+    #
+    #         cmd = command
+    #         cmd._on_src_modified = on_modify
+    #
+    #         thread = threading.Thread(
+    #             target=method,
+    #             args=(self,)
+    #         )
+    #         thread.cmd = cmd
+    #
+    #         thread.start()
+    #
+    #         # Here main thread will wait until script is terminated.
+    #
+    #         try:
+    #             quit_event.wait()
+    #         except KeyboardInterrupt:
+    #             # Cancel currently running command,
+    #             # so it will quit in clean way.
+    #             for i in threading.enumerate():
+    #                 cmd = getattr(i, 'cmd', False)
+    #                 if cmd and cmd.is_running:
+    #                     cmd.cancel()
+    #         sys.exit(0)
+    #
+    #     # Command is run from re-run script.
+    #
+    #     else:
+    #
+    #         quit_event = thread.loop_event
+    #
+    #         # Cancel previous command.
+    #         thread.kill_signal = True
+    #         thread.re_run_event.set()
+    #         # Wait until fully canceled.
+    #         while thread.cmd.is_running:
+    #             pass
+    #
+    #         cmd = command
+    #         cmd._on_src_modified = on_modify
+    #
+    #         t = threading.Thread(
+    #             target=method,
+    #             args=(self,)
+    #         )
+    #         t.cmd = cmd
+    #
+    #         t.start()
+    #
+    #         # Stop executing code after command.
+    #         raise StopExecution
+
     @command
     def watch(self):
 
-        Site._enable_cmds = False
         x = cmds.watch.Watch()
 
-        try:
-            x.watch_site(self)
-        except KeyboardInterrupt:
-            x.cancel()
-            Site._enable_cmds = True
-            pass
+        self._cmd_loop(x, x.watch_site, (self,))
+
+        # self._base_cmd(x, x.watch_site)
+
+        # def re_run():
+        #     """
+        #     Re run module.
+        #     """
+        #
+        #     thread = threading.current_thread()
+        #
+        #     try:
+        #         cmd._run_module(self._script_path)
+        #     except StopExecution:
+        #         pass
+        #     # Do not stop previous command.
+        #     except:
+        #         thread.kill_signal = False
+        #         traceback.print_exc()
+        #
+        #     thread.re_run_event.set()
+        #
+        # def on_modify(path):
+        #     """
+        #     Runs when module or src files were modified.
+        #     """
+        #
+        #     t = threading.Thread(target=re_run)
+        #     t.cmd = cmd
+        #     # If True current command will be canceled.
+        #     t.kill_signal = None
+        #     t.re_run_event = threading.Event()
+        #     t.loop_event = quit_event
+        #
+        #     t.start()
+        #     # Wait until next command is ready to go.
+        #     t.re_run_event.wait()
+        #
+        #     # Exception or next command is starting.
+        #     if t.kill_signal:
+        #         cmd.cancel()
+        #
+        #     # No command executed in re-run module.
+        #     if t.kill_signal is None:
+        #         cmd.cancel()
+        #         # Terminate script.
+        #         quit_event.set()
+        #
+        # thread = threading.current_thread()
+        #
+        # # Command is run first time.
+        #
+        # if not hasattr(thread,  'cmd'):
+        #
+        #     # If set - command will terminated script.
+        #     quit_event = threading.Event()
+        #
+        #     cmd = cmds.watch.Watch()
+        #     cmd._on_src_modified = on_modify
+        #
+        #     thread = threading.Thread(
+        #         target=cmd.watch_site,
+        #         args=(self,)
+        #     )
+        #     thread.cmd = cmd
+        #
+        #     thread.start()
+        #
+        #     # Here main thread will wait until script is terminated.
+        #
+        #     try:
+        #         quit_event.wait()
+        #     except KeyboardInterrupt:
+        #         # Cancel currently running command,
+        #         # so it will quit in clean way.
+        #         for i in threading.enumerate():
+        #             cmd = getattr(i, 'cmd', False)
+        #             if cmd and cmd.is_running:
+        #                 cmd.cancel()
+        #     sys.exit(0)
+        #
+        # # Command is run from re-run script.
+        #
+        # else:
+        #
+        #     quit_event = thread.loop_event
+        #
+        #     # Cancel previous command.
+        #     thread.kill_signal = True
+        #     thread.re_run_event.set()
+        #     # Wait until fully canceled.
+        #     while thread.cmd.is_running:
+        #         pass
+        #
+        #     cmd = cmds.watch.Watch()
+        #     cmd._on_src_modified = on_modify
+        #
+        #     t = threading.Thread(
+        #         target=cmd.watch_site,
+        #         args=(self,)
+        #     )
+        #     t.cmd = cmd
+        #
+        #     t.start()
+        #
+        #     # Stop executing code after command.
+        #     raise StopExecution
 
     @command
     def view(self):
 
-        Site._enable_cmds = False
         x = cmds.view.View()
 
         try:
             x.view_site(self)
         except KeyboardInterrupt:
             x.cancel()
-            Site._enable_cmds = True
             pass
 
     @command
     def edit(self):
 
-        Site._enable_cmds = False
         x = cmds.edit.Edit()
 
-        try:
-            x.edit_site(self)
-        except KeyboardInterrupt:
-            x.cancel()
-            Site._enable_cmds = True
-            pass
+        self._base_cmd(x, x.edit_site)
+
+        # Site._enable_cmds = False
+        # x = cmds.edit.Edit()
+        #
+        # try:
+        #     x.edit_site(self)
+        # except KeyboardInterrupt:
+        #     x.cancel()
+        #     Site._enable_cmds = True
+        #     pass
 
 
     # Controllers.

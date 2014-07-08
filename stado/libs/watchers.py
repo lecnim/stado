@@ -72,7 +72,7 @@ class BaseWatcher:
                 self.check_thread = threading.Timer(check_interval,
                                                     self._thread_check)
                 self.check_thread.name = repr(self)
-                self.check_thread.daemon = True
+                # self.check_thread.daemon = True
                 self.check_thread.start()
 
     def start(self):
