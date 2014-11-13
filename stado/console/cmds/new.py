@@ -5,6 +5,7 @@ import textwrap
 from . import Command
 from ..errors import CommandError
 from .. import log
+from ..events import Event
 
 
 # TODO: Elaborated new site files...
@@ -44,6 +45,7 @@ class New(Command):
         command."""
 
         if os.path.exists(site):
+            self.event(Event(self, 'on_error'))
             raise CommandError('Site already exists!')
 
         os.makedirs(site, exist_ok=True)
@@ -56,4 +58,7 @@ class New(Command):
                 file.write(textwrap.dedent(data))
 
         log.info('New site "{}" successfully created!'.format(site))
+
+        self.event(Event(self, 'on_ready'))
+
         return True

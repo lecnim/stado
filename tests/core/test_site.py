@@ -5,31 +5,27 @@ from stado import config
 from stado.core.site import Site
 from stado.core.item import SiteItem, FileItem, Item
 from stado.plugins import Plugin
-from tests import TestStado
+from tests import BaseTest
 
 
-class BaseTest(TestStado):
-    """Base class for testing Site. Sites output is temporary directory."""
+class SiteBaseTest(BaseTest):
+    """Base class for testing a Site class. Sites output is a temporary
+    directory."""
 
     def setUp(self):
-        TestStado.setUp(self)
+        BaseTest.setUp(self)
         self.site = Site(self.temp_path)
 
 
-class TestSite(BaseTest):
-    """Base class for testing Site. Sites output is temporary directory."""
+# Tests:
 
-    def setUp(self):
-        TestStado.setUp(self)
-        self.site = Site(self.temp_path)
+class TestSite(SiteBaseTest):
+    """Site class"""
 
-    #
-
-    def test_init(self):
+    def test_attributes(self):
+        """should init correct attributes"""
 
         s = Site(self.temp_path, output='built')
-
-        # Check properties:
 
         # source
         self.assertEqual(self.temp_path, s.path)
@@ -39,9 +35,9 @@ class TestSite(BaseTest):
         self.assertEqual([os.path.abspath('built')], s.ignore_paths)
 
 
-class TestBuild(BaseTest):
+class TestBuild(SiteBaseTest):
     """
-    Site build() method
+    Site.build()
     """
 
     def test_utf8(self):
@@ -49,14 +45,14 @@ class TestBuild(BaseTest):
 
         self.create_file('test.utf8', 'ąężółć')
         self.site.build('test.utf8')
-        self.assertEqual('ąężółć', self.read_file('test.utf8'))
+        self.assertEqual('ąężółć', self.read_file(config.build_dir + '/test.utf8'))
 
     def test_absolute_path(self):
-        """should raise exception if path is absolute"""
+        """should raise an exception if path is absolute"""
         self.assertRaises(ValueError, self.site.build, '/blog/post.html')
 
     def test_path_not_found(self):
-        """should raise exception if path is not found"""
+        """should raise an exception if path is not found"""
         self.assertRaises(ValueError, self.site.build('not/found'))
 
     def test_all(self):
@@ -96,21 +92,21 @@ class TestBuild(BaseTest):
         self.assertEqual(['script.py'], os.listdir(config.build_dir))
 
     def test_build_file_in_output(self):
-        """should raise exception if user want to build output file"""
+        """should raise an exception if user wants to build output file"""
 
         self.create_file('foo')
         self.site.build('foo')
         self.assertRaises(ValueError, self.site.build, config.build_dir + '/foo')
 
     def test_path(self):
-        """should accept string as a path argument"""
+        """should accept a string as a path argument"""
 
         self.create_file('foo.html', 'bar')
         self.site.build('foo.html')
         self.assertEqual('bar', self.read_file(config.build_dir + '/foo.html'))
 
     def test_item(self):
-        """should accept item object as a path argument"""
+        """should accept an item object as a path argument"""
 
         # default
 
@@ -214,9 +210,9 @@ class TestBuild(BaseTest):
         self.assertEqual('OVER', self.read_file(config.build_dir + '/foo.html'))
 
 
-class TestRegister(BaseTest):
+class TestRegister(SiteBaseTest):
     """
-    Site register() method
+    Site.register()
     """
 
     def test(self):
@@ -232,9 +228,9 @@ class TestRegister(BaseTest):
                          self.read_file(config.build_dir + '/index.html'))
 
 
-class TestRoute(BaseTest):
+class TestRoute(SiteBaseTest):
     """
-    Site route() method
+    Site.route()
     """
 
     def _check_route(self, path, source):
@@ -273,9 +269,9 @@ class TestRoute(BaseTest):
                          self.read_file(config.build_dir + '/wow/index.html'))
 
 
-class TestLoad(BaseTest):
+class TestLoad(SiteBaseTest):
     """
-    Site load() method
+    Site.load()
     """
 
     def test_load_file(self):
@@ -326,9 +322,9 @@ class TestLoad(BaseTest):
         self.assertEqual('bar', item.source)
 
 
-class TestFind(BaseTest):
+class TestFind(SiteBaseTest):
     """
-    Site find() method
+    Site.find()
     """
 
     def test(self):
@@ -403,9 +399,9 @@ class TestFind(BaseTest):
         self.assertEqual(0, len([i for i in self.site.find('**/*.html')]))
 
 
-class TestHelper(BaseTest):
+class TestHelper(SiteBaseTest):
     """
-    Site helper() method
+    Site.helper()
     """
 
     def test_removing(self):
@@ -502,4 +498,4 @@ class TestHelper(BaseTest):
         self.site.build(i, 'mustache')
         self.assertEqual('bar', self.read_file(config.build_dir + '/foo'))
 
-del BaseTest
+del SiteBaseTest

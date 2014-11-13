@@ -20,6 +20,7 @@ class Command:
             usage=self.usage.format(**{'cmd': self.name}),
             description=self.summary)
         sub_parser.set_defaults(function=self.run)
+        sub_parser.set_defaults(cmd=self)
 
         sub_parser.add_argument('-d', '--debug', action="store_true")
         self._parser_add_arguments(sub_parser)

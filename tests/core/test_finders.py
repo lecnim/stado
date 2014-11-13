@@ -1,8 +1,8 @@
 from stado.core.finders import FileFinder
-from tests import TestStado
+from tests import BaseTest
 
 
-class TestFileFinder(TestStado):
+class TestFileFinder(BaseTest):
     """A FileFinder
 
     This test case change current working directory to __file__ location.

@@ -1,8 +1,8 @@
-from tests import TestStado
+from tests import BaseTest
 from stado.core.item import SiteItem, FileItem, Item
 
 
-class TestFileItem(TestStado):
+class TestFileItem(BaseTest):
     """FileItem class"""
 
     def test_attributes(self):
@@ -16,7 +16,7 @@ class TestFileItem(TestStado):
         self.assertEqual('foo', i._default_output)
 
 
-class TestItem(TestStado):
+class TestItem(BaseTest):
     """Item class"""
 
     def test_attributes(self):
@@ -34,7 +34,7 @@ class TestItem(TestStado):
         self.assertFalse(i.match('*'))
 
 
-class TestSiteItem(TestStado):
+class TestSiteItem(BaseTest):
     """
     SiteItem class
     """

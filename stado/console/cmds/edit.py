@@ -73,6 +73,8 @@ class Edit(Watch, View):
         self._is_running = True
 
     def join(self):
+
+        self.event(Event(self, 'on_ready'))
         self.event(Event(self, 'on_wait'))
 
         while self._is_running:

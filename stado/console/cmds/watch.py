@@ -19,6 +19,7 @@ class Watch(Build):
     usage = '{cmd} [path] [options]'
     summary = 'Build the site or group of sites and watch for changes.'
 
+
     #
 
     def __init__(self):
@@ -60,7 +61,9 @@ class Watch(Build):
         try:
             site_records = self._build_path(path)
         except CommandError:
+
             self.cancel()
+            self.event(Event(self, 'on_error'))
             raise
         except:
             traceback.print_exc()
@@ -202,6 +205,7 @@ class Watch(Build):
 
     def join(self):
 
+        self.event(Event(self, 'on_ready'))
         self.event(Event(self, 'on_wait'))
 
         # Wait here until a watcher thread is not dead!
@@ -240,7 +244,13 @@ class Watch(Build):
 
     def check(self):
         """Runs a file monitor check. Used during unittests!"""
-        self.file_monitor.check()
+
+        if self.file_monitor.is_alive:
+            self.file_monitor.stop()
+            self.file_monitor.check()
+            self.file_monitor.start()
+        else:
+            self.file_monitor.check()
 
     #
     # Watcher thread events:

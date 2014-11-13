@@ -90,11 +90,13 @@ class View(Build):
         try:
             site_records = self._build_path(path)
         except:
+            # self.event(Event(self, 'on_error'))
             self.cancel()
             raise
 
         # Nothing to do, Site instances were not found.
         if not site_records:
+            self.event(Event(self, 'on_error'))
             self.cancel()
             return True
 
@@ -215,6 +217,7 @@ class View(Build):
 
     def join(self):
 
+        self.event(Event(self, 'on_ready'))
         self.event(Event(self, 'on_wait'))
 
         # Wait until all server threads are dead.

@@ -2,10 +2,10 @@ import os
 
 from stado.core.loaders import FileLoader
 from stado.core.item import SiteItem
-from tests import TestStado
+from tests import BaseTest
 
 
-class TestFileLoader(TestStado):
+class TestFileLoader(BaseTest):
     """
     A FileLoader
     """

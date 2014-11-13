@@ -16,9 +16,13 @@ from .cmds.new import New
 class Console:
 
     def __init__(self):
+
+        self.args = None
+        self.current_cmd = None
+
         self.events = EventHandler()
 
-        self.commands = {
+        self.cmds = {
             Build.name: Build(),
             Watch.name: Watch(),
             View.name: View(),
@@ -28,7 +32,7 @@ class Console:
         }
 
         # Every event in each command will run the on_event() method.
-        for i in self.commands.values():
+        for i in self.cmds.values():
             i.event.subscribe(self.on_event)
 
         # Create command line parser.
@@ -50,11 +54,11 @@ class Console:
 
         # Add subparsers from commands.
 
-        for i in self.commands.values():
+        for i in self.cmds.values():
             i.install_parser(subparsers)
 
     def __getitem__(self, item):
-        return self.commands[item]
+        return self.cmds[item]
 
     def on_event(self, event):
         """Commands send an event."""
@@ -81,6 +85,7 @@ class Console:
 
         # Execute command.
         args = vars(args)
+        self.args = args.copy()
 
         # Enable debug mode.
         if 'debug' in args and args.pop('debug'):
@@ -89,27 +94,34 @@ class Console:
         result = None
         if 'function' in args:
 
-            cmd = args.pop('function')
+            target = args.pop('function')
+            self.current_cmd = args.pop('cmd')
 
             try:
-                result = cmd(**args)
+                result = target(**args)
             except KeyboardInterrupt:
                 log.info('Exiting stado, goodbye!')
+                self.current_cmd = None
                 return True
             except CommandError as e:
                 msg = 'Oops! Error! Something went wrong:\n{}'
                 log.error(msg.format(e))
+                self.current_cmd = None
+
+
+                # self.stop()
                 return False
 
         log.setLevel(config.log_level)
+        self.current_cmd = None
         return result
 
     def stop(self):
         log.debug('Stopping all console services!')
 
-        if self.commands['watch'].is_running:
-            self.commands['watch'].cancel()
-        if self.commands['view'].is_running:
-            self.commands['view'].cancel()
-        if self.commands['edit'].is_running:
-            self.commands['edit'].cancel()
+        if self.cmds['watch'].is_running:
+            self.cmds['watch'].cancel()
+        if self.cmds['view'].is_running:
+            self.cmds['view'].cancel()
+        if self.cmds['edit'].is_running:
+            self.cmds['edit'].cancel()

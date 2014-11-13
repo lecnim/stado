@@ -3,6 +3,7 @@
 import os
 import runpy
 import errno
+import traceback
 
 from . import Command
 from ..errors import CommandError
@@ -10,6 +11,7 @@ from .. import log
 from ... import utils
 from ...core.site import Site
 from ... import default_site, clear_default_site
+from ..events import Event
 
 
 class Build(Command):
@@ -31,6 +33,7 @@ class Build(Command):
         command."""
 
         self._build_path(path)
+        self.event(Event(self, 'on_ready'))
         return True
 
     def _build_path(self, path):
@@ -58,7 +61,9 @@ class Build(Command):
             except (IOError, OSError) as e:
                 # File/dir not found.
                 if e.errno == errno.ENOENT:
+                    self.event(Event(self, 'on_error'))
                     raise CommandError('Failed to build, path not found: ' + path)
+
                 else:
                     raise
             else:
@@ -111,7 +116,13 @@ class Build(Command):
         try:
             runpy.run_path(p)
         except:
-            raise
+
+            # Oryginal:
+            #raise
+
+            traceback.print_exc()
+
+
         finally:
             # Delete default site, so the next build will use new one.
             clear_default_site()

@@ -2,13 +2,19 @@
 
 import os
 import threading
+
+import unittest
+
+from multiprocessing import Process, Pipe, Event, Queue
 from contextlib import contextmanager
 
-from stado import config
+from stado import config, log
 from stado.console import Console, CommandError
 from stado.console.cmds.watch import Watch
+from stado.console.cmds.edit import Edit
 from stado.core.site import Site
 from tests.console import TestCommand
+from tests import TestStado
 
 
 class TestWatch(TestCommand):
